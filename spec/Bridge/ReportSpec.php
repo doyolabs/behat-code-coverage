@@ -4,12 +4,12 @@ namespace spec\Doyo\Behat\Coverage\Bridge;
 
 use Doyo\Behat\Coverage\Bridge\Compat;
 use Doyo\Behat\Coverage\Bridge\Report;
-use Doyo\Behat\Coverage\Bridge\Report\ReportInterface;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Report\Clover;
+
 class ReportSpec extends ObjectBehavior
 {
     function it_is_initializable()
@@ -23,7 +23,7 @@ class ReportSpec extends ObjectBehavior
     }
 
     function its_processor_should_be_mutable(
-        Clover $report
+        TestReportProcessor $report
     )
     {
         $this->setProcessor($report)->shouldReturn($this);
@@ -44,11 +44,10 @@ class ReportSpec extends ObjectBehavior
 
     function it_should_handle_report_process_event(
         ReportEvent $event,
-        $report,
+        TestReportProcessor $report,
         $driver
     )
     {
-        $report->beADoubleOf(Clover::class);
         $driver->beADoubleOf(Compat::getDriverClass('Dummy'));
         $coverage = new CodeCoverage($driver->getWrappedObject());
 

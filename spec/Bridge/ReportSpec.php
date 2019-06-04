@@ -44,10 +44,11 @@ class ReportSpec extends ObjectBehavior
 
     function it_should_handle_report_process_event(
         ReportEvent $event,
-        Clover $report,
+        $report,
         $driver
     )
     {
+        $report->beADoubleOf(Clover::class);
         $driver->beADoubleOf(Compat::getDriverClass('Dummy'));
         $coverage = new CodeCoverage($driver->getWrappedObject());
 

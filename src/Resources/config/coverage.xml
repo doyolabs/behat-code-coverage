@@ -7,7 +7,6 @@
         <parameter key="doyo.coverage.remote.repository.class">Doyo\Behat\Coverage\Remote\CoverageRepository</parameter>
         <parameter key="doyo.coverage.remote.class">Doyo\Behat\Coverage\Bridge\RemoteCoverage</parameter>
         <parameter key="doyo.coverage.filter.class">SebastianBergmann\CodeCoverage\Filter</parameter>
-        <parameter key="doyo.coverage.proxy.class">Doyo\Behat\Coverage\Bridge\ProxyCoverage</parameter>
         <parameter key="doyo.coverage.local.class">Doyo\Behat\Coverage\Bridge\LocalCoverage</parameter>
         <parameter key="doyo.coverage.code_coverage.class">SebastianBergmann\CodeCoverage\CodeCoverage</parameter>
         <parameter key="doyo.coverage.config.filter"/>
@@ -21,14 +20,6 @@
             </call>
         </service>
 
-        <service id="doyo.coverage.proxy.code_coverage"
-                 class="%doyo.coverage.code_coverage.class%"
-        >
-            <argument type="service" id="doyo.coverage.driver.dummy"/>
-            <argument type="service" id="doyo.coverage.filter"/>
-            <tag name="doyo.code_coverage"/>
-        </service>
-
         <service id="doyo.coverage.local.code_coverage"
                  class="%doyo.coverage.code_coverage.class%"
         >
@@ -37,16 +28,10 @@
             <tag name="doyo.code_coverage"/>
         </service>
 
-        <!-- setup coverage bridge  -->
-        <service id="doyo.coverage.proxy" class="%doyo.coverage.proxy.class%">
-            <argument type="service" id="doyo.coverage.proxy.code_coverage"/>
-            <tag name="event_dispatcher.subscriber" priority="10"/>
-        </service>
-
         <!-- setup local coverage -->
         <service id="doyo.coverage.local" class="%doyo.coverage.local.class%">
             <argument type="service" id="doyo.coverage.local.code_coverage"/>
-            <tag name="event_dispatcher.subscriber" priority="100"/>
+            <tag name="event_dispatcher.subscriber" priority="0"/>
         </service>
 
         <!-- setup remote coverage -->
@@ -57,7 +42,7 @@
         </service>
         <service id="doyo.coverage.remote" class="%doyo.coverage.remote.class%">
             <argument type="service" id="doyo.coverage.remote.repository"/>
-            <tag name="event_dispatcher.subscriber" priority="100"/>
+            <tag name="event_dispatcher.subscriber" priority="1001"/>
         </service>
     </services>
 </container>

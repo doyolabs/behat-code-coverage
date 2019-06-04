@@ -15,8 +15,8 @@ namespace Test\Doyo\Behat\Coverage;
 
 use Doyo\Behat\Coverage\Bridge\Compat;
 use Doyo\Behat\Coverage\Bridge\LocalCoverage;
-use Doyo\Behat\Coverage\Bridge\ProxyCoverage;
 use Doyo\Behat\Coverage\Bridge\RemoteCoverage;
+use Doyo\Behat\Coverage\Bridge\Report;
 use Doyo\Behat\Coverage\Controller\Cli\CoverageController;
 use Doyo\Behat\Coverage\Listener\BehatEventListener;
 use PHPUnit\Framework\TestCase;
@@ -48,7 +48,6 @@ class ExtensionTest extends TestCase
                 Compat::getCoverageValidConfigs(),
             ],
             ['doyo.coverage.driver.dummy.class', Compat::getDriverClass('Dummy')],
-            ['doyo.coverage.proxy.class', ProxyCoverage::class],
             ['doyo.coverage.local.class', LocalCoverage::class],
             ['doyo.coverage.remote.class', RemoteCoverage::class],
         ];
@@ -84,10 +83,10 @@ class ExtensionTest extends TestCase
             ['doyo.coverage.listener.behat', BehatEventListener::class],
             ['doyo.coverage.controller.cli', CoverageController::class],
             ['doyo.coverage.driver.dummy', Compat::getDriverClass('Dummy')],
-            ['doyo.coverage.proxy', ProxyCoverage::class],
             ['doyo.coverage.local', LocalCoverage::class],
             ['doyo.coverage.remote', RemoteCoverage::class],
             ['doyo.coverage.controller.cli', CoverageController::class],
+            ['doyo.coverage.report.clover', Report::class]
         ];
     }
 

@@ -13,8 +13,9 @@ default:
                 blacklist:
                     - src/blacklist
             report:
-                html:
-                    target: build/html
+                html: build/html
                 clover: build/clover.xml
                 php: build/cov/behat.cov
+                xml: build/xml
+                crap4j: build/crap4j.xml
                 text: true

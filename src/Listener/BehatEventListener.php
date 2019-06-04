@@ -88,6 +88,7 @@ class BehatEventListener implements EventSubscriberInterface
     {
         $dispatcher = $this->dispatcher;
         $event      = new ReportEvent();
+
         $dispatcher->dispatch(ReportEvent::BEFORE_PROCESS, $event);
         $dispatcher->dispatch(ReportEvent::PROCESS, $event);
         $dispatcher->dispatch(ReportEvent::AFTER_PROCESS, $event);

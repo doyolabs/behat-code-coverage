@@ -69,7 +69,7 @@ class FeatureContext implements Context
      */
     public function directoryExist($file)
     {
-        Assert::file($this->fixturesDir.'/'.$file);
+        Assert::directory($this->fixturesDir.'/'.$file);
     }
 
     /**

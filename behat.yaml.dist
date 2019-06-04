@@ -17,3 +17,6 @@ default:
             filter:
                 whitelist:
                     - src/*.php
+            report:
+                php: build/cov/behat.cov
+                html: build/behat

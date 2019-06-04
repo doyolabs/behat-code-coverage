@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="doyo.coverage.report.clover.processor.class">SebastianBergmann\CodeCoverage\Report\Clover</parameter>
+        <parameter key="doyo.coverage.report.crap4j.processor.class">SebastianBergmann\CodeCoverage\Report\Crap4j</parameter>
+        <parameter key="doyo.coverage.report.html.processor.class">SebastianBergmann\CodeCoverage\Report\Html\Facade</parameter>
+        <parameter key="doyo.coverage.report.php.processor.class">SebastianBergmann\CodeCoverage\Report\PHP</parameter>
+        <parameter key="doyo.coverage.report.text.processor.class">SebastianBergmann\CodeCoverage\Report\Text</parameter>
+        <parameter key="doyo.coverage.report.xml.processor.class">SebastianBergmann\CodeCoverage\Report\Xml\Facade</parameter>
+        <parameter key="doyo.coverage.report.class">Doyo\Behat\Coverage\Bridge\Report</parameter>
+    </parameters>
+    <services>
+        <defaults public="true"/>
+
+        <!-- report processor section -->
+        <service id="doyo.coverage.report.clover.processor">
+            <tag name="doyo.coverage.report.processor" format="clover"/>
+        </service>
+        <service id="doyo.coverage.report.crap4j.processor">
+            <tag name="doyo.coverage.report.processor" format="crap4j"/>
+        </service>
+        <service id="doyo.coverage.report.html.processor">
+            <tag name="doyo.coverage.report.processor" format="html"/>
+        </service>
+        <service id="doyo.coverage.report.php.processor">
+            <tag name="doyo.coverage.report.processor" format="php"/>
+        </service>
+        <service id="doyo.coverage.report.text.processor">
+            <tag name="doyo.coverage.report.processor" format="text"/>
+        </service>
+        <service id="doyo.coverage.report.xml.processor">
+            <argument type="string">behat</argument>
+            <tag name="doyo.coverage.report.processor" format="xml"/>
+        </service>
+
+        <!-- coverage report services -->
+        <service id="doyo.coverage.report.clover">
+            <tag name="doyo.coverage.report" format="clover" type="file"/>
+        </service>
+        <service id="doyo.coverage.report.crap4j">
+            <tag name="doyo.coverage.report" format="crap4j" type="file"/>
+        </service>
+        <service id="doyo.coverage.report.html">
+            <tag name="doyo.coverage.report" format="html" type="directory"/>
+        </service>
+        <service id="doyo.coverage.report.php">
+            <tag name="doyo.coverage.report" format="php" type="file"/>
+        </service>
+        <service id="doyo.coverage.report.xml">
+            <tag name="doyo.coverage.report" format="xml" type="directory"/>
+        </service>
+    </services>
+</container>

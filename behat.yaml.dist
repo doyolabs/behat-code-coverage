@@ -1,3 +1,22 @@
 default:
+    suites:
+        default:
+            contexts:
+                - Behat\MinkExtension\Context\MinkContext
+                - behatch:context:system
+                - FeatureContext
+
     extensions:
-        Doyo\Behat\Coverage\Extension: ~
+        Behat\MinkExtension:
+            sessions:
+                default:
+                    goutte:
+            base_url: http://example.org
+        Behatch\Extension: ~
+        Doyo\Behat\Coverage\Extension:
+            filter:
+                whitelist:
+                    - src/*.php
+            report:
+                php: build/cov/behat.cov
+                html: build/behat

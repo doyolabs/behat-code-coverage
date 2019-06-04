@@ -15,7 +15,9 @@ namespace Doyo\Behat\Coverage;
 
 use Behat\Testwork\ServiceContainer\Extension as ExtensionInterface;
 use Behat\Testwork\ServiceContainer\ExtensionManager;
+use Doyo\Behat\Coverage\Compiler\CoveragePass;
 use Doyo\Behat\Coverage\Compiler\DriverPass;
+use Doyo\Behat\Coverage\Compiler\ReportPass;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -46,12 +48,19 @@ class Extension implements ExtensionInterface
 
     public function load(ContainerBuilder $container, array $config)
     {
-        $this->loadServices($container, $config);
+        $this->loadServices($container);
 
         $container->setParameter('doyo.coverage.options', $config['coverage']);
+        $container->setParameter('doyo.coverage.config', $config);
+
+        $reportFormats = ['clover','crap4j','html','php','text','xml'];
+        foreach($reportFormats as $format){
+            $name = 'doyo.coverage.report.'.$format;
+            $container->setParameter($name,$config['report'][$format]);
+        }
     }
 
-    private function loadServices(ContainerBuilder $container, array $config)
+    private function loadServices(ContainerBuilder $container)
     {
         $locator = new FileLocator(__DIR__.'/Resources/config');
         $loader  = new XmlFileLoader($container, $locator);
@@ -59,7 +68,10 @@ class Extension implements ExtensionInterface
         $loader->load('core.xml');
         $loader->load('drivers.xml');
         $loader->load('coverage.xml');
+        $loader->load('report.xml');
 
         $container->addCompilerPass(new DriverPass());
+        $container->addCompilerPass(new CoveragePass());
+        $container->addCompilerPass(new ReportPass());
     }
 }

@@ -31,7 +31,7 @@ class RemoteCoverage implements EventSubscriberInterface
     {
         return [
             CoverageEvent::START   => 'onCoverageStarted',
-            CoverageEvent::STOP    => 'onCoverageStopped',
+            CoverageEvent::STOP    => ['onCoverageStopped', 999],
             CoverageEvent::REFRESH => 'onCoverageRefresh',
         ];
     }

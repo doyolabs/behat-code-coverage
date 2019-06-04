@@ -15,8 +15,6 @@ namespace Doyo\Behat\Coverage\Listener;
 
 use Behat\Behat\EventDispatcher\Event\ExampleTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
-use Behat\Behat\Hook\Scope\BeforeScenarioScope;
-use Behat\Behat\Hook\Scope\ScenarioScope;
 use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Doyo\Behat\Coverage\Bridge\Aggregate;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
@@ -40,7 +38,7 @@ class BehatEventListener implements EventSubscriberInterface
     public function __construct(
         EventDispatcherInterface $dispatcher
     ) {
-        $this->dispatcher = $dispatcher;
+        $this->dispatcher    = $dispatcher;
         $this->coverageEvent = new CoverageEvent();
     }
 
@@ -50,7 +48,7 @@ class BehatEventListener implements EventSubscriberInterface
             ExerciseCompleted::BEFORE => 'refreshCoverage',
             ScenarioTested::BEFORE    => 'startCoverage',
             ExampleTested::BEFORE     => 'startCoverage',
-            ScenarioTested::AFTER     => 'startCoverage',
+            ScenarioTested::AFTER     => 'stopCoverage',
             ExampleTested::AFTER      => 'stopCoverage',
             ExerciseCompleted::AFTER  => 'generateReport',
         ];
@@ -60,18 +58,18 @@ class BehatEventListener implements EventSubscriberInterface
     {
         $dispatcher      = $this->dispatcher;
         $event           = new RefreshEvent();
-        $coverageEvent = $this->coverageEvent;
+        $coverageEvent   = $this->coverageEvent;
 
         $coverageEvent->setCoverageId(null);
         $coverageEvent->setAggregate(new Aggregate());
         $dispatcher->dispatch(CoverageEvent::REFRESH, $event);
     }
 
-    public function startCoverage(ScenarioScope $scope)
+    public function startCoverage($scope)
     {
-        $scenario   = $scope->getScenario();
-        $id         = $scope->getFeature()->getFile().':'.$scenario->getLine();
-        $dispatcher = $this->dispatcher;
+        $scenario      = $scope->getScenario();
+        $id            = $scope->getFeature()->getFile().':'.$scenario->getLine();
+        $dispatcher    = $this->dispatcher;
         $coverageEvent = $this->coverageEvent;
 
         $coverageEvent->setCoverageId($id);
@@ -90,6 +88,7 @@ class BehatEventListener implements EventSubscriberInterface
     {
         $dispatcher = $this->dispatcher;
         $event      = new ReportEvent();
+
         $dispatcher->dispatch(ReportEvent::BEFORE_PROCESS, $event);
         $dispatcher->dispatch(ReportEvent::PROCESS, $event);
         $dispatcher->dispatch(ReportEvent::AFTER_PROCESS, $event);

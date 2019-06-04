@@ -1,4 +1,8 @@
 default:
+    suites:
+        default:
+            contexts:
+                - FeatureContext
     extensions:
         Doyo\Behat\Coverage\Extension:
             local: true
@@ -12,5 +16,5 @@ default:
                 html:
                     target: build/html
                 clover: build/clover.xml
-                php: build/cov/remote.cov
+                php: build/cov/behat.cov
                 text: true

@@ -74,8 +74,9 @@ class CoveragePass implements CompilerPassInterface
             $name = substr($path, $lastPos + 1);
         }
 
-        $finder = Finder::create()->in($basePath);
-        $finder->path($dir);
+        $in     = $basePath.DIRECTORY_SEPARATOR.$dir;
+        $finder = Finder::create()
+            ->in($in);
         if (!is_null($name)) {
             $finder->name($name);
         }

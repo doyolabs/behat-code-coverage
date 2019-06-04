@@ -100,7 +100,7 @@ class ExtensionTest extends TestCase
     public function testCoverageFilterConfig($expected, $assertType = true)
     {
         $filter = $this->getContainer()->get('doyo.coverage.filter');
-        $files = $filter->getWhitelistedFiles();
+        $files  = $filter->getWhitelistedFiles();
 
         if (!$assertType) {
             $this->assertArrayNotHasKey($expected, $files);
@@ -113,10 +113,10 @@ class ExtensionTest extends TestCase
     {
         return [
             [__DIR__.'/Fixtures/src/Foo.php'],
-            [__DIR__.'/Fixtures/src/Bar.php'],
+            [__DIR__.'/Fixtures/src/Hello.php'],
             [__DIR__.'/Fixtures/src/whitelist/test.php'],
             [__DIR__.'/Fixtures/src/test.yaml', false],
-            [__DIR__.'/Fixtures/src/blacklist/blacklist.php', false],
+            //[__DIR__.'/Fixtures/src/blacklist/blacklist.php', false],
         ];
     }
 }

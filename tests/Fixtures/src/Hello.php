@@ -13,6 +13,10 @@ declare(strict_types=1);
 
 namespace Test\Doyo\Behat\Coverage\Fixtures\src;
 
-class Bar
+class Hello
 {
+    public static function say()
+    {
+        return 'Hello World';
+    }
 }

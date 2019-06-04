@@ -13,6 +13,14 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class LocalCoverageSpec extends ObjectBehavior
 {
+    protected $data = [ __DIR__.'/TestClass.php' => [
+        9 => 1,
+        10 => 1,
+        11 => 1,
+        12 => 1,
+        13 => 1,
+    ]];
+
     function let(
         $dummy,
         CoverageEvent $event
@@ -37,7 +45,7 @@ class LocalCoverageSpec extends ObjectBehavior
     function it_should_subscribe_coverage_event()
     {
         $this->getSubscribedEvents()->shouldHaveKeyWithValue(CoverageEvent::START, 'onCoverageStarted');
-        $this->getSubscribedEvents()->shouldHaveKeyWithValue(CoverageEvent::STOP, 'onCoverageStopped');
+        $this->getSubscribedEvents()->shouldHaveKeyWithValue(CoverageEvent::STOP, ['onCoverageStopped',1000]);
         $this->getSubscribedEvents()->shouldHaveKeyWithValue(CoverageEvent::REFRESH, 'onCoverageRefresh');
     }
 
@@ -64,11 +72,5 @@ class LocalCoverageSpec extends ObjectBehavior
 
         $this->onCoverageStarted($event);
         $this->onCoverageStopped($event);
-    }
-
-    private function shouldCovered()
-    {
-        $thisShouldBeCovered = true;
-        return;
     }
 }

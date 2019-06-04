@@ -11,12 +11,4 @@
 
 declare(strict_types=1);
 
-namespace Test\Doyo\Behat\Coverage\Fixtures\src;
-
-class Foo
-{
-    public static function say()
-    {
-        return 'Foo Bar';
-    }
-}
+require realpath(__DIR__.'/../../../../features/bootstrap/FeatureContext.php');

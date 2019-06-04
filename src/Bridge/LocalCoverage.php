@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Doyo\Behat\Coverage\Bridge;
 
 use Doyo\Behat\Coverage\Event\CoverageEvent;
-use Doyo\Behat\Coverage\Event\RefreshEvent;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -32,7 +31,7 @@ class LocalCoverage implements EventSubscriberInterface
     {
         return [
             CoverageEvent::START   => 'onCoverageStarted',
-            CoverageEvent::STOP    => 'onCoverageStopped',
+            CoverageEvent::STOP    => ['onCoverageStopped', 1000],
             CoverageEvent::REFRESH => 'onCoverageRefresh',
         ];
     }
@@ -51,7 +50,8 @@ class LocalCoverage implements EventSubscriberInterface
         $event->updateCoverage($data);
     }
 
-    public function onCoverageRefresh(RefreshEvent $event)
+    public function onCoverageRefresh()
     {
+        $this->coverage->clear();
     }
 }

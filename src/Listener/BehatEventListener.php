@@ -15,7 +15,6 @@ namespace Doyo\Behat\Coverage\Listener;
 
 use Behat\Behat\EventDispatcher\Event\ExampleTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
-use Behat\Behat\Hook\Scope\ScenarioScope;
 use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Doyo\Behat\Coverage\Bridge\Aggregate;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
@@ -49,7 +48,7 @@ class BehatEventListener implements EventSubscriberInterface
             ExerciseCompleted::BEFORE => 'refreshCoverage',
             ScenarioTested::BEFORE    => 'startCoverage',
             ExampleTested::BEFORE     => 'startCoverage',
-            ScenarioTested::AFTER     => 'startCoverage',
+            ScenarioTested::AFTER     => 'stopCoverage',
             ExampleTested::AFTER      => 'stopCoverage',
             ExerciseCompleted::AFTER  => 'generateReport',
         ];
@@ -66,7 +65,7 @@ class BehatEventListener implements EventSubscriberInterface
         $dispatcher->dispatch(CoverageEvent::REFRESH, $event);
     }
 
-    public function startCoverage(ScenarioScope $scope)
+    public function startCoverage($scope)
     {
         $scenario      = $scope->getScenario();
         $id            = $scope->getFeature()->getFile().':'.$scenario->getLine();

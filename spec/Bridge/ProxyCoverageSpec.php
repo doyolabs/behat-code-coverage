@@ -2,6 +2,7 @@
 
 namespace spec\Doyo\Behat\Coverage\Bridge;
 
+use Doyo\Behat\Coverage\Bridge\Aggregate;
 use Doyo\Behat\Coverage\Bridge\Compat;
 use Doyo\Behat\Coverage\Bridge\ProxyCoverage;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
@@ -26,7 +27,6 @@ class ProxyCoverageSpec extends ObjectBehavior
 
     function it_should_subscribe_to_coverage_event()
     {
-        $this->getSubscribedEvents()->shouldHaveKeyWithValue(CoverageEvent::START,'onCoverageStarted');
         $this->getSubscribedEvents()->shouldHaveKeyWithValue(CoverageEvent::STOP, ['onCoverageStopped',10]);
         $this->getSubscribedEvents()->shouldHaveKeyWithValue(CoverageEvent::REFRESH, 'onCoverageRefresh');
     }
@@ -34,5 +34,26 @@ class ProxyCoverageSpec extends ObjectBehavior
     function it_should_subscribe_to_report_event()
     {
         $this->getSubscribedEvents()->shouldHaveKeyWithValue(ReportEvent::BEFORE_PROCESS, 'onBeforeReport');
+    }
+
+    function it_should_handle_coverage_stop_event(
+        CoverageEvent $event,
+        Aggregate $aggregate
+    )
+    {
+        $event->getCoverageId()->shouldBeCalled()->willReturn('some-id');
+        $event->getAggregate()->shouldBeCalled()->willReturn($aggregate);
+        $aggregate->getCoverage()->shouldBeCalled()->willReturn([]);
+
+        $this->onCoverageStopped($event);
+    }
+
+    function it_should_handle_report_before_process_event(
+        ReportEvent $event
+    )
+    {
+        $event->setCoverage(Argument::type(CodeCoverage::class))->shouldBeCalled();
+
+        $this->onBeforeReport($event);
     }
 }

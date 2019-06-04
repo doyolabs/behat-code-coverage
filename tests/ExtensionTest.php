@@ -19,7 +19,6 @@ use Doyo\Behat\Coverage\Bridge\ProxyCoverage;
 use Doyo\Behat\Coverage\Bridge\RemoteCoverage;
 use Doyo\Behat\Coverage\Controller\Cli\CoverageController;
 use Doyo\Behat\Coverage\Listener\BehatEventListener;
-use Doyo\PhpSpec\Listener\CoverageListener;
 use PHPUnit\Framework\TestCase;
 
 class ExtensionTest extends TestCase
@@ -89,6 +88,35 @@ class ExtensionTest extends TestCase
             ['doyo.coverage.local', LocalCoverage::class],
             ['doyo.coverage.remote', RemoteCoverage::class],
             ['doyo.coverage.controller.cli', CoverageController::class],
+        ];
+    }
+
+    /**
+     * @dataProvider getTestCoverageFilter
+     *
+     * @param mixed $expected
+     * @param mixed $assertType
+     */
+    public function testCoverageFilterConfig($expected, $assertType = true)
+    {
+        $filter = $this->getContainer()->get('doyo.coverage.filter');
+        $files = $filter->getWhitelistedFiles();
+
+        if (!$assertType) {
+            $this->assertArrayNotHasKey($expected, $files);
+        } else {
+            $this->assertArrayHasKey($expected, $files);
+        }
+    }
+
+    public function getTestCoverageFilter()
+    {
+        return [
+            [__DIR__.'/Fixtures/src/Foo.php'],
+            [__DIR__.'/Fixtures/src/Bar.php'],
+            [__DIR__.'/Fixtures/src/whitelist/test.php'],
+            [__DIR__.'/Fixtures/src/test.yaml', false],
+            [__DIR__.'/Fixtures/src/blacklist/blacklist.php', false],
         ];
     }
 }

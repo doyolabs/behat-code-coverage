@@ -15,6 +15,7 @@ namespace Doyo\Behat\Coverage;
 
 use Behat\Testwork\ServiceContainer\Extension as ExtensionInterface;
 use Behat\Testwork\ServiceContainer\ExtensionManager;
+use Doyo\Behat\Coverage\Compiler\CoveragePass;
 use Doyo\Behat\Coverage\Compiler\DriverPass;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\FileLocator;
@@ -46,12 +47,13 @@ class Extension implements ExtensionInterface
 
     public function load(ContainerBuilder $container, array $config)
     {
-        $this->loadServices($container, $config);
+        $this->loadServices($container);
 
         $container->setParameter('doyo.coverage.options', $config['coverage']);
+        $container->setParameter('doyo.coverage.config', $config);
     }
 
-    private function loadServices(ContainerBuilder $container, array $config)
+    private function loadServices(ContainerBuilder $container)
     {
         $locator = new FileLocator(__DIR__.'/Resources/config');
         $loader  = new XmlFileLoader($container, $locator);
@@ -61,5 +63,6 @@ class Extension implements ExtensionInterface
         $loader->load('coverage.xml');
 
         $container->addCompilerPass(new DriverPass());
+        $container->addCompilerPass(new CoveragePass());
     }
 }

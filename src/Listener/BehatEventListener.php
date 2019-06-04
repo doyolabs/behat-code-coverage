@@ -15,7 +15,6 @@ namespace Doyo\Behat\Coverage\Listener;
 
 use Behat\Behat\EventDispatcher\Event\ExampleTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
-use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Behat\Hook\Scope\ScenarioScope;
 use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Doyo\Behat\Coverage\Bridge\Aggregate;
@@ -40,7 +39,7 @@ class BehatEventListener implements EventSubscriberInterface
     public function __construct(
         EventDispatcherInterface $dispatcher
     ) {
-        $this->dispatcher = $dispatcher;
+        $this->dispatcher    = $dispatcher;
         $this->coverageEvent = new CoverageEvent();
     }
 
@@ -60,7 +59,7 @@ class BehatEventListener implements EventSubscriberInterface
     {
         $dispatcher      = $this->dispatcher;
         $event           = new RefreshEvent();
-        $coverageEvent = $this->coverageEvent;
+        $coverageEvent   = $this->coverageEvent;
 
         $coverageEvent->setCoverageId(null);
         $coverageEvent->setAggregate(new Aggregate());
@@ -69,9 +68,9 @@ class BehatEventListener implements EventSubscriberInterface
 
     public function startCoverage(ScenarioScope $scope)
     {
-        $scenario   = $scope->getScenario();
-        $id         = $scope->getFeature()->getFile().':'.$scenario->getLine();
-        $dispatcher = $this->dispatcher;
+        $scenario      = $scope->getScenario();
+        $id            = $scope->getFeature()->getFile().':'.$scenario->getLine();
+        $dispatcher    = $this->dispatcher;
         $coverageEvent = $this->coverageEvent;
 
         $coverageEvent->setCoverageId($id);

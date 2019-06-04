@@ -10,11 +10,16 @@
         <parameter key="doyo.coverage.proxy.class">Doyo\Behat\Coverage\Bridge\ProxyCoverage</parameter>
         <parameter key="doyo.coverage.local.class">Doyo\Behat\Coverage\Bridge\LocalCoverage</parameter>
         <parameter key="doyo.coverage.code_coverage.class">SebastianBergmann\CodeCoverage\CodeCoverage</parameter>
+        <parameter key="doyo.coverage.config.filter"/>
     </parameters>
 
     <services>
         <defaults public="true"/>
-        <service id="doyo.coverage.filter" class="%doyo.coverage.filter.class%"/>
+        <service id="doyo.coverage.filter" class="%doyo.coverage.filter.class%">
+            <call method="addFilesToWhitelist">
+                <argument>%doyo.coverage.config.filter%</argument>
+            </call>
+        </service>
 
         <service id="doyo.coverage.proxy.code_coverage"
                  class="%doyo.coverage.code_coverage.class%"

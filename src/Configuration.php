@@ -23,7 +23,6 @@ class Configuration
         $this->configureDriversSection($node);
         $this->configureReportSection($node);
         $this->configureFilterSection($node);
-        //return $node;
     }
 
     private function configureCoverageSection(ArrayNodeDefinition $node)

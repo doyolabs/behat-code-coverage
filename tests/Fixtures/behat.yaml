@@ -5,7 +5,9 @@ default:
             remote: false
             filter:
                 whitelist:
-                    - src
+                    - src/*.php
+                blacklist:
+                    - src/blacklist
             report:
                 html:
                     target: build/html

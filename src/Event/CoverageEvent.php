@@ -56,7 +56,7 @@ class CoverageEvent extends Event
     }
 
     /**
-     * @param null|string $coverageId
+     * @param string|null $coverageId
      */
     public function setCoverageId($coverageId=null)
     {

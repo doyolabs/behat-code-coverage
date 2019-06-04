@@ -34,14 +34,14 @@
     },
     "require": {
         "behat/behat": "^3.5",
-        "phpunit/php-code-coverage": "^5.3",
-        "symfony/cache": "^3.4",
-        "symfony/finder": "^3.4"
+        "phpunit/php-code-coverage": "^5.3 | ^6.0",
+        "symfony/cache": "^3.4 | ^4.0",
+        "symfony/finder": "^3.4 | ^4.0"
     },
     "require-dev": {
         "doyo/phpspec-common": "dev-master",
-        "phpspec/phpspec": "^4.3",
-        "phpunit/phpcov": "^4.0",
-        "phpunit/phpunit": "^6.5"
+        "phpspec/phpspec": "^4.3 | ^5.0",
+        "phpunit/phpcov": "^4.0 | ^5.0",
+        "phpunit/phpunit": "^6.5 | ^7.0"
     }
 }

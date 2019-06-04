@@ -67,6 +67,7 @@ class ExtensionTest extends TestCase
         $this->assertTrue($container->has($id), 'Service "'.$id.'" is not loaded');
 
         $service = $container->get($id);
+
         if (null !== $expectedClass) {
             $this->assertEquals(
                 $expectedClass,

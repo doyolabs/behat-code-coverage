@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<container xmlns="http://symfony.com/schema/dic/services">
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
     <parameters>
         <parameter key="doyo.coverage.controller.cli.class">Doyo\Behat\Coverage\Controller\Cli\CoverageController</parameter>
         <parameter key="doyo.coverage.listener.behat.class">Doyo\Behat\Coverage\Listener\BehatEventListener</parameter>
     </parameters>
     <services>
+        <defaults public="true"/>
         <!-- Code Coverage Cli Controller -->
         <service id="doyo.coverage.controller.cli"
                  class="%doyo.coverage.controller.cli.class%">

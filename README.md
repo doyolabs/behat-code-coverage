@@ -1,4 +1,4 @@
-Behat Coverage Extension [![License](https://img.shields.io/packagist/l/doyolabs/behat-coverage-extension.svg?style=flat-square)](#License)
+Behat Coverage Extension [![License](https://img.shields.io/packagist/l/doyo/behat-coverage-extension.svg?style=flat-square)](#License)
 ====
 Provide code coverage extension during behat tests
 

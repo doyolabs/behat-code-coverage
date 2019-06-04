@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services">
+    <parameters>
+        <parameter key="doyo.coverage.driver.dummy.class">Doyo\Behat\Coverage\Bridge\Driver\Dummy</parameter>
+        <parameter key="doyo.coverage.driver.phpdbg.class">SebastianBergmann\CodeCoverage\Driver\PHPDBG</parameter>
+        <parameter key="doyo.coverage.driver.xdebug.class">SebastianBergmann\CodeCoverage\Driver\Xdebug</parameter>
+    </parameters>
+
+    <services>
+        <service id="doyo.coverage.driver.dummy" class="%doyo.coverage.driver.dummy.class%"/>
+        <service
+            id="doyo.coverage.driver.phpdbg"
+            class="%doyo.coverage.driver.phpdbg.class%"
+        >
+            <tag name="doyo.coverage.drivers"/>
+        </service>
+
+        <service
+            id="doyo.coverage.driver.xdebug"
+            class="%doyo.coverage.driver.xdebug.class%"
+        >
+            <tag name="doyo.coverage.drivers"/>
+        </service>
+    </services>
+</container>

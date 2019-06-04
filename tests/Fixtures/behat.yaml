@@ -1,0 +1,14 @@
+default:
+    extensions:
+        Doyo\Behat\Coverage\Extension:
+            local: true
+            remote: false
+            filter:
+                whitelist:
+                    - src
+            report:
+                html:
+                    target: build/html
+                clover: build/clover.xml
+                php: build/cov/remote.cov
+                text: true

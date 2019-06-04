@@ -1,0 +1,3 @@
+default:
+    extensions:
+        Doyo\Behat\Coverage\Extension: ~

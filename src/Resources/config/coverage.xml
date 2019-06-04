@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services">
+    <parameters>
+        <parameter key="doyo.coverage.remote.repository.class">Doyo\Behat\Coverage\Remote\CoverageRepository</parameter>
+        <parameter key="doyo.coverage.remote.class">Doyo\Behat\Coverage\Bridge\RemoteCoverage</parameter>
+        <parameter key="doyo.coverage.filter.class">SebastianBergmann\CodeCoverage\Filter</parameter>
+        <parameter key="doyo.coverage.proxy.class">Doyo\Behat\Coverage\Bridge\ProxyCoverage</parameter>
+        <parameter key="doyo.coverage.local.class">Doyo\Behat\Coverage\Bridge\LocalCoverage</parameter>
+        <parameter key="doyo.coverage.code_coverage.class">SebastianBergmann\CodeCoverage\CodeCoverage</parameter>
+    </parameters>
+
+    <services>
+        <service id="doyo.coverage.filter" class="%doyo.coverage.filter.class%"/>
+
+        <service id="doyo.coverage.proxy.code_coverage"
+                 class="%doyo.coverage.code_coverage.class%"
+        >
+            <argument type="service" id="doyo.coverage.driver.dummy"/>
+            <argument type="service" id="doyo.coverage.filter"/>
+            <tag name="doyo.code_coverage"/>
+        </service>
+
+        <service id="doyo.coverage.local.code_coverage"
+                 class="%doyo.coverage.code_coverage.class%"
+        >
+            <argument type="service" id="doyo.coverage.local.driver"/>
+            <argument type="service" id="doyo.coverage.filter"/>
+            <tag name="doyo.code_coverage"/>
+        </service>
+
+        <!-- setup coverage bridge  -->
+        <service id="doyo.coverage.proxy" class="%doyo.coverage.proxy.class%">
+            <argument type="service" id="doyo.coverage.proxy.code_coverage"/>
+            <tag name="event_dispatcher.subscriber" priority="10"/>
+        </service>
+
+        <!-- setup local coverage -->
+        <service id="doyo.coverage.local" class="%doyo.coverage.local.class%">
+            <argument type="service" id="doyo.coverage.local.code_coverage"/>
+            <tag name="event_dispatcher.subscriber" priority="100"/>
+        </service>
+
+        <!-- setup remote coverage -->
+        <service id="doyo.coverage.remote.repository" class="%doyo.coverage.remote.repository.class%">
+            <call method="setFilter">
+                <argument type="service" id="doyo.coverage.filter"/>
+            </call>
+        </service>
+        <service id="doyo.coverage.remote" class="%doyo.coverage.remote.class%">
+            <argument type="service" id="doyo.coverage.remote.repository"/>
+            <tag name="event_dispatcher.subscriber" priority="100"/>
+        </service>
+    </services>
+</container>

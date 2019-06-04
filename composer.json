@@ -1,0 +1,41 @@
+{
+    "name": "doyo/behat-coverage-extension",
+    "description": "Behat Code Coverage Extension",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Anthonius Munthi",
+            "email": "me@itstoni.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Doyo\\Behat\\Coverage\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Test\\Doyo\\Behat\\Coverage\\": "tests/",
+            "spec\\Doyo\\Behat\\Coverage\\": "spec/"
+        }
+    },
+    "require": {
+        "behat/behat": "^3.5",
+        "phpunit/php-code-coverage": "^5.3",
+        "symfony/cache": "^3.4",
+        "symfony/finder": "^3.4"
+    },
+    "require-dev": {
+        "doyo/phpspec-common": "dev-master",
+        "phpspec/phpspec": "^4.3",
+        "phpunit/phpcov": "^4.0",
+        "phpunit/phpunit": "^6.5"
+    }
+}

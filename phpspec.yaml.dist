@@ -1,0 +1,16 @@
+formatter.name: pretty
+suites:
+    doyo_behat:
+        namespace: Doyo\Behat\Coverage
+        psr4_prefix: Doyo\Behat\Coverage
+
+extensions:
+    Doyo\PhpSpec\CoverageExtension:
+        whitelist:
+            - src
+        format:
+            - php
+            - html
+        output:
+            php: build/cov/phpspec.cov
+            html: build/phpspec

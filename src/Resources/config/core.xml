@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services">
+    <parameters>
+        <parameter key="doyo.coverage.controller.cli.class">Doyo\Behat\Coverage\Controller\Cli\CoverageController</parameter>
+        <parameter key="doyo.coverage.listener.behat.class">Doyo\Behat\Coverage\Listener\BehatEventListener</parameter>
+    </parameters>
+    <services>
+        <!-- Code Coverage Cli Controller -->
+        <service id="doyo.coverage.controller.cli"
+                 class="%doyo.coverage.controller.cli.class%">
+            <argument type="service" id="service_container" />
+            <tag name="cli.controller" priority="80000" />
+        </service>
+
+        <service id="doyo.coverage.listener.behat" class="%doyo.coverage.listener.behat.class%">
+            <argument type="service" id="event_dispatcher"/>
+            <tag name="event_dispatcher.subscriber" />
+        </service>
+    </services>
+</container>

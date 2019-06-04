@@ -31,10 +31,10 @@ class LocalCoverage implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            CoverageEvent::START   => 'onCoverageStarted',
-            CoverageEvent::STOP    => 'onCoverageStopped',
-            CoverageEvent::REFRESH => 'onCoverageRefresh',
-            ReportEvent::BEFORE_PROCESS => 'onBeforeReportProcess'
+            CoverageEvent::START        => 'onCoverageStarted',
+            CoverageEvent::STOP         => 'onCoverageStopped',
+            CoverageEvent::REFRESH      => 'onCoverageRefresh',
+            ReportEvent::BEFORE_PROCESS => 'onBeforeReportProcess',
         ];
     }
 

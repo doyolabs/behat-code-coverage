@@ -23,18 +23,36 @@ declare(strict_types=1);
 namespace Doyo\Behat\Coverage\Controller\Cli;
 
 use Behat\Testwork\Cli\Controller;
+use Doyo\Behat\Coverage\Event\ReportEvent;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\StyleInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Code Coverage Cli Controller.
  *
  * @author Anthonius Munthi <me@itstoni.com>
  */
-class CoverageController implements Controller
+class CoverageController implements Controller, EventSubscriberInterface
 {
+    /**
+     * @var StyleInterface|null
+     */
+    private $style;
+
+    /**
+     * CoverageController constructor.
+     *
+     * @param StyleInterface|null $style
+     */
+    public function __construct(StyleInterface $style)
+    {
+        $this->style = $style;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -43,13 +61,33 @@ class CoverageController implements Controller
         $command->addOption('coverage', null, InputOption::VALUE_NONE, 'Collecting code coverage');
     }
 
+    public static function getSubscribedEvents()
+    {
+        return [
+            ReportEvent::BEFORE_PROCESS => 'onBeforeReportProcess',
+            ReportEvent::AFTER_PROCESS  => 'onAfterReportProcess',
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         if ($input->hasParameterOption(['--coverage'])) {
-            $output->writeln('<info>Running with coverage</info>');
+            $this->style->note('Running with code coverage');
         }
+    }
+
+    public function onBeforeReportProcess(ReportEvent $event)
+    {
+        $io = $this->style;
+        $io->section('Processing Code Coverage Reports');
+        $event->setIO($io);
+    }
+
+    public function onAfterReportProcess(ReportEvent $event)
+    {
+        $this->style->success('Behat coverage reports process completed');
     }
 }

@@ -22,11 +22,19 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 
 class Extension implements ExtensionInterface
 {
     public function process(ContainerBuilder $container)
     {
+        $definition = $container->getDefinition('doyo.coverage.dispatcher');
+        foreach ($container->findTaggedServiceIds('doyo.dispatcher.subscriber') as $id=>$arguments) {
+            $service  = new Reference($id);
+            $priority = $arguments[0];
+            $priority = $priority['priority'] ?? null;
+            $definition->addMethodCall('addSubscriber', [$service, $priority]);
+        }
     }
 
     public function getConfigKey()
@@ -53,10 +61,10 @@ class Extension implements ExtensionInterface
         $container->setParameter('doyo.coverage.options', $config['coverage']);
         $container->setParameter('doyo.coverage.config', $config);
 
-        $reportFormats = ['clover','crap4j','html','php','text','xml'];
-        foreach($reportFormats as $format){
+        $reportFormats = ['clover', 'crap4j', 'html', 'php', 'text', 'xml'];
+        foreach ($reportFormats as $format) {
             $name = 'doyo.coverage.report.'.$format;
-            $container->setParameter($name,$config['report'][$format]);
+            $container->setParameter($name, $config['report'][$format]);
         }
     }
 
@@ -71,7 +79,7 @@ class Extension implements ExtensionInterface
         $loader->load('report.xml');
 
         $container->addCompilerPass(new DriverPass());
-        $container->addCompilerPass(new CoveragePass());
         $container->addCompilerPass(new ReportPass());
+        $container->addCompilerPass(new CoveragePass());
     }
 }

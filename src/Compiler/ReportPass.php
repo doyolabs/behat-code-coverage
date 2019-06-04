@@ -1,8 +1,17 @@
 <?php
 
+/*
+ * This file is part of the DoyoUserBundle project.
+ *
+ * (c) Anthonius Munthi <me@itstoni.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Compiler;
-
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -16,46 +25,44 @@ class ReportPass implements CompilerPassInterface
         $services = $container->findTaggedServiceIds('doyo.coverage.report');
 
         // configure processors
-        foreach($container->findTaggedServiceIds('doyo.coverage.report.processor') as $id => $tagArguments){
+        foreach ($container->findTaggedServiceIds('doyo.coverage.report.processor') as $id => $tagArguments) {
             $this->configureProcessor($container, $id, $tagArguments);
         }
         // configure report
-        foreach($services as $id => $tagArguments){
+        foreach ($services as $id => $tagArguments) {
             $this->configureReport($container, $id, $tagArguments);
         }
-
     }
 
     private function configureProcessor(ContainerBuilder $container, $id, array $tagArguments)
     {
         $definition = $container->getDefinition($id);
-        $format = $tagArguments[0]['format'];
-        $options = $container->getParameterBag()->get('doyo.coverage.report.'.$format);
-        $class = $container->getParameterBag()->get($id.'.class');
+        $format     = $tagArguments[0]['format'];
+        $options    = $container->getParameterBag()->get('doyo.coverage.report.'.$format);
+        $class      = $container->getParameterBag()->get($id.'.class');
         $hasOptions = ['html', 'text', 'crap4j'];
 
         unset($options['target']);
         $definition->setClass($class);
-        if(!empty($options) && in_array($format,$hasOptions)){
+        if (!empty($options) && in_array($format, $hasOptions, true)) {
             $this->configureProcessorOptions($definition, $class, $options);
         }
-        return;
     }
 
     private function configureProcessorOptions(Definition $definition, $class, $options)
     {
-        $r = new \ReflectionClass($class);
+        $r           = new \ReflectionClass($class);
         $constructor = $r->getConstructor();
-        $parameters = [];
+        $parameters  = [];
 
-        foreach($constructor->getParameters() as $reflectionParameter){
+        foreach ($constructor->getParameters() as $reflectionParameter) {
             $paramName = $reflectionParameter->getName();
-            if(!$reflectionParameter->isDefaultValueAvailable()){
+            if (!$reflectionParameter->isDefaultValueAvailable()) {
                 return;
             }
-            $value = $reflectionParameter->getDefaultValue();
+            $value    = $reflectionParameter->getDefaultValue();
             $position = $reflectionParameter->getPosition();
-            if(isset($options[$paramName])){
+            if (isset($options[$paramName])) {
                 $value = $options[$paramName];
             }
             $parameters[$position] = $value;
@@ -66,19 +73,19 @@ class ReportPass implements CompilerPassInterface
     private function configureReport(ContainerBuilder $container, $id, array $tagArguments)
     {
         $definition = $container->getDefinition($id);
-        $format = $tagArguments[0]['format'];
-        $type = $tagArguments[0]['type'];
-        $config = $container->getParameterBag()->get('doyo.coverage.report.'.$format);
-        $class = $container->getParameterBag()->get('doyo.coverage.report.class');
-        $basePath = $container->getParameterBag()->get('paths.base');
-        $dispatcher = $container->getDefinition('event_dispatcher');
+        $format     = $tagArguments[0]['format'];
+        $type       = $tagArguments[0]['type'];
+        $config     = $container->getParameterBag()->get('doyo.coverage.report.'.$format);
+        $class      = $container->getParameterBag()->get('doyo.coverage.report.class');
+        $basePath   = $container->getParameterBag()->get('paths.base');
+        $dispatcher = $container->getDefinition('doyo.coverage.dispatcher');
         $definition->setClass($class);
 
-        if(isset($config['target'])){
+        if (isset($config['target'])) {
             $target = $basePath.'/'.$config['target'];
             $definition->addMethodCall('setTarget', [$target]);
-            $definition->addMethodCall('setProcessor',[new Reference($id.'.processor')]);
-            $definition->addMethodCall('setName',[$format]);
+            $definition->addMethodCall('setProcessor', [new Reference($id.'.processor')]);
+            $definition->addMethodCall('setName', [$format]);
             $dispatcher->addMethodCall('addSubscriber', [new Reference($id)]);
             $this->ensureDir($type, $target);
         }
@@ -87,13 +94,12 @@ class ReportPass implements CompilerPassInterface
     private function ensureDir($type, $target)
     {
         $dir = $target;
-        if($type === 'file'){
+        if ('file' === $type) {
             $dir = dirname($target);
         }
 
-        if(!is_dir($dir)){
-            mkdir($dir,0775, true);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0775, true);
         }
     }
-
 }

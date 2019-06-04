@@ -86,7 +86,7 @@ class ExtensionTest extends TestCase
             ['doyo.coverage.local', LocalCoverage::class],
             ['doyo.coverage.remote', RemoteCoverage::class],
             ['doyo.coverage.controller.cli', CoverageController::class],
-            ['doyo.coverage.report.clover', Report::class]
+            ['doyo.coverage.report.clover', Report::class],
         ];
     }
 

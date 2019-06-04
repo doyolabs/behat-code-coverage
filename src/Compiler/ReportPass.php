@@ -6,6 +6,7 @@ namespace Doyo\Behat\Coverage\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 class ReportPass implements CompilerPassInterface
@@ -31,8 +32,35 @@ class ReportPass implements CompilerPassInterface
         $format = $tagArguments[0]['format'];
         $options = $container->getParameterBag()->get('doyo.coverage.report.'.$format);
         $class = $container->getParameterBag()->get($id.'.class');
+        $hasOptions = ['html', 'text', 'crap4j'];
 
+        unset($options['target']);
         $definition->setClass($class);
+        if(!empty($options) && in_array($format,$hasOptions)){
+            $this->configureProcessorOptions($definition, $class, $options);
+        }
+        return;
+    }
+
+    private function configureProcessorOptions(Definition $definition, $class, $options)
+    {
+        $r = new \ReflectionClass($class);
+        $constructor = $r->getConstructor();
+        $parameters = [];
+
+        foreach($constructor->getParameters() as $reflectionParameter){
+            $paramName = $reflectionParameter->getName();
+            if(!$reflectionParameter->isDefaultValueAvailable()){
+                return;
+            }
+            $value = $reflectionParameter->getDefaultValue();
+            $position = $reflectionParameter->getPosition();
+            if(isset($options[$paramName])){
+                $value = $options[$paramName];
+            }
+            $parameters[$position] = $value;
+        }
+        $definition->setArguments($parameters);
     }
 
     private function configureReport(ContainerBuilder $container, $id, array $tagArguments)

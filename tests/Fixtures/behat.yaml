@@ -13,7 +13,10 @@ default:
                 blacklist:
                     - src/blacklist
             report:
-                html: build/html
+                html:
+                    target: build/html
+                    lowUpperBound: 60
+                    highLowerBound: 90
                 clover: build/clover.xml
                 php: build/cov/behat.cov
                 xml: build/xml

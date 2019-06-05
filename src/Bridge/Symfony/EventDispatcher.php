@@ -3,39 +3,54 @@
 
 namespace Doyo\Behat\Coverage\Bridge\Symfony;
 
-use Symfony\Component\EventDispatcher\EventDispatcher as BaseEventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Maintain backward compatibility with symfony version
  *
  * @package Doyo\Behat\Coverage\Bridge\Symfony
  */
-class EventDispatcher extends BaseEventDispatcher
+class EventDispatcher
 {
     private $version = '4.2';
 
+    /**
+     * @var SymfonyEventDispatcher
+     */
+    private $dispatcher;
+
     public function __construct()
     {
-        parent::__construct();
-
-        $r = new \ReflectionClass('\Symfony\Component\EventDispatcher\EventDispatcher');
+        $dispatcher = new SymfonyEventDispatcher();
+        $r = new \ReflectionObject($dispatcher);
         $params = $r->getMethod('dispatch')->getParameters();
+
         if('event' === $params[0]->getName()){
             $this->version = '4.3';
         }
+
+        $this->dispatcher = $dispatcher;
+    }
+
+    public function addSubscriber(EventSubscriberInterface $subscriber)
+    {
+        $this->dispatcher->addSubscriber($subscriber);
     }
 
     /**
      * @param Event     $event
      * @param string    $eventName
      *
-     * @return Event
+     * @return \Symfony\Component\EventDispatcher\Event|\Symfony\Contract\EventDispatcher\Event
      */
     public function dispatch($event, $eventName = null)
     {
+        $dispatcher = $this->dispatcher;
         if('4.2' === $this->version){
-            return parent::dispatch($eventName, $event);
+            return $dispatcher->dispatch($eventName, $event);
         }
-        return parent::dispatch($event, $eventName);
+        return $dispatcher->dispatch($event, $eventName);
     }
 }
+    

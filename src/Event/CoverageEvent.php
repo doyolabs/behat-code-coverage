@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the DoyoUserBundle project.
+ * This file is part of the doyo/behat-coverage-extension project.
  *
  * (c) Anthonius Munthi <me@itstoni.com>
  *
@@ -14,13 +14,16 @@ declare(strict_types=1);
 namespace Doyo\Behat\Coverage\Event;
 
 use Doyo\Behat\Coverage\Bridge\Aggregate;
-use Symfony\Component\EventDispatcher\Event;
+use Doyo\Behat\Coverage\Bridge\Symfony\Event;
 
 class CoverageEvent extends Event
 {
-    const START   = 'doyo.coverage.start';
-    const STOP    = 'doyo.coverage.stop';
-    const REFRESH = 'doyo.coverage.refresh';
+    const BEFORE_START   = 'doyo.coverage.start.pre';
+    const BEFORE_STOP    = 'doyo.coverage.stop.pre';
+    const BEFORE_REFRESH = 'doyo.coverage.refresh.pre';
+    const START          = 'doyo.coverage.start';
+    const STOP           = 'doyo.coverage.stop';
+    const REFRESH        = 'doyo.coverage.refresh';
 
     /**
      * @var string

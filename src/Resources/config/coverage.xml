@@ -31,7 +31,7 @@
         <!-- setup local coverage -->
         <service id="doyo.coverage.local" class="%doyo.coverage.local.class%">
             <argument type="service" id="doyo.coverage.local.code_coverage"/>
-            <tag name="doyo.dispatcher.subscriber" priority="0"/>
+            <tag name="doyo.dispatcher.subscriber"/>
         </service>
 
         <!-- setup remote coverage -->
@@ -42,7 +42,7 @@
         </service>
         <service id="doyo.coverage.remote" class="%doyo.coverage.remote.class%">
             <argument type="service" id="doyo.coverage.remote.repository"/>
-            <tag name="doyo.dispatcher.subscriber" priority="1001"/>
+            <tag name="doyo.dispatcher.subscriber" priority="100"/>
         </service>
     </services>
 </container>

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the DoyoUserBundle project.
+ * This file is part of the doyo/behat-coverage-extension project.
  *
  * (c) Anthonius Munthi <me@itstoni.com>
  *
@@ -13,10 +13,10 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Event;
 
+use Doyo\Behat\Coverage\Bridge\Symfony\Event;
 use Doyo\Behat\Coverage\Exception\ReportProcessException;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use Symfony\Component\Console\Style\StyleInterface;
-use Doyo\Behat\Coverage\Bridge\Symfony\Event;
 
 class ReportEvent extends Event
 {
@@ -37,7 +37,7 @@ class ReportEvent extends Event
     /**
      * @var ReportProcessException[]
      */
-    private $exceptions = array();
+    private $exceptions = [];
 
     /**
      * @return CodeCoverage|null

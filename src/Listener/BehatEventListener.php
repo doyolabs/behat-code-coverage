@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the DoyoUserBundle project.
+ * This file is part of the doyo/behat-coverage-extension project.
  *
  * (c) Anthonius Munthi <me@itstoni.com>
  *
@@ -21,7 +21,6 @@ use Doyo\Behat\Coverage\Bridge\Symfony\EventDispatcher;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\RefreshEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class BehatEventListener implements EventSubscriberInterface
@@ -63,6 +62,7 @@ class BehatEventListener implements EventSubscriberInterface
 
         $coverageEvent->setCoverageId(null);
         $coverageEvent->setAggregate(new Aggregate());
+        $dispatcher->dispatch($event, CoverageEvent::BEFORE_REFRESH);
         $dispatcher->dispatch($event, CoverageEvent::REFRESH);
     }
 
@@ -74,6 +74,7 @@ class BehatEventListener implements EventSubscriberInterface
         $coverageEvent = $this->coverageEvent;
 
         $coverageEvent->setCoverageId($id);
+        $dispatcher->dispatch($coverageEvent, CoverageEvent::BEFORE_START);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::START);
         $this->coverageEvent = $coverageEvent;
     }
@@ -82,6 +83,7 @@ class BehatEventListener implements EventSubscriberInterface
     {
         $dispatcher = $this->dispatcher;
         $event      = $this->coverageEvent;
+        $dispatcher->dispatch($event, CoverageEvent::BEFORE_START);
         $dispatcher->dispatch($event, CoverageEvent::STOP);
     }
 

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the DoyoUserBundle project.
+ * This file is part of the doyo/behat-coverage-extension project.
  *
  * (c) Anthonius Munthi <me@itstoni.com>
  *
@@ -79,6 +79,7 @@ class ReportPass implements CompilerPassInterface
         $class      = $container->getParameterBag()->get('doyo.coverage.report.class');
         $basePath   = $container->getParameterBag()->get('paths.base');
         $dispatcher = $container->getDefinition('doyo.coverage.dispatcher');
+
         $definition->setClass($class);
 
         if (isset($config['target'])) {

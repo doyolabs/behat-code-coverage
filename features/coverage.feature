@@ -1,7 +1,7 @@
 Feature: Coverage
 
   Scenario: Run code coverage
-    Given I run behat
+    Given I run behat with "--coverage"
     Then console output should contain "passed"
     And directory "build/html" should exist
     And file "build/clover.xml" should exist

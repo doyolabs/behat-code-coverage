@@ -55,11 +55,27 @@ class Configuration
      */
     private function configureDriversSection(ArrayNodeDefinition $node)
     {
+        $normalizer = function($v){
+            return ['namespace' => $v];
+        };
+
         $node
             ->addDefaultsIfNotSet()
             ->children()
-                ->booleanNode('local')->defaultValue(true)->end()
-                ->booleanNode('remote')->defaultValue(false)->end()
+                ->arrayNode('drivers')
+                    ->arrayPrototype()
+                        ->beforeNormalization()
+                            ->ifString()->then($normalizer)
+                        ->end()
+                        ->children()
+                            ->scalarNode('namespace')->isRequired()->end()
+                            ->scalarNode('driver')->defaultValue('cached')->end()
+                            ->arrayNode('options')
+                                ->scalarPrototype()->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
             ->end();
     }
 

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Compiler;
 
+use Doyo\Behat\Coverage\Bridge\Compat;
 use SebastianBergmann\CodeCoverage\Version;
 use SebastianBergmann\Environment\Runtime;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -30,7 +31,7 @@ class DriverPass implements CompilerPassInterface
     {
         $version = Version::id();
         if (version_compare($version, '6.0', '<')) {
-            $container->getParameterBag()->set('doyo.coverage.driver.dummy.class', 'Doyo\\Behat\\Coverage\\Bridge\\Driver\\Compat\\Dummy');
+            $container->getParameterBag()->set('doyo.coverage.driver.dummy.class', Compat::getDriverClass('Dummy'));
         }
     }
 

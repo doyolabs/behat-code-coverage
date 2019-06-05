@@ -4,11 +4,10 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
     <parameters>
-        <parameter key="doyo.coverage.remote.repository.class">Doyo\Behat\Coverage\Remote\CoverageRepository</parameter>
-        <parameter key="doyo.coverage.remote.class">Doyo\Behat\Coverage\Bridge\CodeCoverage\RemoteCoverage</parameter>
         <parameter key="doyo.coverage.filter.class">SebastianBergmann\CodeCoverage\Filter</parameter>
-        <parameter key="doyo.coverage.local.class">Doyo\Behat\Coverage\Bridge\CodeCoverage\LocalCoverage</parameter>
+        <parameter key="doyo.coverage.local.class">Doyo\Behat\Coverage\Bridge\LocalCoverage</parameter>
         <parameter key="doyo.coverage.code_coverage.class">SebastianBergmann\CodeCoverage\CodeCoverage</parameter>
+        <parameter key="doyo.coverage.cached.class">Doyo\Behat\Coverage\Bridge\CodeCoverage\CachedCoverage</parameter>
         <parameter key="doyo.coverage.config.filter"/>
     </parameters>
 
@@ -28,17 +27,6 @@
         <service id="doyo.coverage.local" class="%doyo.coverage.local.class%">
             <argument type="service" id="doyo.coverage.local.code_coverage"/>
             <tag name="doyo.dispatcher.subscriber"/>
-        </service>
-
-        <!-- setup remote coverage -->
-        <service id="doyo.coverage.remote.repository" class="%doyo.coverage.remote.repository.class%">
-            <call method="setFilter">
-                <argument type="service" id="doyo.coverage.filter"/>
-            </call>
-        </service>
-        <service id="doyo.coverage.remote" class="%doyo.coverage.remote.class%">
-            <argument type="service" id="doyo.coverage.remote.repository"/>
-            <tag name="doyo.dispatcher.subscriber" priority="100"/>
         </service>
     </services>
 </container>

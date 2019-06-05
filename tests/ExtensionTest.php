@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Test\Doyo\Behat\Coverage;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\LocalCoverage;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\RemoteCoverage;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\CachedCoverage;
+use Doyo\Behat\Coverage\Bridge\LocalCoverage;
 use Doyo\Behat\Coverage\Bridge\Compat;
 use Doyo\Behat\Coverage\Bridge\Report;
 use Doyo\Behat\Coverage\Controller\Cli\CoverageController;
@@ -49,7 +49,6 @@ class ExtensionTest extends TestCase
             ],
             ['doyo.coverage.driver.dummy.class', Compat::getDriverClass('Dummy')],
             ['doyo.coverage.local.class', LocalCoverage::class],
-            ['doyo.coverage.remote.class', RemoteCoverage::class],
         ];
     }
 
@@ -84,9 +83,9 @@ class ExtensionTest extends TestCase
             ['doyo.coverage.controller.cli', CoverageController::class],
             ['doyo.coverage.driver.dummy', Compat::getDriverClass('Dummy')],
             ['doyo.coverage.local', LocalCoverage::class],
-            ['doyo.coverage.remote', RemoteCoverage::class],
             ['doyo.coverage.controller.cli', CoverageController::class],
             ['doyo.coverage.report.clover', Report::class],
+            ['doyo.coverage.cached.test', CachedCoverage::class],
         ];
     }
 

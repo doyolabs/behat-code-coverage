@@ -45,7 +45,7 @@ class BehatEventListenerSpec extends ObjectBehavior
     )
     {
         $event->setCoverageId(null)->shouldBeCalled();
-        $event->setAggregate(Argument::type(Aggregate::class))->shouldBeCalled();
+        $event->setCoverage(Argument::type('array'))->shouldBeCalled();
 
         $dispatcher
             ->dispatch(Argument::type(RefreshEvent::class), CoverageEvent::BEFORE_REFRESH)

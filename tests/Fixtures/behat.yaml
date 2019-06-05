@@ -5,8 +5,8 @@ default:
                 - FeatureContext
     extensions:
         Doyo\Behat\Coverage\Extension:
-            local: true
-            remote: false
+            drivers:
+                - test
             filter:
                 - style1/*.php
                 - directory: src

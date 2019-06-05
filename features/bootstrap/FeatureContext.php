@@ -109,7 +109,7 @@ class FeatureContext implements Context
     {
         $php      = (new \Symfony\Component\Process\ExecutableFinder())->find('phpdbg');
         $commands = [];
-        $behat    = realpath(__DIR__.'/../../vendor/bin/behat');
+        $behat    = realpath(__DIR__.'/../../tests/Fixtures/bin/behat');
 
         if (null === $php) {
             $php = (new \Symfony\Component\Process\PhpExecutableFinder())->find();

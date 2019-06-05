@@ -33,6 +33,7 @@
         }
     },
     "require": {
+        "php": ">=7.0",
         "behat/behat": "^3.5",
         "phpunit/php-code-coverage": "^5.3 | ^6.0",
         "symfony/cache": "^3.4 | ^4.0",

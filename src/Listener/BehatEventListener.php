@@ -61,7 +61,7 @@ class BehatEventListener implements EventSubscriberInterface
         $coverageEvent   = $this->coverageEvent;
 
         $coverageEvent->setCoverageId(null);
-        $coverageEvent->setAggregate(new Aggregate());
+        $coverageEvent->setCoverage([]);
         $dispatcher->dispatch($event, CoverageEvent::BEFORE_REFRESH);
         $dispatcher->dispatch($event, CoverageEvent::REFRESH);
     }

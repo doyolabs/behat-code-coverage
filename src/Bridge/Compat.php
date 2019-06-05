@@ -32,13 +32,6 @@ class Compat
         return $class;
     }
 
-    public static function createDriver($name)
-    {
-        $class = static::getDriverClass($name);
-
-        return new $class();
-    }
-
     public static function getVersion()
     {
         static $version;

@@ -31,23 +31,47 @@ class CoverageEvent extends Event
     private $coverageId;
 
     /**
-     * @var Aggregate
+     * @var array
      */
-    private $aggregate;
+    private $coverage;
 
     public function __construct($coverageId = null)
     {
         $this->coverageId = $coverageId;
-        $this->aggregate  = new Aggregate();
+        $this->coverage  = array();
     }
 
     public function updateCoverage($coverage)
     {
-        $aggregate = $this->aggregate;
+        $aggregate = $this->coverage;
 
         foreach ($coverage as $class => $counts) {
-            $aggregate->update($class, $counts);
+
+            if(!isset($this->coverage[$class])){
+                $aggregate[$class] = $counts;
+                continue;
+            }
+
+            foreach($counts as $line => $status){
+                $status = !$status ? -1 : ($status > 1 ? 1 : $status);
+                $aggregate[$class][$line] = $status;
+            }
         }
+
+        $this->coverage = $aggregate;
+    }
+
+    public function setCoverage(array $coverage)
+    {
+        $this->coverage = $coverage;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCoverage()
+    {
+        return $this->coverage;
     }
 
     /**
@@ -64,21 +88,5 @@ class CoverageEvent extends Event
     public function setCoverageId($coverageId=null)
     {
         $this->coverageId = $coverageId;
-    }
-
-    /**
-     * @return Aggregate
-     */
-    public function getAggregate(): Aggregate
-    {
-        return $this->aggregate;
-    }
-
-    /**
-     * @param Aggregate $aggregate
-     */
-    public function setAggregate(Aggregate $aggregate)
-    {
-        $this->aggregate = $aggregate;
     }
 }

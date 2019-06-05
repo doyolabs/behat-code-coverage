@@ -14,6 +14,8 @@ default:
             base_url: http://example.org
         Behatch\Extension: ~
         Doyo\Behat\Coverage\Extension:
+            drivers:
+                - console
             filter:
                 - directory: src/*.php
                   exclude:

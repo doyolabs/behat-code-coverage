@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Doyo\Behat\Coverage\Bridge\CodeCoverage;
+namespace Doyo\Behat\Coverage\Bridge;
 
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
@@ -49,7 +49,7 @@ class LocalCoverage implements EventSubscriberInterface
 
         $coverage->stop();
 
-        $data = $event->getAggregate()->getCoverage();
+        $data = $event->getCoverage();
         $coverage->append($data, $event->getCoverageId());
     }
 

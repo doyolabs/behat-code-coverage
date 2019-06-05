@@ -16,13 +16,47 @@ namespace Doyo\Behat\Coverage\Compiler;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 
 class CoveragePass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $this->compileCoverageOptions($container);
         $this->compileFilterOptions($container);
+        $this->compileDrivers($container);
+        $this->compileCoverageOptions($container);
+
+        $definition = $container->getDefinition('doyo.coverage.dispatcher');
+        $tagged = $container->findTaggedServiceIds('doyo.dispatcher.subscriber');
+
+        foreach($tagged as $id=>$arguments){
+            $definition->addMethodCall('addSubscriber', [new Reference($id)]);
+        }
+    }
+
+    private function compileDrivers(ContainerBuilder $container)
+    {
+        $drivers = $container->getParameterBag()->get('doyo.coverage.drivers');
+
+        $map = [
+            'cached' => $container->getParameterBag()->get('doyo.coverage.cached.class')
+        ];
+
+        foreach($drivers as $config){
+            $namespace = $config['namespace'];
+            $driver = $config['driver'];
+            $class = $map[$driver];
+            $id = 'doyo.coverage.cached.'.$namespace;
+
+            $definition = new Definition($class);
+            $definition->addTag('doyo.dispatcher.subscriber');
+            $definition->addArgument($namespace);
+            $definition->addMethodCall('setFilter',[new Reference('doyo.coverage.filter')]);
+            $definition->addMethodCall('save');
+            $definition->setPublic(true);
+
+            $container->setDefinition($id, $definition);
+        }
     }
 
     private function compileCoverageOptions(ContainerBuilder $container)
@@ -30,7 +64,6 @@ class CoveragePass implements CompilerPassInterface
         $options = $container->getParameterBag()->get('doyo.coverage.options');
 
         $definitions = $container->findTaggedServiceIds('doyo.code_coverage');
-
         /* @var \Symfony\Component\DependencyInjection\Definition $definition */
         foreach ($definitions as $id => $test) {
             $definition = $container->getDefinition($id);

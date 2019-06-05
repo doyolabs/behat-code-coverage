@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Doyo\Behat\Coverage\Remote;
+namespace Doyo\Behat\Coverage\Bridge;
 
 use Doyo\Behat\Coverage\Bridge\Aggregate;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
@@ -37,7 +37,7 @@ use Symfony\Component\Cache\Adapter\FilesystemAdapter;
  * @method void delete($id)
  * @method bool has($id)
  */
-class CoverageRepository
+class Cache
 {
     /**
      * @var FilesystemAdapter
@@ -49,10 +49,10 @@ class CoverageRepository
      */
     private $coverage;
 
-    public function __construct()
+    public function __construct($name)
     {
         $dir         = sys_get_temp_dir().'/doyo/behat-coverage';
-        $this->cache = new FilesystemAdapter('coverage', 0, $dir);
+        $this->cache = new FilesystemAdapter($name, 0, $dir);
     }
 
     public function start()

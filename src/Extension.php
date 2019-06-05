@@ -28,6 +28,7 @@ class Extension implements ExtensionInterface
 {
     public function process(ContainerBuilder $container)
     {
+        /*
         $definition = $container->getDefinition('doyo.coverage.dispatcher');
         foreach ($container->findTaggedServiceIds('doyo.dispatcher.subscriber') as $id=>$arguments) {
             $service  = new Reference($id);
@@ -35,6 +36,7 @@ class Extension implements ExtensionInterface
             $priority = $priority['priority'] ?? null;
             $definition->addMethodCall('addSubscriber', [$service, $priority]);
         }
+        */
     }
 
     public function getConfigKey()
@@ -60,6 +62,7 @@ class Extension implements ExtensionInterface
 
         $container->setParameter('doyo.coverage.options', $config['coverage']);
         $container->setParameter('doyo.coverage.config', $config);
+        $container->setParameter('doyo.coverage.drivers', $config['drivers']);
 
         $reportFormats = ['clover', 'crap4j', 'html', 'php', 'text', 'xml'];
         foreach ($reportFormats as $format) {

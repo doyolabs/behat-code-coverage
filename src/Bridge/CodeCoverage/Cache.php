@@ -39,7 +39,7 @@ class Cache implements \Serializable
     /**
      * @var array
      */
-    private $coverage = [];
+    private $data = [];
 
     /**
      * @var array
@@ -74,7 +74,7 @@ class Cache implements \Serializable
     public function reset()
     {
         $this->coverageId = null;
-        $this->coverage   = [];
+        $this->data   = [];
         $this->exceptions = [];
 
         $this->save();
@@ -84,7 +84,9 @@ class Cache implements \Serializable
     {
         $data = [
             $this->coverageId,
-            $this->coverage,
+            $this->data,
+            $this->codeCoverageOptions,
+            $this->filter
         ];
 
         return serialize($data);
@@ -92,7 +94,12 @@ class Cache implements \Serializable
 
     public function unserialize($serialized)
     {
-        list($this->coverageId, $this->coverage) = unserialize($serialized);
+        list(
+            $this->coverageId,
+            $this->data,
+            $this->codeCoverageOptions,
+            $this->filter
+        ) = unserialize($serialized);
     }
 
     /**
@@ -146,19 +153,19 @@ class Cache implements \Serializable
     /**
      * @return array
      */
-    public function getCoverage(): array
+    public function getData(): array
     {
-        return $this->coverage;
+        return $this->data;
     }
 
     /**
-     * @param array $coverage
+     * @param array $data
      *
      * @return Cache
      */
-    public function setCoverage(array $coverage): self
+    public function setData(array $data): self
     {
-        $this->coverage = $coverage;
+        $this->data = $data;
 
         return $this;
     }
@@ -206,6 +213,11 @@ class Cache implements \Serializable
         return $this;
     }
 
+    public function getExceptions()
+    {
+        return $this->exceptions;
+    }
+
     public function save()
     {
         $adapter = $this->adapter;
@@ -222,7 +234,7 @@ class Cache implements \Serializable
 
         if ($cached instanceof self) {
             $this->coverageId = $cached->getCoverageId();
-            $this->coverage   = $cached->getCoverage();
+            $this->data   = $cached->getData();
         }
     }
 
@@ -246,9 +258,7 @@ class Cache implements \Serializable
             return;
         }
         try {
-            $coverage           = $this->createCodeCoverage($driver);
-            $this->codeCoverage = $coverage;
-
+            $coverage = $this->createCodeCoverage($driver);
             $coverage->start($this->getCoverageId());
             register_shutdown_function([$this, 'shutdown']);
         } catch (\Exception $e) {
@@ -268,8 +278,8 @@ class Cache implements \Serializable
             return;
         }
 
-        $data               = $codeCoverage->stop();
-        $this->coverage     = $data;
+        $data = $codeCoverage->stop();
+        $this->data = $data;
         $this->codeCoverage = null;
 
         $this->save();
@@ -282,12 +292,18 @@ class Cache implements \Serializable
      */
     private function createCodeCoverage($driver = null)
     {
+        $coverage = $this->codeCoverage;
         $filter   = $this->createFilter();
         $options  = $this->codeCoverageOptions;
-        $coverage = new CodeCoverage($driver, $filter);
+
+        if(is_null($coverage)){
+            $coverage = new CodeCoverage($driver, $filter);
+            $this->codeCoverage = $coverage;
+        }
 
         foreach ($options as $method => $option) {
-            if (method_exists($coverage, $option)) {
+            $method = 'set'.$method;
+            if (method_exists($coverage, $method)) {
                 \call_user_func_array([$coverage, $method], [$option]);
             }
         }

@@ -70,7 +70,7 @@ class CachedCoverageSpec extends ObjectBehavior
     {
         $data = ['onCoverageStop'];
         $cache->readCache()->shouldBeCalledOnce();
-        $cache->getCoverage()->shouldBeCalledOnce()->willReturn($data);
+        $cache->getData()->shouldBeCalledOnce()->willReturn($data);
         $event->updateCoverage($data)->shouldBeCalledOnce();
 
         $this->onCoverageStopped($event);

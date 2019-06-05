@@ -83,6 +83,6 @@ class CachedCoverage implements EventSubscriberInterface
         $cache = $this->cache;
 
         $cache->readCache();
-        $event->updateCoverage($cache->getCoverage());
+        $event->updateCoverage($cache->getData());
     }
 }

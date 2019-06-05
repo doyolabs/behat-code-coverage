@@ -10,3 +10,13 @@
  */
 
 declare(strict_types=1);
+
+namespace Test\Doyo\Behat\Coverage\Fixtures\src\blacklist;
+
+class blacklist
+{
+    public static function say()
+    {
+        return "blacklist";
+    }
+}

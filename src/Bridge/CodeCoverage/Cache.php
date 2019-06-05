@@ -1,29 +1,38 @@
 <?php
 
+/*
+ * This file is part of the doyo/behat-coverage-extension project.
+ *
+ * (c) Anthonius Munthi <me@itstoni.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
 namespace Doyo\Behat\Coverage\Bridge\CodeCoverage;
 
-use Doyo\Behat\Coverage\Event\CoverageEvent;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Filter;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-class CachedCoverage implements \Serializable, EventSubscriberInterface
+class Cache implements \Serializable
 {
     const CACHE_KEY = 'subject';
 
     /**
-     * @var null|string
+     * @var string|null
      */
     private $namespace;
 
     /**
-     * @var null|string
+     * @var string|null
      */
     private $coverageId;
 
     /**
-     * @var null|FilesystemAdapter
+     * @var FilesystemAdapter|null
      */
     private $adapter;
 
@@ -43,24 +52,29 @@ class CachedCoverage implements \Serializable, EventSubscriberInterface
     private $codeCoverage;
 
     /**
+     * @var array
+     */
+    private $codeCoverageOptions = [];
+
+    /**
      * @var \Exception[]
      */
     private $exceptions = [];
 
     public function __construct($namespace)
     {
-        $dir = sys_get_temp_dir().'/doyo/behat-coverage-extension';
-        $adapter = new FilesystemAdapter($namespace,0, $dir);
-        $this->adapter = $adapter;
+        $dir             = sys_get_temp_dir().'/doyo/behat-coverage-extension';
+        $adapter         = new FilesystemAdapter($namespace, 0, $dir);
+        $this->adapter   = $adapter;
         $this->namespace = $namespace;
 
         $this->readCache();
     }
 
-    public function initialize()
+    public function reset()
     {
         $this->coverageId = null;
-        $this->coverage = [];
+        $this->coverage   = [];
         $this->exceptions = [];
 
         $this->save();
@@ -70,8 +84,9 @@ class CachedCoverage implements \Serializable, EventSubscriberInterface
     {
         $data = [
             $this->coverageId,
-            $this->coverage
+            $this->coverage,
         ];
+
         return serialize($data);
     }
 
@@ -98,11 +113,13 @@ class CachedCoverage implements \Serializable, EventSubscriberInterface
 
     /**
      * @param string|null $coverageId
-     * @return CachedCoverage
+     *
+     * @return Cache
      */
-    public function setCoverageId(string $coverageId): CachedCoverage
+    public function setCoverageId(string $coverageId): self
     {
         $this->coverageId = $coverageId;
+
         return $this;
     }
 
@@ -116,11 +133,13 @@ class CachedCoverage implements \Serializable, EventSubscriberInterface
 
     /**
      * @param FilesystemAdapter|null $adapter
-     * @return CachedCoverage
+     *
+     * @return Cache
      */
-    public function setAdapter(FilesystemAdapter $adapter): CachedCoverage
+    public function setAdapter(FilesystemAdapter $adapter): self
     {
         $this->adapter = $adapter;
+
         return $this;
     }
 
@@ -134,11 +153,33 @@ class CachedCoverage implements \Serializable, EventSubscriberInterface
 
     /**
      * @param array $coverage
-     * @return CachedCoverage
+     *
+     * @return Cache
      */
-    public function setCoverage(array $coverage): CachedCoverage
+    public function setCoverage(array $coverage): self
     {
         $this->coverage = $coverage;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCodeCoverageOptions(): array
+    {
+        return $this->codeCoverageOptions;
+    }
+
+    /**
+     * @param array $codeCoverageOptions
+     *
+     * @return Cache
+     */
+    public function setCodeCoverageOptions(array $codeCoverageOptions): self
+    {
+        $this->codeCoverageOptions = $codeCoverageOptions;
+
         return $this;
     }
 
@@ -148,15 +189,15 @@ class CachedCoverage implements \Serializable, EventSubscriberInterface
     }
 
     /**
-     * @param  Filter|array $filter
+     * @param Filter|array $filter
      *
      * @return $this
      */
     public function setFilter($filter)
     {
-        if($filter instanceof Filter){
-            $whitelistedFiles = $filter->getWhitelistedFiles();
-            $filter = [];
+        if ($filter instanceof Filter) {
+            $whitelistedFiles              = $filter->getWhitelistedFiles();
+            $filter                        = [];
             $filter['addFilesToWhitelist'] = $whitelistedFiles;
         }
 
@@ -168,7 +209,8 @@ class CachedCoverage implements \Serializable, EventSubscriberInterface
     public function save()
     {
         $adapter = $this->adapter;
-        $item = $adapter->getItem(static::CACHE_KEY);
+        $item    = $adapter->getItem(static::CACHE_KEY);
+
         $item->set($this);
         $adapter->save($item);
     }
@@ -176,23 +218,14 @@ class CachedCoverage implements \Serializable, EventSubscriberInterface
     public function readCache()
     {
         $adapter = $this->adapter;
-        $cached = $adapter->get(static::CACHE_KEY, function(){
+        $cached  = $adapter->get(static::CACHE_KEY, function () {
             return false;
         });
 
-        if($cached instanceof CachedCoverage){
+        if ($cached instanceof self) {
             $this->coverageId = $cached->getCoverageId();
-            $this->coverage = $cached->getCoverage();
+            $this->coverage   = $cached->getCoverage();
         }
-    }
-
-    public static function getSubscribedEvents()
-    {
-        return [
-            CoverageEvent::REFRESH => 'onCoverageRefresh',
-            CoverageEvent::START => 'onCoverageStarted',
-            CoverageEvent::STOP => ['onCoverageStopped', 10],
-        ];
     }
 
     /**
@@ -202,60 +235,65 @@ class CachedCoverage implements \Serializable, EventSubscriberInterface
     {
         $config = $this->filter;
         $filter = new Filter();
-        foreach ($config as $method => $value){
-            call_user_func_array([$filter, $method], [$value]);
+        foreach ($config as $method => $value) {
+            \call_user_func_array([$filter, $method], [$value]);
         }
+
         return $filter;
     }
 
     public function startCoverage($driver = null)
     {
-        if(is_null($this->coverageId)){
+        if (null === $this->coverageId) {
             return;
         }
-        $filter = $this->createFilter();
-        try{
-            $coverage = new CodeCoverage($driver, $filter);
-            $coverage->start($this->getCoverageId());
-
+        try {
+            $coverage           = $this->createCodeCoverage($driver);
             $this->codeCoverage = $coverage;
-        }catch (\Exception $e){
+
+            $coverage->start($this->getCoverageId());
+            register_shutdown_function([$this, 'shutdown']);
+        } catch (\Exception $e) {
             $this->exceptions[] = sprintf(
-                "Error in starting code coverage:\n%s",
+                "Can not start coverage in namespace: %s :\n%s",
+                $this->namespace,
                 $e->getMessage()
             );
         }
-        register_shutdown_function([$this,'shutdown']);
-    }
-
-    public function onCoverageRefresh()
-    {
-        $this->initialize();
-    }
-
-    public function onCoverageStarted(CoverageEvent $event)
-    {
-        $this->coverageId = $event->getCoverageId();
-        $this->save();
-    }
-
-    public function onCoverageStopped(CoverageEvent $event)
-    {
-        $this->readCache();
-        $event->updateCoverage($this->coverage);
     }
 
     public function shutdown()
     {
         $codeCoverage = $this->codeCoverage;
 
-        if(is_null($codeCoverage)){
+        if (null === $codeCoverage) {
             return;
         }
 
-        $data = $codeCoverage->stop();
-        $this->coverage = $data;
-        $this->save();
+        $data               = $codeCoverage->stop();
+        $this->coverage     = $data;
         $this->codeCoverage = null;
+
+        $this->save();
+    }
+
+    /**
+     * @param mixed|null $driver
+     *
+     * @return CodeCoverage
+     */
+    private function createCodeCoverage($driver = null)
+    {
+        $filter   = $this->createFilter();
+        $options  = $this->codeCoverageOptions;
+        $coverage = new CodeCoverage($driver, $filter);
+
+        foreach ($options as $method => $option) {
+            if (method_exists($coverage, $option)) {
+                \call_user_func_array([$coverage, $method], [$option]);
+            }
+        }
+
+        return $coverage;
     }
 }

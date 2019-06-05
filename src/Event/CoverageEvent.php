@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Event;
 
-use Doyo\Behat\Coverage\Bridge\Aggregate;
 use Doyo\Behat\Coverage\Bridge\Symfony\Event;
 
 class CoverageEvent extends Event
@@ -38,7 +37,7 @@ class CoverageEvent extends Event
     public function __construct($coverageId = null)
     {
         $this->coverageId = $coverageId;
-        $this->coverage  = array();
+        $this->coverage   = [];
     }
 
     public function updateCoverage($coverage)
@@ -46,14 +45,13 @@ class CoverageEvent extends Event
         $aggregate = $this->coverage;
 
         foreach ($coverage as $class => $counts) {
-
-            if(!isset($this->coverage[$class])){
+            if (!isset($this->coverage[$class])) {
                 $aggregate[$class] = $counts;
                 continue;
             }
 
-            foreach($counts as $line => $status){
-                $status = !$status ? -1 : ($status > 1 ? 1 : $status);
+            foreach ($counts as $line => $status) {
+                $status                   = !$status ? -1 : ($status > 1 ? 1 : $status);
                 $aggregate[$class][$line] = $status;
             }
         }

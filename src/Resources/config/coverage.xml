@@ -7,7 +7,7 @@
         <parameter key="doyo.coverage.filter.class">SebastianBergmann\CodeCoverage\Filter</parameter>
         <parameter key="doyo.coverage.local.class">Doyo\Behat\Coverage\Bridge\LocalCoverage</parameter>
         <parameter key="doyo.coverage.code_coverage.class">SebastianBergmann\CodeCoverage\CodeCoverage</parameter>
-        <parameter key="doyo.coverage.cached.class">Doyo\Behat\Coverage\Bridge\CodeCoverage\CachedCoverage</parameter>
+        <parameter key="doyo.coverage.cached.class">Doyo\Behat\Coverage\Bridge\CachedCoverage</parameter>
         <parameter key="doyo.coverage.config.filter"/>
     </parameters>
 

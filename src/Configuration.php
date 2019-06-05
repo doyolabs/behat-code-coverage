@@ -55,7 +55,7 @@ class Configuration
      */
     private function configureDriversSection(ArrayNodeDefinition $node)
     {
-        $normalizer = function($v){
+        $normalizer = function ($v) {
             return ['namespace' => $v];
         };
 

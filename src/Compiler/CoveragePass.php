@@ -27,32 +27,33 @@ class CoveragePass implements CompilerPassInterface
         $this->compileCoverageOptions($container);
 
         $definition = $container->getDefinition('doyo.coverage.dispatcher');
-        $tagged = $container->findTaggedServiceIds('doyo.dispatcher.subscriber');
+        $tagged     = $container->findTaggedServiceIds('doyo.dispatcher.subscriber');
 
-        foreach($tagged as $id=>$arguments){
+        foreach ($tagged as $id=>$arguments) {
             $definition->addMethodCall('addSubscriber', [new Reference($id)]);
         }
     }
 
     private function compileDrivers(ContainerBuilder $container)
     {
-        $drivers = $container->getParameterBag()->get('doyo.coverage.drivers');
+        $drivers             = $container->getParameterBag()->get('doyo.coverage.drivers');
+        $codeCoverageOptions = $container->getParameterBag()->get('doyo.coverage.options');
 
         $map = [
-            'cached' => $container->getParameterBag()->get('doyo.coverage.cached.class')
+            'cached' => $container->getParameterBag()->get('doyo.coverage.cached.class'),
         ];
 
-        foreach($drivers as $config){
+        foreach ($drivers as $config) {
             $namespace = $config['namespace'];
-            $driver = $config['driver'];
-            $class = $map[$driver];
-            $id = 'doyo.coverage.cached.'.$namespace;
+            $driver    = $config['driver'];
+            $class     = $map[$driver];
+            $id        = 'doyo.coverage.cached.'.$namespace;
 
             $definition = new Definition($class);
             $definition->addTag('doyo.dispatcher.subscriber');
             $definition->addArgument($namespace);
-            $definition->addMethodCall('setFilter',[new Reference('doyo.coverage.filter')]);
-            $definition->addMethodCall('save');
+            $definition->addArgument($codeCoverageOptions);
+            $definition->addArgument(new Reference('doyo.coverage.filter'));
             $definition->setPublic(true);
 
             $container->setDefinition($id, $definition);

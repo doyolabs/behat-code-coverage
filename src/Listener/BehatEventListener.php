@@ -16,7 +16,6 @@ namespace Doyo\Behat\Coverage\Listener;
 use Behat\Behat\EventDispatcher\Event\ExampleTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
 use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
-use Doyo\Behat\Coverage\Bridge\Aggregate;
 use Doyo\Behat\Coverage\Bridge\Symfony\EventDispatcher;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\RefreshEvent;

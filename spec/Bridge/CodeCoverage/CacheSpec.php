@@ -2,30 +2,26 @@
 
 namespace spec\Doyo\Behat\Coverage\Bridge\CodeCoverage;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\CachedCoverage;
-use Doyo\Behat\Coverage\Event\CoverageEvent;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Cache;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Filter;
 use spec\Doyo\Behat\Coverage\CoverageHelperTrait;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Webmozart\Assert\Assert;
 
-class CachedCoverageSpec extends ObjectBehavior
+class CacheSpec extends ObjectBehavior
 {
     use CoverageHelperTrait;
 
     function let()
     {
         $this->beConstructedWith('spec-test');
-        $this->initialize();
+        $this->reset();
     }
 
     function it_is_initializable()
     {
-        $this->shouldHaveType(CachedCoverage::class);
+        $this->shouldHaveType(Cache::class);
     }
 
     function it_should_be_serializable()
@@ -46,6 +42,13 @@ class CachedCoverageSpec extends ObjectBehavior
         $this->getCoverage()->shouldReturn([]);
         $this->setCoverage($value)->shouldReturn($this);
         $this->getCoverage()->shouldReturn($value);
+    }
+
+    function its_code_coverage_options_should_be_mutable()
+    {
+        $option = ['some-option'];
+        $this->setCodeCoverageOptions($option)->shouldReturn($this);
+        $this->getCodeCoverageOptions()->shouldReturn($option);
     }
 
     function its_cache_adapter_should_be_mutable(
@@ -71,58 +74,14 @@ class CachedCoverageSpec extends ObjectBehavior
         $this->setCoverage($coverage);
         $this->save();
 
-        $ob = new CachedCoverage('spec-test');
-        Assert::eq($ob->getCoverageId(), $id);
-        Assert::same($ob->getCoverage(), $coverage);
-        $ob->initialize();
-
-        $ob = new CachedCoverage('spec-test');
-        Assert::null($ob->getCoverageId());
-        Assert::isEmpty($ob->getCoverage());
-    }
-
-    function it_should_subscribe_to_coverage_events()
-    {
-        $this->shouldImplement(EventSubscriberInterface::class);
-        $this->getSubscribedEvents()->shouldHaveKey(CoverageEvent::REFRESH);
-        $this->getSubscribedEvents()->shouldHaveKey(CoverageEvent::START);
-        $this->getSubscribedEvents()->shouldHaveKey(CoverageEvent::STOP);
-    }
-
-    function it_should_handle_coverage_refresh_event()
-    {
-        $this->setCoverage(['data']);
-        $this->save();
-
-        $this->onCoverageRefresh();
         $this->readCache();
-        $this->getCoverage()->shouldBeEqualTo([]);
-    }
+        $this->getCoverageId()->shouldReturn($id);
+        $this->getCoverage()->shouldReturn($coverage);
 
-    function it_should_handle_coverage_start_event(
-        CoverageEvent $event
-    )
-    {
-        $id = 'coverage-id';
-        $event->getCoverageId()->shouldBeCalledOnce()->willReturn($id);
+        $this->reset();
 
-        $this->onCoverageStarted($event);
-        $this->readCache();
-        $this->getCoverageId()->shouldBeEqualTo('coverage-id');
-    }
-
-    function it_should_handle_coverage_stop_event(
-        CoverageEvent $event
-    )
-    {
-        $data = ['onCoverageStopped'];
-        $this->setCoverage($data);
-        $this->save();
-
-        $event->updateCoverage($data)->shouldBeCalledOnce();
-
-        $this->onCoverageStopped($event);
-        $this->getCoverage()->shouldBeEqualTo($data);
+        $this->getCoverageId()->shouldBeNull();
+        $this->getCoverage()->shouldEqual([]);
     }
 
     function its_filter_should_be_mutable()
@@ -155,6 +114,7 @@ class CachedCoverageSpec extends ObjectBehavior
         $driver->start(true)->shouldBeCalledOnce();
         $driver->stop()->shouldBeCalledOnce();
         $this->setCoverageId($id);
+
         $this->startCoverage($driver);
         $this->shutdown();
     }

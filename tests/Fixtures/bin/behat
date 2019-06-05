@@ -3,9 +3,9 @@
 
 require __DIR__.'/../../../vendor/autoload.php';
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\CachedCoverage;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Cache;
 
-$cache = new CachedCoverage('console');
+$cache = new Cache('console');
 $cache->startCoverage();
 
 require __DIR__.'/../../../vendor/bin/behat';

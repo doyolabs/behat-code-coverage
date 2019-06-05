@@ -2,7 +2,6 @@
 
 namespace spec\Doyo\Behat\Coverage\Bridge;
 
-use Doyo\Behat\Coverage\Bridge\Aggregate;
 use Doyo\Behat\Coverage\Bridge\Compat;
 use Doyo\Behat\Coverage\Bridge\LocalCoverage;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
@@ -64,8 +63,7 @@ class LocalCoverageSpec extends ObjectBehavior
 
     function it_should_handle_coverage_stop_event(
         $dummy,
-        CoverageEvent $event,
-        Aggregate $aggregate
+        CoverageEvent $event
     )
     {
         $data = [ __DIR__.'/TestClass.php' => [
@@ -77,9 +75,7 @@ class LocalCoverageSpec extends ObjectBehavior
         ]];
 
         $event->getCoverageId()->willReturn('some-id');
-        $event->getAggregate()->willReturn($aggregate);
-
-        $aggregate->getCoverage()->willReturn($data);
+        $event->getCoverage()->willReturn($data);
 
         $dummy->start(true)->shouldBeCalled();
         $dummy->stop(Argument::cetera())->shouldBeCalled()->willReturn($data);

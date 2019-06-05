@@ -5,17 +5,22 @@ default:
                 - FeatureContext
     extensions:
         Doyo\Behat\Coverage\Extension:
-            local: true
-            remote: false
+            drivers:
+                - test
             filter:
-                whitelist:
-                    - src/*.php
-                blacklist:
+                - style1/*.php
+                - directory: src
+                  exclude: 
                     - src/blacklist
+                    - src/*/blacklist
+                - file: 'files/file.php'
+                  
             report:
-                html: build/html
+                html:
+                    target: build/html
+                    lowUpperBound: 60
+                    highLowerBound: 90
                 clover: build/clover.xml
                 php: build/cov/behat.cov
-                xml: build/xml
                 crap4j: build/crap4j.xml
                 text: true

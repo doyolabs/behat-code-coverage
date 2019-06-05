@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the DoyoUserBundle project.
+ * This file is part of the doyo/behat-coverage-extension project.
  *
  * (c) Anthonius Munthi <me@itstoni.com>
  *
@@ -13,27 +13,82 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Event;
 
+use Doyo\Behat\Coverage\Bridge\Symfony\Event;
+use Doyo\Behat\Coverage\Exception\ReportProcessException;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\Console\Style\StyleInterface;
 
 class ReportEvent extends Event
 {
     const BEFORE_PROCESS = 'doyo.coverage.report_pre';
-    const PROCESS        = 'doyo.coverage.report_pre';
+    const PROCESS        = 'doyo.coverage.report_process';
     const AFTER_PROCESS  = 'doyo.coverage.report_post';
 
     /**
-     * @var CodeCoverage
+     * @var CodeCoverage|null
      */
     private $coverage;
 
-    public function getCoverage(): CodeCoverage
+    /**
+     * @var StyleInterface|null
+     */
+    private $io;
+
+    /**
+     * @var ReportProcessException[]
+     */
+    private $exceptions = [];
+
+    /**
+     * @return CodeCoverage|null
+     */
+    public function getCoverage()
     {
         return $this->coverage;
     }
 
+    /**
+     * @param CodeCoverage $coverage
+     *
+     * @return static
+     */
     public function setCoverage(CodeCoverage $coverage)
     {
         $this->coverage = $coverage;
+
+        return $this;
+    }
+
+    /**
+     * @return StyleInterface|null
+     */
+    public function getIO()
+    {
+        return $this->io;
+    }
+
+    /**
+     * @param StyleInterface|null $io
+     *
+     * @return static
+     */
+    public function setIO(StyleInterface $io)
+    {
+        $this->io = $io;
+
+        return $this;
+    }
+
+    public function addException(ReportProcessException $exception)
+    {
+        $this->exceptions[] = $exception;
+    }
+
+    /**
+     * @return ReportProcessException[]
+     */
+    public function getExceptions()
+    {
+        return $this->exceptions;
     }
 }

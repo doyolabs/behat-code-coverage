@@ -9,9 +9,9 @@ use Prophecy\Argument;
 
 class CoverageEventSpec extends ObjectBehavior
 {
-    function let(Aggregate $aggregate)
+    function let()
     {
-        $this->beConstructedWith('some-id', $aggregate);
+        $this->beConstructedWith('some-id');
     }
 
     function it_is_initializable()

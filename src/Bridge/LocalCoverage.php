@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the DoyoUserBundle project.
+ * This file is part of the doyo/behat-coverage-extension project.
  *
  * (c) Anthonius Munthi <me@itstoni.com>
  *
@@ -31,10 +31,10 @@ class LocalCoverage implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            CoverageEvent::START   => 'onCoverageStarted',
-            CoverageEvent::STOP    => 'onCoverageStopped',
-            CoverageEvent::REFRESH => 'onCoverageRefresh',
-            ReportEvent::BEFORE_PROCESS => 'onBeforeReportProcess'
+            CoverageEvent::START        => 'onCoverageStarted',
+            CoverageEvent::STOP         => 'onCoverageStopped',
+            CoverageEvent::REFRESH      => 'onCoverageRefresh',
+            ReportEvent::BEFORE_PROCESS => 'onBeforeReportProcess',
         ];
     }
 
@@ -49,7 +49,7 @@ class LocalCoverage implements EventSubscriberInterface
 
         $coverage->stop();
 
-        $data = $event->getAggregate()->getCoverage();
+        $data = $event->getCoverage();
         $coverage->append($data, $event->getCoverageId());
     }
 

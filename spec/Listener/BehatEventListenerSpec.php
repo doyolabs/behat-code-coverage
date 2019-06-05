@@ -13,13 +13,13 @@ use Doyo\Behat\Coverage\Event\ReportEvent;
 use Doyo\Behat\Coverage\Listener\BehatEventListener;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Doyo\Behat\Coverage\Bridge\Symfony\EventDispatcher;
 use Webmozart\Assert\Assert;
 
 class BehatEventListenerSpec extends ObjectBehavior
 {
     function let(
-        EventDispatcherInterface $dispatcher,
+        EventDispatcher $dispatcher,
         CoverageEvent $event
     )
     {
@@ -40,22 +40,25 @@ class BehatEventListenerSpec extends ObjectBehavior
     }
 
     function it_should_dispatch_coverage_refresh_event(
-        EventDispatcherInterface $dispatcher,
+        EventDispatcher $dispatcher,
         CoverageEvent $event
     )
     {
         $event->setCoverageId(null)->shouldBeCalled();
-        $event->setAggregate(Argument::type(Aggregate::class))->shouldBeCalled();
+        $event->setCoverage(Argument::type('array'))->shouldBeCalled();
 
         $dispatcher
-            ->dispatch(CoverageEvent::REFRESH,Argument::type(RefreshEvent::class))
+            ->dispatch(Argument::type(RefreshEvent::class), CoverageEvent::BEFORE_REFRESH)
+            ->shouldBeCalled();
+        $dispatcher
+            ->dispatch(Argument::type(RefreshEvent::class), CoverageEvent::REFRESH)
             ->shouldBeCalled();
 
         $this->refreshCoverage();
     }
 
     function it_should_dispatch_coverage_start_event(
-        EventDispatcherInterface $dispatcher,
+        EventDispatcher $dispatcher,
         ScenarioScope $scope,
         ScenarioInterface $scenario,
         FeatureNode $feature,
@@ -69,35 +72,40 @@ class BehatEventListenerSpec extends ObjectBehavior
 
         $event->setCoverageId('some.feature:line')->shouldBeCalled();
         $dispatcher
-            ->dispatch(CoverageEvent::START, $event)
+            ->dispatch($event, CoverageEvent::BEFORE_START)
+            ->shouldBeCalled();
+        $dispatcher
+            ->dispatch($event, CoverageEvent::START)
             ->shouldBeCalled();
 
         $this->startCoverage($scope);
     }
 
     function it_should_dispatch_coverage_stop_event(
-        EventDispatcherInterface $dispatcher,
+        EventDispatcher $dispatcher,
         CoverageEvent $event
     )
     {
-        $dispatcher->dispatch(CoverageEvent::STOP, $event)
+        $dispatcher->dispatch($event, CoverageEvent::BEFORE_STOP)
+            ->shouldBeCalled();
+        $dispatcher->dispatch($event, CoverageEvent::STOP)
             ->shouldBeCalled();
 
         $this->stopCoverage();
     }
 
     function it_should_dispatch_report_events(
-        EventDispatcherInterface $dispatcher
+        EventDispatcher $dispatcher
     )
     {
         $dispatcher
-            ->dispatch(ReportEvent::BEFORE_PROCESS, Argument::any())
+            ->dispatch(Argument::any(), ReportEvent::BEFORE_PROCESS)
             ->shouldBeCalled();
         $dispatcher
-            ->dispatch(ReportEvent::PROCESS, Argument::any())
+            ->dispatch(Argument::any(), ReportEvent::PROCESS)
             ->shouldBeCalled();
         $dispatcher
-            ->dispatch(ReportEvent::AFTER_PROCESS, Argument::any())
+            ->dispatch(Argument::any(), ReportEvent::AFTER_PROCESS)
             ->shouldBeCalled();
 
         $this->generateReport();

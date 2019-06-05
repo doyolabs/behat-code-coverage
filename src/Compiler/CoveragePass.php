@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the DoyoUserBundle project.
+ * This file is part of the doyo/behat-coverage-extension project.
  *
  * (c) Anthonius Munthi <me@itstoni.com>
  *
@@ -16,14 +16,48 @@ namespace Doyo\Behat\Coverage\Compiler;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\Finder\Finder;
+use Symfony\Component\DependencyInjection\Reference;
 
 class CoveragePass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $this->compileCoverageOptions($container);
         $this->compileFilterOptions($container);
+        $this->compileDrivers($container);
+        $this->compileCoverageOptions($container);
+
+        $definition = $container->getDefinition('doyo.coverage.dispatcher');
+        $tagged     = $container->findTaggedServiceIds('doyo.dispatcher.subscriber');
+
+        foreach ($tagged as $id=>$arguments) {
+            $definition->addMethodCall('addSubscriber', [new Reference($id)]);
+        }
+    }
+
+    private function compileDrivers(ContainerBuilder $container)
+    {
+        $drivers             = $container->getParameterBag()->get('doyo.coverage.drivers');
+        $codeCoverageOptions = $container->getParameterBag()->get('doyo.coverage.options');
+
+        $map = [
+            'cached' => $container->getParameterBag()->get('doyo.coverage.cached.class'),
+        ];
+
+        foreach ($drivers as $config) {
+            $namespace = $config['namespace'];
+            $driver    = $config['driver'];
+            $class     = $map[$driver];
+            $id        = 'doyo.coverage.cached.'.$namespace;
+
+            $definition = new Definition($class);
+            $definition->addTag('doyo.dispatcher.subscriber');
+            $definition->addArgument($namespace);
+            $definition->addArgument($codeCoverageOptions);
+            $definition->addArgument(new Reference('doyo.coverage.filter'));
+            $definition->setPublic(true);
+
+            $container->setDefinition($id, $definition);
+        }
     }
 
     private function compileCoverageOptions(ContainerBuilder $container)
@@ -31,7 +65,6 @@ class CoveragePass implements CompilerPassInterface
         $options = $container->getParameterBag()->get('doyo.coverage.options');
 
         $definitions = $container->findTaggedServiceIds('doyo.code_coverage');
-
         /* @var \Symfony\Component\DependencyInjection\Definition $definition */
         foreach ($definitions as $id => $test) {
             $definition = $container->getDefinition($id);
@@ -52,44 +85,40 @@ class CoveragePass implements CompilerPassInterface
         $config     = $container->getParameterBag()->get('doyo.coverage.config');
         $filter     = $config['filter'];
         $basePath   = $container->getParameterBag()->get('paths.base');
+        $definition = $container->getDefinition('doyo.coverage.filter');
 
-        $whitelist = $filter['whitelist'];
-        $blackList = $filter['blacklist'];
-
-        $files = [];
-        foreach ($whitelist as $path) {
-            $found = $this->findFiles($basePath, $path, $blackList);
-            $files = array_merge($found, $files);
+        foreach ($filter as $options) {
+            $options['basePath'] = $basePath;
+            $this->filterWhitelist($definition, $options, 'add');
+            $exclude = $options['exclude'];
+            foreach ($exclude as $item) {
+                $item['basePath'] = $basePath;
+                $this->filterWhitelist($definition, $item, 'remove');
+            }
         }
-        $container->setParameter('doyo.coverage.config.filter', $files);
     }
 
-    private function findFiles($basePath, $path, $blacklist)
+    private function filterWhitelist(Definition $definition, $options, $method)
     {
-        $lastPos = stripos($path, '/');
-        $dir     = $path;
-        $name    = null;
-        if (false !== $lastPos) {
-            $dir  = substr($path, 0, $lastPos);
-            $name = substr($path, $lastPos + 1);
+        $basePath  = $options['basePath'];
+        $suffix    = $options['suffix'] ?: '.php';
+        $prefix    = $options['prefix'] ?: '';
+        $type      = $options['directory'] ? 'directory' : 'file';
+        $directory = $basePath.\DIRECTORY_SEPARATOR.$options['directory'];
+        $file      = $basePath.\DIRECTORY_SEPARATOR.$options['file'];
+
+        if (preg_match('/\/\*(\..+)/', $directory, $matches)) {
+            $suffix    = $matches[1];
+            $directory = str_replace($matches[0], '', $directory);
         }
 
-        $in     = $basePath.DIRECTORY_SEPARATOR.$dir;
-        $finder = Finder::create()
-            ->in($in);
-        if (!is_null($name)) {
-            $finder->name($name);
+        $methodSuffix = 'add' === $method ? 'ToWhitelist' : 'FromWhitelist';
+        if ('directory' === $type) {
+            $definition->addMethodCall($method.'Directory'.$methodSuffix, [$directory, $suffix, $prefix]);
         }
 
-        foreach ($blacklist as $l) {
-            $finder->notPath($l);
+        if ('file' === $type) {
+            $definition->addMethodCall($method.'File'.$methodSuffix, [$file]);
         }
-
-        $files = [];
-        foreach ($finder->files() as $file) {
-            $files[] = $file->getRealPath();
-        }
-
-        return $files;
     }
 }

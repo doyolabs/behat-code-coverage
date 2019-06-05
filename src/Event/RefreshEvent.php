@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the DoyoUserBundle project.
+ * This file is part of the doyo/behat-coverage-extension project.
  *
  * (c) Anthonius Munthi <me@itstoni.com>
  *
@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Doyo\Behat\Coverage\Bridge\Symfony\Event;
 
 class RefreshEvent extends Event
 {

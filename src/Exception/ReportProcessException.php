@@ -11,12 +11,8 @@
 
 declare(strict_types=1);
 
-namespace Test\Doyo\Behat\Coverage\Fixtures\src;
+namespace Doyo\Behat\Coverage\Exception;
 
-class Foo
+class ReportProcessException extends \RuntimeException
 {
-    public static function say()
-    {
-        return 'Foo Bar';
-    }
 }

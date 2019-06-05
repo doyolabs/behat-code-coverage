@@ -14,9 +14,15 @@ default:
             base_url: http://example.org
         Behatch\Extension: ~
         Doyo\Behat\Coverage\Extension:
+            drivers:
+                - console
             filter:
-                whitelist:
-                    - src/*.php
+                - directory: src/*.php
+                  exclude:
+                      - src/Resources
             report:
                 php: build/cov/behat.cov
-                html: build/behat
+                html:
+                    target: build/behat
+                    lowUpperBound: 30
+                    highLowerBound: 90

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the DoyoUserBundle project.
+ * This file is part of the doyo/behat-coverage-extension project.
  *
  * (c) Anthonius Munthi <me@itstoni.com>
  *
@@ -39,17 +39,20 @@ class FeatureContext implements Context
 
     /**
      * @Given I run behat
-     * @Given I run behat with config:
+     * @Given I run behat with :arguments
+     * @Given I run behat with :arguments and config:
+     *
+     * @param mixed|null $arguments
      */
-    public function iRun(PyStringNode $node = null)
+    public function iRun($arguments = null, PyStringNode $node = null)
     {
         $configFile = 'behat.yaml';
 
-        if (!is_null($node)) {
+        if (null !== $node) {
             $configFile = $this->createConfig($node->getRaw());
         }
 
-        $this->runBehat($configFile);
+        $this->runBehat($configFile, $arguments);
     }
 
     /**
@@ -102,13 +105,13 @@ class FeatureContext implements Context
         $this->output .= "\n".\Test\Doyo\Behat\Coverage\Fixtures\src\Hello::say();
     }
 
-    private function runBehat($config)
+    private function runBehat($config, $additional = [])
     {
         $php      = (new \Symfony\Component\Process\ExecutableFinder())->find('phpdbg');
         $commands = [];
-        $behat    = realpath(__DIR__.'/../../vendor/bin/behat');
+        $behat    = realpath(__DIR__.'/../../tests/Fixtures/bin/behat');
 
-        if (is_null($php)) {
+        if (null === $php) {
             $php = (new \Symfony\Component\Process\PhpExecutableFinder())->find();
         }
 
@@ -119,6 +122,7 @@ class FeatureContext implements Context
 
         $commands = array_merge($commands, [
             $behat,
+            $additional,
             '--no-interaction',
             '--config='.$config,
         ]);

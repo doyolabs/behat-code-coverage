@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 $header = <<<'HEADER'
-This file is part of the DoyoUserBundle project.
+This file is part of the doyo/behat-coverage-extension project.
 
 (c) Anthonius Munthi <me@itstoni.com>
 
@@ -26,6 +26,7 @@ return PhpCsFixer\Config::create()
         '@PHP71Migration:risky' => true,
         '@PHPUnit60Migration:risky' => true,
         '@Symfony' => true,
+        '@Symfony:risky' => true,
         'align_multiline_comment' => [
             'comment_type' => 'phpdocs_like',
         ],

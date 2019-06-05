@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the DoyoUserBundle project.
+ * This file is part of the doyo/behat-coverage-extension project.
  *
  * (c) Anthonius Munthi <me@itstoni.com>
  *
@@ -30,13 +30,6 @@ class Compat
         $class = $namespace.$name;
 
         return $class;
-    }
-
-    public static function createDriver($name)
-    {
-        $class = static::getDriverClass($name);
-
-        return new $class();
     }
 
     public static function getVersion()

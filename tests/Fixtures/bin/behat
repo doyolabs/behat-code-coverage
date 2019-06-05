@@ -1,0 +1,13 @@
+#!/usr/bin/env php
+<?php
+
+require __DIR__.'/../../../vendor/autoload.php';
+
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Cache;
+
+$cache = new Cache('console');
+$cache->startCoverage();
+
+require __DIR__.'/../../../vendor/bin/behat';
+
+

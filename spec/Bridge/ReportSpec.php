@@ -9,6 +9,7 @@ use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Report\Clover;
+use Symfony\Component\Console\Style\StyleInterface;
 
 class ReportSpec extends ObjectBehavior
 {
@@ -45,9 +46,11 @@ class ReportSpec extends ObjectBehavior
     function it_should_handle_report_process_event(
         ReportEvent $event,
         TestReportProcessor $report,
+        StyleInterface $io,
         $driver
     )
     {
+        $event->getIO()->willReturn($io);
         $driver->beADoubleOf(Compat::getDriverClass('Dummy'));
         $coverage = new CodeCoverage($driver->getWrappedObject());
 

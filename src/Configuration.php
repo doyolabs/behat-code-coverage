@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the DoyoUserBundle project.
+ * This file is part of the doyo/behat-coverage-extension project.
  *
  * (c) Anthonius Munthi <me@itstoni.com>
  *
@@ -55,11 +55,27 @@ class Configuration
      */
     private function configureDriversSection(ArrayNodeDefinition $node)
     {
+        $normalizer = function ($v) {
+            return ['namespace' => $v];
+        };
+
         $node
             ->addDefaultsIfNotSet()
             ->children()
-                ->booleanNode('local')->defaultValue(true)->end()
-                ->booleanNode('remote')->defaultValue(false)->end()
+                ->arrayNode('drivers')
+                    ->arrayPrototype()
+                        ->beforeNormalization()
+                            ->ifString()->then($normalizer)
+                        ->end()
+                        ->children()
+                            ->scalarNode('namespace')->isRequired()->end()
+                            ->scalarNode('driver')->defaultValue('cached')->end()
+                            ->arrayNode('options')
+                                ->scalarPrototype()->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
             ->end();
     }
 
@@ -105,17 +121,35 @@ class Configuration
 
     private function configureFilterSection(ArrayNodeDefinition $builder)
     {
+        $stringNormalizer = function ($v) {
+            return ['directory' => $v];
+        };
+
         $builder
-            ->addDefaultsIfNotSet()
             ->children()
                 ->arrayNode('filter')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->arrayNode('whitelist')
-                            ->scalarPrototype()->end()
+                    ->arrayPrototype()
+                        ->beforeNormalization()
+                            ->ifString()->then($stringNormalizer)
                         ->end()
-                        ->arrayNode('blacklist')
-                            ->scalarPrototype()->end()
+                        ->children()
+                            ->scalarNode('directory')->defaultNull()->end()
+                            ->scalarNode('file')->defaultNull()->end()
+                            ->scalarNode('suffix')->defaultValue('.php')->end()
+                            ->scalarNode('prefix')->defaultValue('')->end()
+                            ->arrayNode('exclude')
+                                ->arrayPrototype()
+                                    ->beforeNormalization()
+                                        ->ifString()->then($stringNormalizer)
+                                    ->end()
+                                    ->children()
+                                        ->scalarNode('directory')->defaultNull()->end()
+                                        ->scalarNode('file')->defaultNull()->end()
+                                        ->scalarNode('suffix')->defaultNull()->end()
+                                        ->scalarNode('prefix')->defaultNull()->end()
+                                    ->end()
+                                ->end()
+                            ->end()
                         ->end()
                     ->end()
                 ->end()

@@ -218,9 +218,7 @@ class Cache implements \Serializable
     public function readCache()
     {
         $adapter = $this->adapter;
-        $cached  = $adapter->get(static::CACHE_KEY, function () {
-            return false;
-        });
+        $cached  = $adapter->getItem(static::CACHE_KEY)->get();
 
         if ($cached instanceof self) {
             $this->coverageId = $cached->getCoverageId();

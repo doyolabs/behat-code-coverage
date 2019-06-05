@@ -112,8 +112,9 @@ class CacheSpec extends ObjectBehavior
         $this->getDriverSubject($driver);
 
         $driver->start(true)->shouldBeCalledOnce();
-        $driver->stop()->shouldBeCalledOnce();
+        $driver->stop()->shouldBeCalledOnce()->willReturn([]);
         $this->setCoverageId($id);
+        $this->save();
 
         $this->startCoverage($driver);
         $this->shutdown();

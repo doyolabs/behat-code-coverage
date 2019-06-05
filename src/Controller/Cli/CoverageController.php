@@ -82,12 +82,23 @@ class CoverageController implements Controller, EventSubscriberInterface
     public function onBeforeReportProcess(ReportEvent $event)
     {
         $io = $this->style;
-        $io->section('Processing Code Coverage Reports');
+        $io->section('behat coverage reports process started');
         $event->setIO($io);
     }
 
     public function onAfterReportProcess(ReportEvent $event)
     {
-        $this->style->success('Behat coverage reports process completed');
+        $exceptions = $event->getExceptions();
+        $io = $event->getIO();
+        if(0 === count($exceptions)){
+            $this->style->success('behat coverage reports process completed');
+            return;
+        }
+
+        $io->newLine(2);
+        $io->section('behat coverage reports process failed');
+        foreach($exceptions as $exception){
+            $io->error($exception->getMessage());
+        }
     }
 }

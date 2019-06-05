@@ -17,6 +17,7 @@ use Behat\Behat\EventDispatcher\Event\ExampleTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
 use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Doyo\Behat\Coverage\Bridge\Aggregate;
+use Doyo\Behat\Coverage\Bridge\Symfony\EventDispatcher;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\RefreshEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
@@ -26,7 +27,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class BehatEventListener implements EventSubscriberInterface
 {
     /**
-     * @var EventDispatcherInterface
+     * @var EventDispatcher
      */
     private $dispatcher;
 
@@ -36,7 +37,7 @@ class BehatEventListener implements EventSubscriberInterface
     protected $coverageEvent;
 
     public function __construct(
-        EventDispatcherInterface $dispatcher
+        EventDispatcher $dispatcher
     ) {
         $this->dispatcher    = $dispatcher;
         $this->coverageEvent = new CoverageEvent();
@@ -62,7 +63,7 @@ class BehatEventListener implements EventSubscriberInterface
 
         $coverageEvent->setCoverageId(null);
         $coverageEvent->setAggregate(new Aggregate());
-        $dispatcher->dispatch(CoverageEvent::REFRESH, $event);
+        $dispatcher->dispatch($event, CoverageEvent::REFRESH);
     }
 
     public function startCoverage($scope)
@@ -73,7 +74,7 @@ class BehatEventListener implements EventSubscriberInterface
         $coverageEvent = $this->coverageEvent;
 
         $coverageEvent->setCoverageId($id);
-        $dispatcher->dispatch(CoverageEvent::START, $coverageEvent);
+        $dispatcher->dispatch($coverageEvent, CoverageEvent::START);
         $this->coverageEvent = $coverageEvent;
     }
 
@@ -81,7 +82,7 @@ class BehatEventListener implements EventSubscriberInterface
     {
         $dispatcher = $this->dispatcher;
         $event      = $this->coverageEvent;
-        $dispatcher->dispatch(CoverageEvent::STOP, $event);
+        $dispatcher->dispatch($event, CoverageEvent::STOP);
     }
 
     public function generateReport()
@@ -89,8 +90,8 @@ class BehatEventListener implements EventSubscriberInterface
         $dispatcher = $this->dispatcher;
         $event      = new ReportEvent();
 
-        $dispatcher->dispatch(ReportEvent::BEFORE_PROCESS, $event);
-        $dispatcher->dispatch(ReportEvent::PROCESS, $event);
-        $dispatcher->dispatch(ReportEvent::AFTER_PROCESS, $event);
+        $dispatcher->dispatch($event, ReportEvent::BEFORE_PROCESS);
+        $dispatcher->dispatch($event, ReportEvent::PROCESS);
+        $dispatcher->dispatch($event, ReportEvent::AFTER_PROCESS);
     }
 }

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Doyo\Behat\Coverage\Bridge;
 
 use Doyo\Behat\Coverage\Event\ReportEvent;
+use Doyo\Behat\Coverage\Exception\ReportProcessException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class Report implements EventSubscriberInterface
@@ -109,12 +110,17 @@ class Report implements EventSubscriberInterface
             $this->processor->process($coverage, $this->target, $this->name);
             $io->text(
                 sprintf(
-                    '<info>Generated <comment>%s</comment> to <comment>%s</comment></info>',
+                    '<info><comment>%s</comment> processed to: <comment>%s</comment></info>',
                     $this->name,
                     $this->target
                 ));
         } catch (\Exception $e) {
-            $io->error('Failed to generate '.$this->name.' report.');
+            $message = sprintf(
+                "failed to generate %s report. with Processor message:\n%s",
+                $this->name,
+                $e->getMessage()
+            );
+            $event->addException(new ReportProcessException($message));
         }
     }
 }

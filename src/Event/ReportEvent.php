@@ -13,9 +13,10 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Event;
 
+use Doyo\Behat\Coverage\Exception\ReportProcessException;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use Symfony\Component\Console\Style\StyleInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Doyo\Behat\Coverage\Bridge\Symfony\Event;
 
 class ReportEvent extends Event
 {
@@ -34,6 +35,11 @@ class ReportEvent extends Event
     private $io;
 
     /**
+     * @var ReportProcessException[]
+     */
+    private $exceptions = array();
+
+    /**
      * @return CodeCoverage|null
      */
     public function getCoverage()
@@ -43,6 +49,8 @@ class ReportEvent extends Event
 
     /**
      * @param CodeCoverage $coverage
+     *
+     * @return static
      */
     public function setCoverage(CodeCoverage $coverage)
     {
@@ -62,12 +70,25 @@ class ReportEvent extends Event
     /**
      * @param StyleInterface|null $io
      *
-     * @return ReportEvent
+     * @return static
      */
     public function setIO(StyleInterface $io)
     {
         $this->io = $io;
 
         return $this;
+    }
+
+    public function addException(ReportProcessException $exception)
+    {
+        $this->exceptions[] = $exception;
+    }
+
+    /**
+     * @return ReportProcessException[]
+     */
+    public function getExceptions()
+    {
+        return $this->exceptions;
     }
 }

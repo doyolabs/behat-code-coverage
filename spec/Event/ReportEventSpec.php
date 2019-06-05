@@ -3,6 +3,7 @@
 namespace spec\Doyo\Behat\Coverage\Event;
 
 use Doyo\Behat\Coverage\Event\ReportEvent;
+use Doyo\Behat\Coverage\Exception\ReportProcessException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use spec\Doyo\Behat\Coverage\CoverageHelperTrait;
@@ -24,6 +25,14 @@ class ReportEventSpec extends ObjectBehavior
 
         $this->setCoverage($coverage)->shouldReturn($this);
         $this->getCoverage()->shouldReturn($coverage);
+    }
+
+    function its_exceptions_should_be_mutable(
+        ReportProcessException $exception
+    )
+    {
+        $this->addException($exception);
+        $this->getExceptions()->shouldHaveCount(1);
     }
 
     function its_IO_should_be_mutable(

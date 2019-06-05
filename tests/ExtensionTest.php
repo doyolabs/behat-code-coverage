@@ -102,9 +102,9 @@ class ExtensionTest extends TestCase
         $files  = $filter->getWhitelistedFiles();
 
         if (!$assertType) {
-            $this->assertArrayNotHasKey($expected, $files);
+            $this->assertArrayNotHasKey($expected, $files, 'File should not be covered: '.$expected);
         } else {
-            $this->assertArrayHasKey($expected, $files);
+            $this->assertArrayHasKey($expected, $files, 'File should be covered: '.$expected);
         }
     }
 
@@ -115,7 +115,10 @@ class ExtensionTest extends TestCase
             [__DIR__.'/Fixtures/src/Hello.php'],
             [__DIR__.'/Fixtures/src/whitelist/test.php'],
             [__DIR__.'/Fixtures/src/test.yaml', false],
-            //[__DIR__.'/Fixtures/src/blacklist/blacklist.php', false],
+            [__DIR__.'/Fixtures/src/blacklist/blacklist.php', false],
+            [__DIR__.'/Fixtures/files/file.php'],
+            [__DIR__.'/Fixtures/style1/style1.php'],
+            [__DIR__.'/Fixtures/src/subdir/blacklist/blacklist.php', false],
         ];
     }
 }

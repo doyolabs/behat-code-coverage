@@ -105,17 +105,35 @@ class Configuration
 
     private function configureFilterSection(ArrayNodeDefinition $builder)
     {
+        $stringNormalizer = function ($v) {
+            return ['directory' => $v];
+        };
+
         $builder
-            ->addDefaultsIfNotSet()
             ->children()
                 ->arrayNode('filter')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->arrayNode('whitelist')
-                            ->scalarPrototype()->end()
+                    ->arrayPrototype()
+                        ->beforeNormalization()
+                            ->ifString()->then($stringNormalizer)
                         ->end()
-                        ->arrayNode('blacklist')
-                            ->scalarPrototype()->end()
+                        ->children()
+                            ->scalarNode('directory')->defaultNull()->end()
+                            ->scalarNode('file')->defaultNull()->end()
+                            ->scalarNode('suffix')->defaultValue('.php')->end()
+                            ->scalarNode('prefix')->defaultValue('')->end()
+                            ->arrayNode('exclude')
+                                ->arrayPrototype()
+                                    ->beforeNormalization()
+                                        ->ifString()->then($stringNormalizer)
+                                    ->end()
+                                    ->children()
+                                        ->scalarNode('directory')->defaultNull()->end()
+                                        ->scalarNode('file')->defaultNull()->end()
+                                        ->scalarNode('suffix')->defaultNull()->end()
+                                        ->scalarNode('prefix')->defaultNull()->end()
+                                    ->end()
+                                ->end()
+                            ->end()
                         ->end()
                     ->end()
                 ->end()

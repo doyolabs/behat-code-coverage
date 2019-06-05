@@ -15,8 +15,9 @@ default:
         Behatch\Extension: ~
         Doyo\Behat\Coverage\Extension:
             filter:
-                whitelist:
-                    - src/*.php
+                - directory: src/*.php
+                  exclude:
+                      - src/Resources
             report:
                 php: build/cov/behat.cov
                 html:

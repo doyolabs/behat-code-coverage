@@ -8,10 +8,13 @@ default:
             local: true
             remote: false
             filter:
-                whitelist:
-                    - src/*.php
-                blacklist:
+                - style1/*.php
+                - directory: src
+                  exclude: 
                     - src/blacklist
+                    - src/*/blacklist
+                - file: 'files/file.php'
+                  
             report:
                 html:
                     target: build/html

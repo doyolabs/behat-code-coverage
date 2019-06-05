@@ -14,11 +14,7 @@
 
     <services>
         <defaults public="true"/>
-        <service id="doyo.coverage.filter" class="%doyo.coverage.filter.class%">
-            <call method="addFilesToWhitelist">
-                <argument>%doyo.coverage.config.filter%</argument>
-            </call>
-        </service>
+        <service id="doyo.coverage.filter" class="%doyo.coverage.filter.class%"/>
 
         <service id="doyo.coverage.local.code_coverage"
                  class="%doyo.coverage.code_coverage.class%"

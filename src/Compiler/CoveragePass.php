@@ -16,7 +16,6 @@ namespace Doyo\Behat\Coverage\Compiler;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\Finder\Finder;
 
 class CoveragePass implements CompilerPassInterface
 {
@@ -52,44 +51,40 @@ class CoveragePass implements CompilerPassInterface
         $config     = $container->getParameterBag()->get('doyo.coverage.config');
         $filter     = $config['filter'];
         $basePath   = $container->getParameterBag()->get('paths.base');
+        $definition = $container->getDefinition('doyo.coverage.filter');
 
-        $whitelist = $filter['whitelist'];
-        $blackList = $filter['blacklist'];
-
-        $files = [];
-        foreach ($whitelist as $path) {
-            $found = $this->findFiles($basePath, $path, $blackList);
-            $files = array_merge($found, $files);
+        foreach ($filter as $options) {
+            $options['basePath'] = $basePath;
+            $this->filterWhitelist($definition, $options, 'add');
+            $exclude = $options['exclude'];
+            foreach ($exclude as $item) {
+                $item['basePath'] = $basePath;
+                $this->filterWhitelist($definition, $item, 'remove');
+            }
         }
-        $container->setParameter('doyo.coverage.config.filter', $files);
     }
 
-    private function findFiles($basePath, $path, $blacklist)
+    private function filterWhitelist(Definition $definition, $options, $method)
     {
-        $lastPos = stripos($path, '/');
-        $dir     = $path;
-        $name    = null;
-        if (false !== $lastPos) {
-            $dir  = substr($path, 0, $lastPos);
-            $name = substr($path, $lastPos + 1);
+        $basePath  = $options['basePath'];
+        $suffix    = $options['suffix'] ?: '.php';
+        $prefix    = $options['prefix'] ?: '';
+        $type      = $options['directory'] ? 'directory' : 'file';
+        $directory = $basePath.DIRECTORY_SEPARATOR.$options['directory'];
+        $file      = $basePath.DIRECTORY_SEPARATOR.$options['file'];
+
+        if (preg_match('/\/\*(\..+)/', $directory, $matches)) {
+            $suffix    = $matches[1];
+            $directory = str_replace($matches[0], '', $directory);
         }
 
-        $in     = $basePath.DIRECTORY_SEPARATOR.$dir;
-        $finder = Finder::create()
-            ->in($in);
-        if (!is_null($name)) {
-            $finder->name($name);
+        $methodSuffix = 'add' === $method ? 'ToWhitelist' : 'FromWhitelist';
+        if ('directory' === $type) {
+            $definition->addMethodCall($method.'Directory'.$methodSuffix, [$directory, $suffix, $prefix]);
         }
 
-        foreach ($blacklist as $l) {
-            $finder->notPath($l);
+        if ('file' === $type) {
+            $definition->addMethodCall($method.'File'.$methodSuffix, [$file]);
         }
-
-        $files = [];
-        foreach ($finder->files() as $file) {
-            $files[] = $file->getRealPath();
-        }
-
-        return $files;
     }
 }

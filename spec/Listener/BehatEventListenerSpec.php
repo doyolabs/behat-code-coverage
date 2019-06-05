@@ -48,6 +48,9 @@ class BehatEventListenerSpec extends ObjectBehavior
         $event->setAggregate(Argument::type(Aggregate::class))->shouldBeCalled();
 
         $dispatcher
+            ->dispatch(Argument::type(RefreshEvent::class), CoverageEvent::BEFORE_REFRESH)
+            ->shouldBeCalled();
+        $dispatcher
             ->dispatch(Argument::type(RefreshEvent::class), CoverageEvent::REFRESH)
             ->shouldBeCalled();
 
@@ -69,6 +72,9 @@ class BehatEventListenerSpec extends ObjectBehavior
 
         $event->setCoverageId('some.feature:line')->shouldBeCalled();
         $dispatcher
+            ->dispatch($event, CoverageEvent::BEFORE_START)
+            ->shouldBeCalled();
+        $dispatcher
             ->dispatch($event, CoverageEvent::START)
             ->shouldBeCalled();
 
@@ -80,6 +86,8 @@ class BehatEventListenerSpec extends ObjectBehavior
         CoverageEvent $event
     )
     {
+        $dispatcher->dispatch($event, CoverageEvent::BEFORE_STOP)
+            ->shouldBeCalled();
         $dispatcher->dispatch($event, CoverageEvent::STOP)
             ->shouldBeCalled();
 

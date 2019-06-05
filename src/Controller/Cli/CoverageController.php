@@ -64,7 +64,7 @@ class CoverageController implements Controller, EventSubscriberInterface
         return [
             ReportEvent::BEFORE_PROCESS => [
                 ['validateEvent', 1000],
-                ['onBeforeReportProcess', 0],
+                ['onBeforeReportProcess', 100],
             ],
             ReportEvent::AFTER_PROCESS    => 'onAfterReportProcess',
             CoverageEvent::BEFORE_REFRESH => ['validateEvent', 1000],

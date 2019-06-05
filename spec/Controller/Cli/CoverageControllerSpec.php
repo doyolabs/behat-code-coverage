@@ -29,17 +29,16 @@ class CoverageControllerSpec extends ObjectBehavior
 
     function it_should_subscribe_to_coverage_before_event()
     {
-        $this->getSubscribedEvents()->shouldHaveKeyWithValue(CoverageEvent::BEFORE_START, 'validateEvent');
-        $this->getSubscribedEvents()->shouldHaveKeyWithValue(CoverageEvent::BEFORE_STOP, 'validateEvent');
-        $this->getSubscribedEvents()->shouldHaveKeyWithValue(CoverageEvent::BEFORE_REFRESH, 'validateEvent');
+        $this->getSubscribedEvents()->shouldHaveKey(CoverageEvent::BEFORE_START);
+        $this->getSubscribedEvents()->shouldHaveKey(CoverageEvent::BEFORE_STOP);
+        $this->getSubscribedEvents()->shouldHaveKey(CoverageEvent::BEFORE_REFRESH);
     }
 
     function it_should_subscribe_to_report_event()
     {
         $this->shouldImplement(EventSubscriberInterface::class);
-        $this->getSubscribedEvents()->shouldHaveKeyWithValue(ReportEvent::BEFORE_PROCESS,'onBeforeReportProcess');
-        $this->getSubscribedEvents()->shouldHaveKeyWithValue(ReportEvent::PROCESS,['validateEvent',100]);
-        $this->getSubscribedEvents()->shouldHaveKeyWithValue(ReportEvent::AFTER_PROCESS,['validateEvent','onAfterReportProcess']);
+        $this->getSubscribedEvents()->shouldHaveKey(ReportEvent::BEFORE_PROCESS);
+        $this->getSubscribedEvents()->shouldHaveKey(ReportEvent::AFTER_PROCESS);
     }
 
     function it_should_handle_before_report_process_event(

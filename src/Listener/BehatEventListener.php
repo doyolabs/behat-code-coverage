@@ -83,7 +83,7 @@ class BehatEventListener implements EventSubscriberInterface
     {
         $dispatcher = $this->dispatcher;
         $event      = $this->coverageEvent;
-        $dispatcher->dispatch($event, CoverageEvent::BEFORE_START);
+        $dispatcher->dispatch($event, CoverageEvent::BEFORE_STOP);
         $dispatcher->dispatch($event, CoverageEvent::STOP);
     }
 

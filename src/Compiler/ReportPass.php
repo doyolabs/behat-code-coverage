@@ -44,7 +44,7 @@ class ReportPass implements CompilerPassInterface
 
         unset($options['target']);
         $definition->setClass($class);
-        if (!empty($options) && in_array($format, $hasOptions, true)) {
+        if (!empty($options) && \in_array($format, $hasOptions, true)) {
             $this->configureProcessorOptions($definition, $class, $options);
         }
     }
@@ -96,7 +96,7 @@ class ReportPass implements CompilerPassInterface
     {
         $dir = $target;
         if ('file' === $type) {
-            $dir = dirname($target);
+            $dir = \dirname($target);
         }
 
         if (!is_dir($dir)) {

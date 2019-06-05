@@ -48,7 +48,7 @@ class FeatureContext implements Context
     {
         $configFile = 'behat.yaml';
 
-        if (!is_null($node)) {
+        if (null !== $node) {
             $configFile = $this->createConfig($node->getRaw());
         }
 
@@ -111,7 +111,7 @@ class FeatureContext implements Context
         $commands = [];
         $behat    = realpath(__DIR__.'/../../vendor/bin/behat');
 
-        if (is_null($php)) {
+        if (null === $php) {
             $php = (new \Symfony\Component\Process\PhpExecutableFinder())->find();
         }
 

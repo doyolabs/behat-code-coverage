@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Doyo\Behat\Coverage\Bridge;
+namespace Doyo\Behat\Coverage\Bridge\CodeCoverage;
 
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Remote\CoverageRepository;

@@ -70,8 +70,8 @@ class CoveragePass implements CompilerPassInterface
         $suffix    = $options['suffix'] ?: '.php';
         $prefix    = $options['prefix'] ?: '';
         $type      = $options['directory'] ? 'directory' : 'file';
-        $directory = $basePath.DIRECTORY_SEPARATOR.$options['directory'];
-        $file      = $basePath.DIRECTORY_SEPARATOR.$options['file'];
+        $directory = $basePath.\DIRECTORY_SEPARATOR.$options['directory'];
+        $file      = $basePath.\DIRECTORY_SEPARATOR.$options['file'];
 
         if (preg_match('/\/\*(\..+)/', $directory, $matches)) {
             $suffix    = $matches[1];

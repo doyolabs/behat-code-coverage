@@ -101,7 +101,7 @@ class CoverageController implements Controller, EventSubscriberInterface
     {
         $exceptions = $event->getExceptions();
         $io         = $event->getIO();
-        if (0 === count($exceptions)) {
+        if (0 === \count($exceptions)) {
             $this->style->success('behat coverage reports process completed');
 
             return;

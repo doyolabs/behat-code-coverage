@@ -4,7 +4,7 @@ namespace spec\Doyo\Behat\Coverage\Bridge;
 
 use Doyo\Behat\Coverage\Bridge\Aggregate;
 use Doyo\Behat\Coverage\Bridge\Compat;
-use Doyo\Behat\Coverage\Bridge\LocalCoverage;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\LocalCoverage;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use PhpSpec\ObjectBehavior;

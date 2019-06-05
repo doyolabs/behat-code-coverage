@@ -21,19 +21,21 @@ use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 /**
  * Class CoverageRepository.
  *
- * @method           setCoverage(Aggregate $coverage)
+ * @method void      setCoverage(Aggregate $coverage)
  * @method Aggregate getCoverage()
- * @method           hasCoverage()
- * @method           delCoverage()
- * @method           setFilter(Filter $filter)
- * @method           hasFilter()
- * @method Filter    getFilter()
+ * @method bool      hasCoverage()
+ * @method void      delCoverage()
  **
- * @method        setCoverageId(string $id)
- * @method        hasCoverageId()
+ * @method void   setFilter(Filter $filter)
+ * @method bool   hasFilter()
+ * @method Filter getFilter()
+ **
+ * @method void   setCoverageId(string $id)
+ * @method bool   hasCoverageId()
  * @method string getCoverageId()
- * @method        delete($id)
- * @method        has($id)
+ **
+ * @method void delete($id)
+ * @method bool has($id)
  */
 class CoverageRepository
 {

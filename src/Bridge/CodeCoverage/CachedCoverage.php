@@ -11,15 +11,8 @@
 
 declare(strict_types=1);
 
-namespace Doyo\Behat\Coverage\Bridge;
+namespace Doyo\Behat\Coverage\Bridge\CodeCoverage;
 
-interface CodeCoverageInterface
+class CachedCoverage
 {
-    public function start($id);
-
-    public function stop();
-
-    public function refresh();
-
-    public function getCoverage();
 }

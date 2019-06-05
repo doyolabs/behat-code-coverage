@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Test\Doyo\Behat\Coverage;
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\LocalCoverage;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\RemoteCoverage;
 use Doyo\Behat\Coverage\Bridge\Compat;
-use Doyo\Behat\Coverage\Bridge\LocalCoverage;
-use Doyo\Behat\Coverage\Bridge\RemoteCoverage;
 use Doyo\Behat\Coverage\Bridge\Report;
 use Doyo\Behat\Coverage\Controller\Cli\CoverageController;
 use Doyo\Behat\Coverage\Listener\BehatEventListener;

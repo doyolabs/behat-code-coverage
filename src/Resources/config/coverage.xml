@@ -5,9 +5,9 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
     <parameters>
         <parameter key="doyo.coverage.remote.repository.class">Doyo\Behat\Coverage\Remote\CoverageRepository</parameter>
-        <parameter key="doyo.coverage.remote.class">Doyo\Behat\Coverage\Bridge\RemoteCoverage</parameter>
+        <parameter key="doyo.coverage.remote.class">Doyo\Behat\Coverage\Bridge\CodeCoverage\RemoteCoverage</parameter>
         <parameter key="doyo.coverage.filter.class">SebastianBergmann\CodeCoverage\Filter</parameter>
-        <parameter key="doyo.coverage.local.class">Doyo\Behat\Coverage\Bridge\LocalCoverage</parameter>
+        <parameter key="doyo.coverage.local.class">Doyo\Behat\Coverage\Bridge\CodeCoverage\LocalCoverage</parameter>
         <parameter key="doyo.coverage.code_coverage.class">SebastianBergmann\CodeCoverage\CodeCoverage</parameter>
         <parameter key="doyo.coverage.config.filter"/>
     </parameters>

@@ -4,6 +4,8 @@ default:
             contexts:
                 - Behat\MinkExtension\Context\MinkContext
                 - behatch:context:system
+                - behatch:context:rest
+                - behatch:context:json
                 - FeatureContext
 
     extensions:
@@ -11,11 +13,12 @@ default:
             sessions:
                 default:
                     goutte:
-            base_url: http://example.org
+            base_url: http://localhost:8000
         Behatch\Extension: ~
         Doyo\Behat\Coverage\Extension:
             drivers:
                 - console
+                - remote
             filter:
                 - directory: src/*.php
                   exclude:

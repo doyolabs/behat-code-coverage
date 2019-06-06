@@ -13,7 +13,8 @@ declare(strict_types=1);
 
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\CodeCoverage;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Webmozart\Assert\Assert;
 
 /**
@@ -108,9 +109,8 @@ class FeatureContext implements Context
             file_put_contents($patchedFile, $contents);
         }
 
-        $class    = \Doyo\Behat\Coverage\Bridge\Compat::getDriverClass('Dummy');
-        $driver   = new $class();
-        $coverage = new CodeCoverage($driver);
+        $driver   = new Dummy();
+        $coverage = new Processor($driver);
 
         include $patchedFile;
 

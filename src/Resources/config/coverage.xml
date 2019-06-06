@@ -6,7 +6,7 @@
     <parameters>
         <parameter key="doyo.coverage.filter.class">SebastianBergmann\CodeCoverage\Filter</parameter>
         <parameter key="doyo.coverage.local.class">Doyo\Behat\Coverage\Bridge\LocalCoverage</parameter>
-        <parameter key="doyo.coverage.code_coverage.class">Doyo\Behat\Coverage\Bridge\CodeCoverage\CodeCoverage</parameter>
+        <parameter key="doyo.coverage.processor.class">Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor</parameter>
         <parameter key="doyo.coverage.cached.class">Doyo\Behat\Coverage\Bridge\CachedCoverage</parameter>
         <parameter key="doyo.coverage.config.filter"/>
     </parameters>
@@ -15,17 +15,17 @@
         <defaults public="true"/>
         <service id="doyo.coverage.filter" class="%doyo.coverage.filter.class%"/>
 
-        <service id="doyo.coverage.local.code_coverage"
-                 class="%doyo.coverage.code_coverage.class%"
+        <service id="doyo.coverage.local.processor"
+                 class="%doyo.coverage.processor.class%"
         >
             <argument type="service" id="doyo.coverage.local.driver"/>
             <argument type="service" id="doyo.coverage.filter"/>
-            <tag name="doyo.code_coverage"/>
+            <tag name="doyo.coverage.processor"/>
         </service>
 
         <!-- setup local coverage -->
         <service id="doyo.coverage.local" class="%doyo.coverage.local.class%">
-            <argument type="service" id="doyo.coverage.local.code_coverage"/>
+            <argument type="service" id="doyo.coverage.local.processor"/>
             <tag name="doyo.dispatcher.subscriber"/>
         </service>
     </services>

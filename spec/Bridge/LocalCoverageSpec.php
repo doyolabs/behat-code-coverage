@@ -4,16 +4,13 @@ namespace spec\Doyo\Behat\Coverage\Bridge;
 
 use SebastianBergmann\CodeCoverage\Driver\Driver;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
-use Doyo\Behat\Coverage\Bridge\Compat;
 use Doyo\Behat\Coverage\Bridge\LocalCoverage;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use PhpSpec\ObjectBehavior;
 use SebastianBergmann\CodeCoverage\Filter;
 use Prophecy\Argument;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\CodeCoverage;
-use SebastianBergmann\CodeCoverage\CodeCoverage as ReportCodeCoverage;
-use SebastianBergmann\CodeCoverage\Report\Xml\Coverage;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Webmozart\Assert\Assert;
 
@@ -27,11 +24,9 @@ class LocalCoverageSpec extends ObjectBehavior
         13 => 1,
     ]];
 
-    private $coverage;
-
     function let(
         Driver $driver,
-        CodeCoverage $coverage
+        Processor $coverage
     ){
         $filter = new Filter();
         $filter->addFileToWhitelist(__DIR__.'/TestClass.php');
@@ -59,7 +54,7 @@ class LocalCoverageSpec extends ObjectBehavior
     function it_should_handle_coverage_start_event(
         CoverageEvent $event,
         TestCase $testCase,
-        CodeCoverage $coverage
+        Processor $coverage
     )
     {
         $event->getTestCase()->willReturn($testCase);
@@ -68,20 +63,23 @@ class LocalCoverageSpec extends ObjectBehavior
     }
 
     function it_should_handle_coverage_stop_event(
-        CodeCoverage $coverage,
+        Processor $coverage,
         CoverageEvent $event,
         TestCase $testCase
     )
     {
         $data = ['somedata'];
+        $name = 'some-name';
+        $testCase->getName()->willReturn($name);
 
         $event->getCoverage()->willReturn($data);
         $event->getTestCase()->willReturn($testCase);
 
-        $coverage->append($data, $testCase, Argument::cetera())->shouldBeCalled();
+        $coverage->append($data, $name, Argument::cetera())->shouldBeCalled();
 
         $coverage->start($testCase)->shouldBeCalled();
         $coverage->stop()->shouldBeCalled();
+        $coverage->addTestCase($testCase)->shouldBeCalled();
 
         $this->onCoverageStarted($event);
         $this->onCoverageStopped($event);
@@ -89,22 +87,16 @@ class LocalCoverageSpec extends ObjectBehavior
 
     function it_should_handle_before_report_process_event(
         ReportEvent $event,
-        CodeCoverage $coverage,
-        Driver $driver
+        Processor $coverage
     )
     {
-        $filter = new Filter();
-        $coverage->getData(Argument::any())->willReturn([]);
-        $coverage->getTests()->willReturn([]);
-        $coverage->getDriver()->shouldBeCalled()->willReturn($driver);
-        $coverage->filter()->willReturn($filter);
+        $coverage->complete()->shouldBeCalledOnce();
 
-        $event->setCoverage(Argument::type(ReportCodeCoverage::class))->shouldBeCalled();
         $this->onBeforeReportProcess($event);
     }
 
     function it_should_handle_coverage_refresh_event(
-        CodeCoverage $coverage
+        Processor $coverage
     )
     {
         $coverage->clear()->shouldBeCalled();

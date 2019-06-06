@@ -2,6 +2,7 @@
 
 namespace spec\Doyo\Behat\Coverage\Event;
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use Doyo\Behat\Coverage\Exception\ReportProcessException;
 use PhpSpec\ObjectBehavior;
@@ -11,20 +12,24 @@ use Symfony\Component\Console\Style\StyleInterface;
 
 class ReportEventSpec extends ObjectBehavior
 {
-    use CoverageHelperTrait;
+    function let(
+        Processor $processor
+    )
+    {
+        $this->setProcessor($processor);
+    }
 
     function it_is_initializable()
     {
         $this->shouldHaveType(ReportEvent::class);
     }
 
-    function its_coverage_should_be_mutable($driver)
+    function its_processor_should_be_mutable(
+        Processor $processor
+    )
     {
-        $this->getDriverSubject($driver);
-        $coverage = $this->getCoverageSubject($driver);
-
-        $this->setCoverage($coverage)->shouldReturn($this);
-        $this->getCoverage()->shouldReturn($coverage);
+        $this->setProcessor($processor)->shouldReturn($this);
+        $this->getProcessor()->shouldReturn($processor);
     }
 
     function its_exceptions_should_be_mutable(

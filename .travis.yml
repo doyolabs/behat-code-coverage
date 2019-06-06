@@ -31,6 +31,8 @@ cache:
     robo test
   - &run-test-coverage
     robo coverage
+  - &start-php-server
+    php -S localhost:8000 -t tests/Fixtures/public --timeout=0 > /dev/null 2>&1 &
 
 jobs:
   include:
@@ -58,6 +60,8 @@ before_install:
 
 install:
   - *update-project-dependencies
+
+before_script: *start-php-server
 
 script:
   - *run-test

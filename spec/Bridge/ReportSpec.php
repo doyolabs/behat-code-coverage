@@ -2,17 +2,29 @@
 
 namespace spec\Doyo\Behat\Coverage\Bridge;
 
-use Doyo\Behat\Coverage\Bridge\Compat;
+use Behat\Mink\Driver\DriverInterface;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Doyo\Behat\Coverage\Bridge\Report;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
+use SebastianBergmann\CodeCoverage\Driver\Driver;
 use SebastianBergmann\CodeCoverage\Report\Clover;
 use Symfony\Component\Console\Style\StyleInterface;
 
 class ReportSpec extends ObjectBehavior
 {
+    private $coverage;
+
+    function let(
+        Driver $driver,
+        Processor $processor
+    )
+    {
+        $processor->beConstructedWith([$driver->getWrappedObject()]);
+    }
+
     function it_is_initializable()
     {
         $this->shouldHaveType(Report::class);
@@ -47,16 +59,16 @@ class ReportSpec extends ObjectBehavior
         ReportEvent $event,
         TestReportProcessor $report,
         StyleInterface $io,
-        $driver
+        Processor $processor,
+        DriverInterface $driver
     )
     {
-        $event->getIO()->willReturn($io);
-        $driver->beADoubleOf(Compat::getDriverClass('Dummy'));
         $coverage = new CodeCoverage($driver->getWrappedObject());
+        $event->getIO()->willReturn($io);
+        $event->getProcessor()->willReturn($processor)->shouldBeCalled();
+        $processor->getCodeCoverage()->willReturn($coverage);
 
-        $event->getCoverage()->willReturn($coverage)->shouldBeCalled();
-
-        $report->process($coverage, 'some-target', 'some-name')->shouldBeCalled();
+        $report->process(Argument::type(CodeCoverage::class), 'some-target', 'some-name')->shouldBeCalled();
 
         $this->setTarget('some-target');
         $this->setName('some-name');

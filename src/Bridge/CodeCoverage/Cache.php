@@ -46,7 +46,7 @@ class Cache implements \Serializable
     private $filter = [];
 
     /**
-     * @var CodeCoverage
+     * @var Processor
      */
     private $codeCoverage;
 
@@ -60,6 +60,11 @@ class Cache implements \Serializable
      */
     private $exceptions = [];
 
+    /**
+     * @var bool
+     */
+    private $hasStarted = false;
+
     public function __construct($namespace)
     {
         $dir             = sys_get_temp_dir().'/doyo/behat-coverage-extension';
@@ -72,9 +77,10 @@ class Cache implements \Serializable
 
     public function reset()
     {
-        $this->testCase   = null;
-        $this->data       = [];
-        $this->exceptions = [];
+        $this->testCase     = null;
+        $this->data         = [];
+        $this->exceptions   = [];
+        $this->codeCoverage = null;
 
         $this->save();
     }
@@ -206,7 +212,7 @@ class Cache implements \Serializable
     }
 
     /**
-     * @return CodeCoverage|null
+     * @return Processor|null
      */
     public function getCodeCoverage()
     {
@@ -214,11 +220,11 @@ class Cache implements \Serializable
     }
 
     /**
-     * @param CodeCoverage $codeCoverage
+     * @param Processor $codeCoverage
      *
      * @return Cache
      */
-    public function setCodeCoverage(CodeCoverage $codeCoverage)
+    public function setCodeCoverage(Processor $codeCoverage)
     {
         $this->codeCoverage = $codeCoverage;
 
@@ -290,8 +296,9 @@ class Cache implements \Serializable
             $coverage = $this->createCodeCoverage($driver);
             $coverage->start($this->getTestCase());
             register_shutdown_function([$this, 'shutdown']);
+            $this->hasStarted = true;
         } catch (\Exception $e) {
-            $this->exceptions[] = sprintf(
+            $message = sprintf(
                 "Can not start code coverage in namespace: %s :\n%s",
                 $this->namespace,
                 $e->getMessage()
@@ -302,11 +309,15 @@ class Cache implements \Serializable
     public function shutdown()
     {
         $codeCoverage = $this->codeCoverage;
-
-        if (null !== $codeCoverage) {
-            $data               = $codeCoverage->stop();
-            $this->data         = $data;
-            $this->codeCoverage = null;
+        if ($this->hasStarted) {
+            try {
+                $data               = $codeCoverage->stop();
+                $this->data         = $data;
+                $this->codeCoverage = null;
+                $this->hasStarted   = false;
+            } catch (\Exception $e) {
+                $this->exceptions[] = $e->getMessage();
+            }
         }
 
         $this->save();
@@ -315,7 +326,7 @@ class Cache implements \Serializable
     /**
      * @param mixed|null $driver
      *
-     * @return CodeCoverage
+     * @return Processor
      */
     private function createCodeCoverage($driver = null)
     {
@@ -324,15 +335,13 @@ class Cache implements \Serializable
         $options  = $this->codeCoverageOptions;
 
         if (null === $coverage) {
-            $coverage           = new CodeCoverage($driver, $filter);
+            $coverage           = new Processor($driver, $filter);
             $this->codeCoverage = $coverage;
         }
 
         foreach ($options as $method => $option) {
-            $method = 'set'.$method;
-            if (method_exists($coverage, $method)) {
-                \call_user_func_array([$coverage, $method], [$option]);
-            }
+            $method = 'set'.ucfirst($method);
+            \call_user_func_array([$coverage, $method], [$option]);
         }
 
         return $coverage;

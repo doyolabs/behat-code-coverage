@@ -4,18 +4,18 @@ namespace spec\Doyo\Behat\Coverage\Bridge\CodeCoverage;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Cache;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
+use Doyo\Behat\Coverage\Bridge\Exception\CacheException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\CodeCoverage;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
+use SebastianBergmann\CodeCoverage\Driver\Driver;
 use SebastianBergmann\CodeCoverage\Filter;
-use spec\Doyo\Behat\Coverage\CoverageHelperTrait;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Webmozart\Assert\Assert;
+use SebastianBergmann\CodeCoverage\CodeCoverage as CodeCoverage;
 
 class CacheSpec extends ObjectBehavior
 {
-    use CoverageHelperTrait;
-
     function let()
     {
         $this->beConstructedWith('spec-test');
@@ -109,39 +109,29 @@ class CacheSpec extends ObjectBehavior
         $filter->getWhitelistedFiles()->shouldHaveKeyWithValue(__FILE__, true);
     }
 
-    function it_should_start_coverage(
-        CodeCoverage $coverage,
-        TestCase $testCase
-    )
-    {
-
-        // should not start when coverage id not exist
-        $this->startCoverage();
-
-        $this->setTestCase($testCase);
-        $this->save();
-
-        $this->startCoverage();
-        $this->shutdown();
-        $this->shutdown();
-    }
-
     function it_should_handle_error_when_starting_coverage(
-        CodeCoverage $coverage,
-        TestCase $testCase
+        Processor $coverage,
+        TestCase $testCase,
+        Driver $driver
     )
     {
+        $phpCoverage = new CodeCoverage($driver->getWrappedObject());
+        $coverage->setCodeCoverage($phpCoverage);
+        //$coverage->setAddUncoveredFilesFromWhitelist(false)->shouldBeCalled();
+
+        /*
         $this->setCodeCoverageOptions([
             'addUncoveredFilesFromWhitelist' => false,
         ]);
+        */
 
-        $this->setCodeCoverage($coverage);
+        $this->setCodeCoverage($coverage->getWrappedObject());
         $e = new \RuntimeException('some error');
         $coverage->start($testCase)->shouldBeCalledOnce()->willThrow($e);
-        $coverage->setAddUncoveredFilesFromWhitelist(false)->shouldBeCalledOnce();
+
         $this->setTestCase($testCase);
-        $this->startCoverage();
-        $this->getExceptions()->shouldHaveCount(1);
-        $this->hasExceptions()->shouldBe(true);
+
+        $this->shouldThrow(CacheException::class)
+            ->during('startCoverage', []);
     }
 }

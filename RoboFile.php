@@ -136,14 +136,9 @@ class RoboFile extends Tasks
         if ($this->coverage) {
             $task->option('coverage');
             $command = $task->getCommand();
-            /*
-            $command = str_replace(
-                __DIR__.'/vendor/bin/behat',
-                __DIR__.'/tests/Fixtures/bin/behat',
-                $command
-            );
-            */
             $task = $this->taskExec('phpdbg -qrr '.$command);
+        }else{
+            $task->option('tags','~@remote');
         }
 
         return $task;

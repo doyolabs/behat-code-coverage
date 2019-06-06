@@ -45,6 +45,7 @@ jobs:
       before_cache:
         - *install-php-coveralls
         - *install-scrutinizer-ocular
+      before_script: *start-php-server
       script:
         - *run-test-coverage
       after_script:
@@ -55,13 +56,11 @@ jobs:
 
 before_install:
   - *disable-php-memory-limit
-  - *disable-xdebug-php-extension
+  - if [[ ${COVERAGE} != "yes" ]]; then *disable-xdebug-php-extension; fi
   - *install-robo
 
 install:
   - *update-project-dependencies
-
-before_script: *start-php-server
 
 script:
   - *run-test

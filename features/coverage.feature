@@ -10,6 +10,7 @@ Feature: Coverage
     And console output should contain "behat coverage reports process started"
     And console output should contain "behat coverage reports process completed"
 
+  @remote
   Scenario: Run with remote coverage
     Given I run behat with coverage and profile "remote"
     Then console output should contain "6 steps (6 passed)"

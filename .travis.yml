@@ -10,7 +10,7 @@ cache:
   - &disable-php-memory-limit |
     echo "memory_limit=-1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
   - &disable-xdebug-php-extension |
-    phpenv config-rm xdebug.ini || echo "xdebug not available"
+    if [[ ${COVERAGE} != yes ]]; then phpenv config-rm xdebug.ini || echo "xdebug not available"; fi
   - &update-project-dependencies |
     composer update --prefer-dist --no-progress --no-suggest --ansi
   - &install-php-coveralls |
@@ -56,7 +56,7 @@ jobs:
 
 before_install:
   - *disable-php-memory-limit
-  - if [[ ${COVERAGE} != "yes" ]]; then *disable-xdebug-php-extension; fi
+  - *disable-xdebug-php-extension
   - *install-robo
 
 install:

@@ -2,16 +2,13 @@
 
 namespace spec\Doyo\Behat\Coverage\Listener;
 
-use Behat\Behat\EventDispatcher\Event\AfterScenarioTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
-use Behat\Behat\Hook\Scope\ScenarioScope;
 use Behat\Gherkin\Node\FeatureNode;
 use Behat\Gherkin\Node\ScenarioInterface;
 use Behat\Testwork\EventDispatcher\Event\AfterTested;
 use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Behat\Testwork\Tester\Result\TestResult;
 use Behat\Testwork\Tester\Result\TestResults;
-use Doyo\Behat\Coverage\Bridge\Aggregate;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\RefreshEvent;
@@ -20,7 +17,6 @@ use Doyo\Behat\Coverage\Listener\BehatEventListener;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Doyo\Behat\Coverage\Bridge\Symfony\EventDispatcher;
-use Webmozart\Assert\Assert;
 
 class BehatEventListenerSpec extends ObjectBehavior
 {

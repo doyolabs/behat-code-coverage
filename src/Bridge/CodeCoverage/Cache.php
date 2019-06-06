@@ -287,7 +287,7 @@ class Cache implements \Serializable
             register_shutdown_function([$this, 'shutdown']);
         } catch (\Exception $e) {
             $this->exceptions[] = sprintf(
-                "Can not start coverage in namespace: %s :\n%s",
+                "Can not start code coverage in namespace: %s :\n%s",
                 $this->namespace,
                 $e->getMessage()
             );
@@ -298,13 +298,11 @@ class Cache implements \Serializable
     {
         $codeCoverage = $this->codeCoverage;
 
-        if (null === $codeCoverage) {
-            return;
+        if (null !== $codeCoverage) {
+            $data = $codeCoverage->stop();
+            $this->data = $data;
+            $this->codeCoverage = null;
         }
-
-        $data = $codeCoverage->stop();
-        $this->data = $data;
-        $this->codeCoverage = null;
 
         $this->save();
     }

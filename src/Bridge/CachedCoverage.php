@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Doyo\Behat\Coverage\Bridge;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Cache;
+use Doyo\Behat\Coverage\Bridge\Exception\CacheException;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use SebastianBergmann\CodeCoverage\Filter;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -84,5 +85,10 @@ class CachedCoverage implements EventSubscriberInterface
 
         $cache->readCache();
         $event->updateCoverage($cache->getData());
+
+        if($cache->hasExceptions()){
+            $message = implode("\n", $cache->getExceptions());
+            throw new CacheException($message);
+        }
     }
 }

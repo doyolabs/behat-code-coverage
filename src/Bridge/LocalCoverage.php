@@ -48,20 +48,6 @@ class LocalCoverage implements EventSubscriberInterface
     public function onCoverageStopped(CoverageEvent $event)
     {
         $coverage = $this->coverage;
-
-        /*
-        $results = $event->getTestResults();
-
-        $coverage->stop();
-
-        if($results->isPassed()){
-            $this->coverage->setCurrentStatus(0);
-        }
-        $map = [
-            TestResult::PASSED => 0,
-            TestResult::FAILED => 0,
-        ];
-        */
         $coverage->stop();
         $data = $event->getCoverage();
         $coverage->append($data, $event->getTestCase());

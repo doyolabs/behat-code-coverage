@@ -94,7 +94,7 @@ class BehatEventListenerSpec extends ObjectBehavior
     function it_should_dispatch_coverage_stop_event(
         EventDispatcher $dispatcher,
         CoverageEvent $event,
-        ScenarioTested $tested,
+        AfterTested $afterTested,
         TestResult $result,
         TestCase $testCase
     )
@@ -104,10 +104,12 @@ class BehatEventListenerSpec extends ObjectBehavior
         $dispatcher->dispatch($event, CoverageEvent::STOP)
             ->shouldBeCalled();
 
-        $event->getTestCase()->willReturn($testCase);
-        //$testCase->setResult($result)->shouldBeCalledOnce();
+        $afterTested->getTestResult()->willReturn($result)->shouldBeCalledOnce();
+        $result->getResultCode()->willReturn(0)->shouldBeCalledOnce();
+        $event->getTestCase()->willReturn($testCase)->shouldBeCalledOnce();
+        $testCase->setResult(0)->shouldBeCalledOnce();
 
-        $this->stopCoverage($tested);
+        $this->stopCoverage($afterTested);
     }
 
     function it_should_dispatch_report_events(

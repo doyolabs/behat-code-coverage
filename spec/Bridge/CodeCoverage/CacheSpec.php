@@ -142,5 +142,6 @@ class CacheSpec extends ObjectBehavior
         $this->setTestCase($testCase);
         $this->startCoverage();
         $this->getExceptions()->shouldHaveCount(1);
+        $this->hasExceptions()->shouldBe(true);
     }
 }

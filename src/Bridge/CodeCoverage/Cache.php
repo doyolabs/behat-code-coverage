@@ -85,7 +85,8 @@ class Cache implements \Serializable
             $this->testCase,
             $this->data,
             $this->codeCoverageOptions,
-            $this->filter
+            $this->filter,
+            $this->exceptions
         ];
 
         return serialize($data);
@@ -97,7 +98,8 @@ class Cache implements \Serializable
             $this->testCase,
             $this->data,
             $this->codeCoverageOptions,
-            $this->filter
+            $this->filter,
+            $this->exceptions
         ) = unserialize($serialized);
     }
 
@@ -230,6 +232,11 @@ class Cache implements \Serializable
         return $this;
     }
 
+    public function hasExceptions()
+    {
+        return count($this->exceptions) > 0;
+    }
+
     public function getExceptions()
     {
         return $this->exceptions;
@@ -284,8 +291,6 @@ class Cache implements \Serializable
                 $this->namespace,
                 $e->getMessage()
             );
-            $this->save();
-            throw $e;
         }
     }
 

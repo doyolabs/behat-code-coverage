@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Bridge;
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\CodeCoverage;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\CodeCoverage as ReportCodeCoverage;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -60,7 +60,7 @@ class LocalCoverage implements EventSubscriberInterface
     public function onBeforeReportProcess(ReportEvent $event)
     {
         $coverage       = $this->coverage;
-        $driver = $coverage->getDriver();
+        $driver         = $coverage->getDriver();
         $reportCoverage = new ReportCodeCoverage($driver, $coverage->filter());
 
         $reportCoverage->setData($coverage->getData(true));

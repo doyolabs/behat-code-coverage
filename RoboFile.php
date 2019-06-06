@@ -144,7 +144,6 @@ class RoboFile extends Tasks
             );
             */
             $task = $this->taskExec('phpdbg -qrr '.$command);
-
         }
 
         return $task;

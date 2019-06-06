@@ -86,7 +86,7 @@ class CachedCoverage implements EventSubscriberInterface
         $cache->readCache();
         $event->updateCoverage($cache->getData());
 
-        if($cache->hasExceptions()){
+        if ($cache->hasExceptions()) {
             $message = implode("\n", $cache->getExceptions());
             throw new CacheException($message);
         }

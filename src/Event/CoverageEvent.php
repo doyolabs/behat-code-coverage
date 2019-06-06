@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Event;
 
-use Behat\Testwork\Tester\Result\TestResults;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Bridge\Symfony\Event;
 
@@ -38,7 +37,7 @@ class CoverageEvent extends Event
 
     public function __construct(TestCase $testCase = null)
     {
-        $this->testCase = $testCase;
+        $this->testCase   = $testCase;
         $this->coverage   = [];
     }
 

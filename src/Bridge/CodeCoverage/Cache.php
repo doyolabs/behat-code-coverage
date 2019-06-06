@@ -72,8 +72,8 @@ class Cache implements \Serializable
 
     public function reset()
     {
-        $this->testCase = null;
-        $this->data   = [];
+        $this->testCase   = null;
+        $this->data       = [];
         $this->exceptions = [];
 
         $this->save();
@@ -86,7 +86,7 @@ class Cache implements \Serializable
             $this->data,
             $this->codeCoverageOptions,
             $this->filter,
-            $this->exceptions
+            $this->exceptions,
         ];
 
         return serialize($data);
@@ -103,17 +103,16 @@ class Cache implements \Serializable
         ) = unserialize($serialized);
     }
 
-
     public function readCache()
     {
         $adapter = $this->adapter;
         $cached  = $adapter->getItem(static::CACHE_KEY)->get();
 
         if ($cached instanceof self) {
-            $this->testCase = $cached->getTestCase();
-            $this->data   = $cached->getData();
-            $this->exceptions = $cached->getExceptions();
-            $this->filter = $cached->getFilter();
+            $this->testCase            = $cached->getTestCase();
+            $this->data                = $cached->getData();
+            $this->exceptions          = $cached->getExceptions();
+            $this->filter              = $cached->getFilter();
             $this->codeCoverageOptions = $cached->getCodeCoverageOptions();
         }
     }
@@ -207,7 +206,7 @@ class Cache implements \Serializable
     }
 
     /**
-     * @return null|CodeCoverage
+     * @return CodeCoverage|null
      */
     public function getCodeCoverage()
     {
@@ -216,11 +215,13 @@ class Cache implements \Serializable
 
     /**
      * @param CodeCoverage $codeCoverage
+     *
      * @return Cache
      */
     public function setCodeCoverage(CodeCoverage $codeCoverage)
     {
         $this->codeCoverage = $codeCoverage;
+
         return $this;
     }
 
@@ -249,7 +250,7 @@ class Cache implements \Serializable
 
     public function hasExceptions()
     {
-        return count($this->exceptions) > 0;
+        return \count($this->exceptions) > 0;
     }
 
     public function getExceptions()
@@ -303,8 +304,8 @@ class Cache implements \Serializable
         $codeCoverage = $this->codeCoverage;
 
         if (null !== $codeCoverage) {
-            $data = $codeCoverage->stop();
-            $this->data = $data;
+            $data               = $codeCoverage->stop();
+            $this->data         = $data;
             $this->codeCoverage = null;
         }
 
@@ -322,8 +323,8 @@ class Cache implements \Serializable
         $filter   = $this->createFilter();
         $options  = $this->codeCoverageOptions;
 
-        if(is_null($coverage)){
-            $coverage = new CodeCoverage($driver, $filter);
+        if (null === $coverage) {
+            $coverage           = new CodeCoverage($driver, $filter);
             $this->codeCoverage = $coverage;
         }
 

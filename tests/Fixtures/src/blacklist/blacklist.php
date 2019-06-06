@@ -17,6 +17,6 @@ class blacklist
 {
     public static function say()
     {
-        return "blacklist";
+        return 'blacklist';
     }
 }

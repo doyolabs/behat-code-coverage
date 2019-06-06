@@ -84,15 +84,15 @@ class BehatEventListener implements EventSubscriberInterface
 
     public function stopCoverage(AfterTested $testedEvent)
     {
-        $dispatcher = $this->dispatcher;
+        $dispatcher         = $this->dispatcher;
         $coverageEvent      = $this->coverageEvent;
-        $result = $testedEvent->getTestResult();
+        $result             = $testedEvent->getTestResult();
 
         $map = [
-            TestResult::PASSED => TestCase::RESULT_PASSED,
-            TestResult::FAILED => TestCase::RESULT_FAILED,
+            TestResult::PASSED  => TestCase::RESULT_PASSED,
+            TestResult::FAILED  => TestCase::RESULT_FAILED,
             TestResult::SKIPPED => TestCase::RESULT_SKIPPED,
-            TestResult::PENDING => TestCase::RESULT_SKIPPED
+            TestResult::PENDING => TestCase::RESULT_SKIPPED,
         ];
         $result = $map[$result->getResultCode()];
         $coverageEvent->getTestCase()->setResult($result);

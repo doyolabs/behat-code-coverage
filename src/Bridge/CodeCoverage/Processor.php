@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Bridge\CodeCoverage;
 
+use Doyo\Behat\Coverage\Bridge\Exception\ProcessorException;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Driver\Driver;
 use SebastianBergmann\CodeCoverage\Filter;
@@ -48,7 +49,7 @@ class Processor
         $this->codeCoverage = $codeCoverage;
     }
 
-    public function setCodeCoverage(self $codeCoverage)
+    public function setCodeCoverage(CodeCoverage $codeCoverage)
     {
         $this->codeCoverage = $codeCoverage;
     }
@@ -92,6 +93,6 @@ class Processor
         if (method_exists($codeCoverage, $name)) {
             return \call_user_func_array([$codeCoverage, $name], $arguments);
         }
-        throw new \RuntimeException('Method name: '.$name.' not supported.');
+        throw new ProcessorException('Method name: '.$name.' not supported.');
     }
 }

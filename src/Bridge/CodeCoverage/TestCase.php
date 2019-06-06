@@ -47,16 +47,4 @@ class TestCase
     {
         return $this->name;
     }
-
-    /**
-     * @param string $name
-     *
-     * @return TestCase
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
 }

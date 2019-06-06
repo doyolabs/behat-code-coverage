@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Bridge\CodeCoverage;
 
+use Doyo\Behat\Coverage\Bridge\Exception\CacheException;
 use SebastianBergmann\CodeCoverage\Filter;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
@@ -116,7 +117,7 @@ class Cache implements \Serializable
 
         if ($cached instanceof self) {
             $this->testCase            = $cached->getTestCase();
-            $this->data                = $cached->getData();
+            $this->data                = $cached->getData()?:[];
             $this->exceptions          = $cached->getExceptions();
             $this->filter              = $cached->getFilter();
             $this->codeCoverageOptions = $cached->getCodeCoverageOptions();
@@ -174,7 +175,7 @@ class Cache implements \Serializable
     /**
      * @return array
      */
-    public function getData(): array
+    public function getData()
     {
         return $this->data;
     }
@@ -184,11 +185,9 @@ class Cache implements \Serializable
      *
      * @return Cache
      */
-    public function setData(array $data): self
+    public function setData(array $data)
     {
         $this->data = $data;
-
-        return $this;
     }
 
     /**
@@ -212,23 +211,20 @@ class Cache implements \Serializable
     }
 
     /**
-     * @return Processor|null
-     */
-    public function getProcessor()
-    {
-        return $this->processor;
-    }
-
-    /**
      * @param Processor $processor
      *
      * @return Cache
      */
-    public function setProcessor(Processor $processor)
+    public function setProcessor(Processor $processor = null)
     {
         $this->processor = $processor;
 
         return $this;
+    }
+
+    public function getProcessor()
+    {
+        return $this->processor;
     }
 
     public function getFilter(): array
@@ -276,7 +272,7 @@ class Cache implements \Serializable
     /**
      * @return Filter
      */
-    public function createFilter()
+    private function createCodeCoverageFilter()
     {
         $config = $this->filter;
         $filter = new Filter();
@@ -293,8 +289,11 @@ class Cache implements \Serializable
             return;
         }
         try {
-            $coverage = $this->createCodeCoverage($driver);
-            $coverage->start($this->getTestCase());
+            $processor = $this->processor;
+            if(is_null($processor)){
+                $processor = $this->createCodeCoverage($driver);
+            }
+            $processor->start($this->getTestCase());
             register_shutdown_function([$this, 'shutdown']);
             $this->hasStarted = true;
         } catch (\Exception $e) {
@@ -309,18 +308,17 @@ class Cache implements \Serializable
 
     public function shutdown()
     {
-        $codeCoverage = $this->processor;
+        $processor = $this->processor;
         if ($this->hasStarted) {
             try {
-                $data               = $codeCoverage->stop();
+                $data               = $processor->stop();
                 $this->data         = $data;
-                $this->processor = null;
-                $this->hasStarted   = false;
             } catch (\Exception $e) {
-                $this->exceptions[] = $e->getMessage();
+                $this->exceptions[] = new CacheException($e->getMessage());
             }
         }
-
+        $this->processor    = null;
+        $this->hasStarted   = false;
         $this->save();
     }
 
@@ -332,11 +330,11 @@ class Cache implements \Serializable
     private function createCodeCoverage($driver = null)
     {
         $coverage = $this->processor;
-        $filter   = $this->createFilter();
+        $filter   = $this->createCodeCoverageFilter();
         $options  = $this->codeCoverageOptions;
 
         if (null === $coverage) {
-            $coverage           = new Processor($driver, $filter);
+            $coverage        = new Processor($driver, $filter);
             $this->processor = $coverage;
         }
 

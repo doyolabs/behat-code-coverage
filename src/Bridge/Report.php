@@ -22,7 +22,7 @@ class Report implements EventSubscriberInterface
     /**
      * @var object
      */
-    private $processor;
+    private $reportProcessor;
 
     /**
      * @var string
@@ -44,19 +44,19 @@ class Report implements EventSubscriberInterface
     /**
      * @return object
      */
-    public function getProcessor()
+    public function getReportProcessor()
     {
-        return $this->processor;
+        return $this->reportProcessor;
     }
 
     /**
-     * @param object $processor
+     * @param object $reportProcessor
      *
      * @return Report
      */
-    public function setProcessor($processor)
+    public function setReportProcessor($reportProcessor)
     {
-        $this->processor = $processor;
+        $this->reportProcessor = $reportProcessor;
 
         return $this;
     }
@@ -107,7 +107,7 @@ class Report implements EventSubscriberInterface
         $io       = $event->getIO();
         /* @todo process this error message */
         try {
-            $this->processor->process($coverage, $this->target, $this->name);
+            $this->reportProcessor->process($coverage, $this->target, $this->name);
             $io->text(
                 sprintf(
                     '<info><comment>%s</comment> processed to: <comment>%s</comment></info>',

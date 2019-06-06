@@ -3,6 +3,7 @@
 namespace spec\Doyo\Behat\Coverage\Bridge\CodeCoverage;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Cache;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Bridge\Exception\CacheException;
 use PhpSpec\ObjectBehavior;
@@ -16,10 +17,28 @@ use SebastianBergmann\CodeCoverage\CodeCoverage as CodeCoverage;
 
 class CacheSpec extends ObjectBehavior
 {
-    function let()
+    /**
+     * @var CodeCoverage
+     */
+    private $codeCoverage;
+
+    function let(
+        Processor $processor,
+        Dummy $dummy,
+        TestCase $testCase
+    )
     {
         $this->beConstructedWith('spec-test');
         $this->reset();
+
+        $codeCoverage = new CodeCoverage($dummy->getWrappedObject());
+
+        $testCase->getName()->willReturn('some-test');
+        $this->setTestCase($testCase);
+
+        $processor->setCodeCoverage($codeCoverage);
+        $this->codeCoverage = $codeCoverage;
+        $this->setProcessor($processor);
     }
 
     function it_is_initializable()
@@ -40,11 +59,11 @@ class CacheSpec extends ObjectBehavior
         $this->getTestCase()->shouldReturn($testCase);
     }
 
-    function its_coverage_should_be_mutable()
+    function its_data_should_be_mutable()
     {
         $value = ['some'];
         $this->getData()->shouldReturn([]);
-        $this->setData($value)->shouldReturn($this);
+        $this->setData($value);
         $this->getData()->shouldReturn($value);
     }
 
@@ -97,38 +116,84 @@ class CacheSpec extends ObjectBehavior
         $this->getFilter()->shouldReturn($filter);
     }
 
-    function it_should_create_coverage_filter()
+    function it_should_create_processor_when_not_exist(
+        Dummy $driver
+    )
     {
         $this->setFilter([
             'addFilesToWhitelist' => [
                 __FILE__
             ]
         ]);
-        $filter = $this->createFilter();
+        $this->setCodeCoverageOptions([
+            'addUncoveredFilesFromWhitelist' => true
+        ]);
+        $driver->stop()->willReturn([]);
+        $this->setProcessor(null);
+        $this->startCoverage($driver);
+        //$this->getProcessor()->getCodeCoverage()->setAddUncoveredFilesFromWhitelist(true)
+
+        $this->getProcessor()->shouldBeAnInstanceOf(Processor::class);
+        $filter = $this->getProcessor()->filter();
         $filter->shouldBeAnInstanceOf(Filter::class);
         $filter->getWhitelistedFiles()->shouldHaveKeyWithValue(__FILE__, true);
+
+        $this->shutdown();
+    }
+
+    function it_should_not_start_process_without_test_case(
+        Processor $processor
+    )
+    {
+        $processor->start(Argument::any())->shouldNotBeCalled();
+        $this->setTestCase(null);
+
+        $this->startCoverage();
     }
 
     function it_should_handle_error_when_starting_coverage(
-        Processor $coverage,
-        TestCase $testCase,
-        Driver $driver
+        Processor $processor,
+        TestCase $testCase
     )
     {
-        //$coverage->setAddUncoveredFilesFromWhitelist(false)->shouldBeCalled();
-
-        /*
-        $this->setCodeCoverageOptions([
-            'addUncoveredFilesFromWhitelist' => false,
-        ]);
-        */
         $e = new \RuntimeException('some error');
         $this->setTestCase($testCase);
-        $coverage->start($testCase)->shouldBeCalledOnce()->willThrow($e);
-        $this->setProcessor($coverage);
+
+        $processor->start($testCase)->shouldBeCalledOnce()->willThrow($e);
+        $this->setProcessor($processor);
 
 
-        $this->startCoverage($driver);
+        $this->startCoverage();
+        $this->hasExceptions()->shouldBe(true);
+    }
+
+    function it_should_stop_code_coverage_on_shutdown(
+        Processor $processor,
+        TestCase $testCase
+    )
+    {
+        $processor->start($testCase)->shouldBeCalledOnce();
+        $processor->stop()->shouldBeCalledOnce();
+
+        $this->startCoverage();
+        $this->shutdown();
+    }
+
+    function it_should_handle_exception_during_shutdown(
+        Processor $processor,
+        TestCase $testCase
+    )
+    {
+        $this->reset();
+        $e = new \Exception('some error');
+        $processor->start($testCase)->shouldBeCalled();
+        $processor->stop()->willThrow($e);
+        $this->setTestCase($testCase);
+        $this->setProcessor($processor);
+
+        $this->startCoverage();
+
+        $this->shutdown();
         $this->hasExceptions()->shouldBe(true);
     }
 }

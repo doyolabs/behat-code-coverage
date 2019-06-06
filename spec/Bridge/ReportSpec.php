@@ -3,26 +3,35 @@
 namespace spec\Doyo\Behat\Coverage\Bridge;
 
 use Behat\Mink\Driver\DriverInterface;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Doyo\Behat\Coverage\Bridge\Report;
 use Doyo\Behat\Coverage\Event\ReportEvent;
+use Doyo\Behat\Coverage\Exception\ReportProcessException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Driver\Driver;
 use SebastianBergmann\CodeCoverage\Report\Clover;
 use Symfony\Component\Console\Style\StyleInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class ReportSpec extends ObjectBehavior
 {
     private $coverage;
 
     function let(
-        Driver $driver,
-        Processor $processor
+        Dummy $driver,
+        Processor $processor,
+        ReportEvent $event,
+        SymfonyStyle $io
     )
     {
+        $coverage = new CodeCoverage($driver->getWrappedObject());
         $processor->beConstructedWith([$driver->getWrappedObject()]);
+        $event->getProcessor()->willReturn($processor);
+        $processor->getCodeCoverage()->willReturn($coverage);;
+        $event->getIO()->willReturn($io);;
     }
 
     function it_is_initializable()
@@ -39,8 +48,8 @@ class ReportSpec extends ObjectBehavior
         TestReportProcessor $report
     )
     {
-        $this->setProcessor($report)->shouldReturn($this);
-        $this->getProcessor()->shouldReturn($report);
+        $this->setReportProcessor($report)->shouldReturn($this);
+        $this->getReportProcessor()->shouldReturn($report);
     }
 
     function its_name_should_be_mutable()
@@ -72,9 +81,25 @@ class ReportSpec extends ObjectBehavior
 
         $this->setTarget('some-target');
         $this->setName('some-name');
-        $this->setProcessor($report);
+        $this->setReportProcessor($report);
 
         $this->onReportProcess($event);
+    }
 
+    function it_should_handle_error_when_creating_report(
+        TestReportProcessor $testReportProcessor,
+        ReportEvent $event,
+        Processor $processor
+    )
+    {
+        $e = new \Exception('Report Error');
+        $event->addException(Argument::type(ReportProcessException::class))
+            ->shouldBeCalled();
+        $event->getProcessor()->willReturn($processor);
+        $testReportProcessor->process(Argument::any())
+            ->willThrow($e);
+        $this->setReportProcessor($testReportProcessor);
+
+        $this->onReportProcess($event);
     }
 }

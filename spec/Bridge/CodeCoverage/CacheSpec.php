@@ -92,7 +92,7 @@ class CacheSpec extends ObjectBehavior
     function its_filter_should_be_mutable()
     {
         $filter = ['some-filter'];
-        $this->getFilter()->shouldReturn([]);
+        $this->reset();
         $this->setFilter($filter)->shouldReturn($this);
         $this->getFilter()->shouldReturn($filter);
     }

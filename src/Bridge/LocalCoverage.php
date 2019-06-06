@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Bridge;
 
-use Behat\Testwork\Tester\Result\TestResult;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\CodeCoverage;
@@ -62,7 +61,7 @@ class LocalCoverage implements EventSubscriberInterface
     {
         $coverage       = $this->coverage;
         $driver = $coverage->getDriver();
-        $reportCoverage = new ReportCodeCoverage($driver);
+        $reportCoverage = new ReportCodeCoverage($driver, $coverage->filter());
 
         $reportCoverage->setData($coverage->getData(true));
         $reportCoverage->setTests($coverage->getTests());

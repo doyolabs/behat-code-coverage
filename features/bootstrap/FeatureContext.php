@@ -250,6 +250,7 @@ class FeatureContext implements Context
         ]);
 
         $process = new Symfony\Component\Process\Process($commands, $this->fixturesDir);
+        $process->setTimeout(0);
         $process->run();
 
         $this->output = $process->getOutput();

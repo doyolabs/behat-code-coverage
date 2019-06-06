@@ -103,6 +103,21 @@ class Cache implements \Serializable
         ) = unserialize($serialized);
     }
 
+
+    public function readCache()
+    {
+        $adapter = $this->adapter;
+        $cached  = $adapter->getItem(static::CACHE_KEY)->get();
+
+        if ($cached instanceof self) {
+            $this->testCase = $cached->getTestCase();
+            $this->data   = $cached->getData();
+            $this->exceptions = $cached->getExceptions();
+            $this->filter = $cached->getFilter();
+            $this->codeCoverageOptions = $cached->getCodeCoverageOptions();
+        }
+    }
+
     /**
      * @return string|null
      */
@@ -249,17 +264,6 @@ class Cache implements \Serializable
 
         $item->set($this);
         $adapter->save($item);
-    }
-
-    public function readCache()
-    {
-        $adapter = $this->adapter;
-        $cached  = $adapter->getItem(static::CACHE_KEY)->get();
-
-        if ($cached instanceof self) {
-            $this->testCase = $cached->getTestCase();
-            $this->data   = $cached->getData();
-        }
     }
 
     /**

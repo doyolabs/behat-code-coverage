@@ -42,7 +42,7 @@ class CachedCoverage implements EventSubscriberInterface
         return [
             CoverageEvent::REFRESH => 'onCoverageRefresh',
             CoverageEvent::START   => 'onCoverageStarted',
-            CoverageEvent::STOP    => ['onCoverageStopped', 10],
+            CoverageEvent::STOP    => ['onCoverageStopped', 100],
         ];
     }
 

@@ -93,9 +93,11 @@ class LocalCoverageSpec extends ObjectBehavior
         Driver $driver
     )
     {
+        $filter = new Filter();
         $coverage->getData(Argument::any())->willReturn([]);
         $coverage->getTests()->willReturn([]);
         $coverage->getDriver()->shouldBeCalled()->willReturn($driver);
+        $coverage->filter()->willReturn($filter);
 
         $event->setCoverage(Argument::type(ReportCodeCoverage::class))->shouldBeCalled();
         $this->onBeforeReportProcess($event);

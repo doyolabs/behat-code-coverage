@@ -4,6 +4,7 @@ namespace spec\Doyo\Behat\Coverage\Bridge;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Cache;
 use Doyo\Behat\Coverage\Bridge\CachedCoverage;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -52,12 +53,12 @@ class CachedCoverageSpec extends ObjectBehavior
 
     function it_should_handle_coverage_start_event(
         Cache $cache,
-        CoverageEvent $event
+        CoverageEvent $event,
+        TestCase $testCase
     )
     {
-        $id = 'some-id';
-        $event->getCoverageId()->shouldBeCalledOnce()->willReturn($id);
-        $cache->setCoverageId($id)->shouldBeCalledOnce();
+        $event->getTestCase()->shouldBeCalledOnce()->willReturn($testCase);
+        $cache->setTestCase($testCase)->shouldBeCalledOnce();
         $cache->save()->shouldBeCalledOnce();
 
         $this->onCoverageStarted($event);

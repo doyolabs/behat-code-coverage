@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Bridge\CodeCoverage;
 
-use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Filter;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
@@ -27,9 +26,9 @@ class Cache implements \Serializable
     private $namespace;
 
     /**
-     * @var string|null
+     * @var TestCase
      */
-    private $coverageId;
+    private $testCase;
 
     /**
      * @var FilesystemAdapter|null
@@ -73,7 +72,7 @@ class Cache implements \Serializable
 
     public function reset()
     {
-        $this->coverageId = null;
+        $this->testCase = null;
         $this->data   = [];
         $this->exceptions = [];
 
@@ -83,7 +82,7 @@ class Cache implements \Serializable
     public function serialize()
     {
         $data = [
-            $this->coverageId,
+            $this->testCase,
             $this->data,
             $this->codeCoverageOptions,
             $this->filter
@@ -95,7 +94,7 @@ class Cache implements \Serializable
     public function unserialize($serialized)
     {
         list(
-            $this->coverageId,
+            $this->testCase,
             $this->data,
             $this->codeCoverageOptions,
             $this->filter
@@ -111,21 +110,21 @@ class Cache implements \Serializable
     }
 
     /**
-     * @return string|null
+     * @return TestCase
      */
-    public function getCoverageId()
+    public function getTestCase()
     {
-        return $this->coverageId;
+        return $this->testCase;
     }
 
     /**
-     * @param string|null $coverageId
+     * @param TestCase $testCase
      *
      * @return Cache
      */
-    public function setCoverageId(string $coverageId): self
+    public function setTestCase(TestCase $testCase = null)
     {
-        $this->coverageId = $coverageId;
+        $this->testCase = $testCase;
 
         return $this;
     }
@@ -190,6 +189,24 @@ class Cache implements \Serializable
         return $this;
     }
 
+    /**
+     * @return null|CodeCoverage
+     */
+    public function getCodeCoverage()
+    {
+        return $this->codeCoverage;
+    }
+
+    /**
+     * @param CodeCoverage $codeCoverage
+     * @return Cache
+     */
+    public function setCodeCoverage(CodeCoverage $codeCoverage)
+    {
+        $this->codeCoverage = $codeCoverage;
+        return $this;
+    }
+
     public function getFilter(): array
     {
         return $this->filter;
@@ -233,7 +250,7 @@ class Cache implements \Serializable
         $cached  = $adapter->getItem(static::CACHE_KEY)->get();
 
         if ($cached instanceof self) {
-            $this->coverageId = $cached->getCoverageId();
+            $this->testCase = $cached->getTestCase();
             $this->data   = $cached->getData();
         }
     }
@@ -254,12 +271,12 @@ class Cache implements \Serializable
 
     public function startCoverage($driver = null)
     {
-        if (null === $this->coverageId) {
+        if (null === $this->testCase) {
             return;
         }
         try {
             $coverage = $this->createCodeCoverage($driver);
-            $coverage->start($this->getCoverageId());
+            $coverage->start($this->getTestCase());
             register_shutdown_function([$this, 'shutdown']);
         } catch (\Exception $e) {
             $this->exceptions[] = sprintf(
@@ -267,6 +284,8 @@ class Cache implements \Serializable
                 $this->namespace,
                 $e->getMessage()
             );
+            $this->save();
+            throw $e;
         }
     }
 

@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Event;
 
+use Behat\Testwork\Tester\Result\TestResults;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Bridge\Symfony\Event;
 
 class CoverageEvent extends Event
@@ -25,18 +27,18 @@ class CoverageEvent extends Event
     const REFRESH        = 'doyo.coverage.refresh';
 
     /**
-     * @var string
+     * @var TestCase
      */
-    private $coverageId;
+    private $testCase;
 
     /**
      * @var array
      */
     private $coverage;
 
-    public function __construct($coverageId = null)
+    public function __construct(TestCase $testCase = null)
     {
-        $this->coverageId = $coverageId;
+        $this->testCase = $testCase;
         $this->coverage   = [];
     }
 
@@ -73,18 +75,18 @@ class CoverageEvent extends Event
     }
 
     /**
-     * @return string
+     * @return TestCase
      */
-    public function getCoverageId(): string
+    public function getTestCase()
     {
-        return $this->coverageId;
+        return $this->testCase;
     }
 
     /**
-     * @param string|null $coverageId
+     * @param TestCase $testCase
      */
-    public function setCoverageId($coverageId=null)
+    public function setTestCase($testCase=null)
     {
-        $this->coverageId = $coverageId;
+        $this->testCase = $testCase;
     }
 }

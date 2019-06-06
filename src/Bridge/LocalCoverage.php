@@ -13,9 +13,11 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Bridge;
 
+use Behat\Testwork\Tester\Result\TestResult;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
-use SebastianBergmann\CodeCoverage\CodeCoverage;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\CodeCoverage;
+use SebastianBergmann\CodeCoverage\CodeCoverage as ReportCodeCoverage;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class LocalCoverage implements EventSubscriberInterface
@@ -40,17 +42,29 @@ class LocalCoverage implements EventSubscriberInterface
 
     public function onCoverageStarted(CoverageEvent $event)
     {
-        $this->coverage->start($event->getCoverageId());
+        $this->coverage->start($event->getTestCase());
     }
 
     public function onCoverageStopped(CoverageEvent $event)
     {
         $coverage = $this->coverage;
 
+        /*
+        $results = $event->getTestResults();
+
         $coverage->stop();
 
+        if($results->isPassed()){
+            $this->coverage->setCurrentStatus(0);
+        }
+        $map = [
+            TestResult::PASSED => 0,
+            TestResult::FAILED => 0,
+        ];
+        */
+        $coverage->stop();
         $data = $event->getCoverage();
-        $coverage->append($data, $event->getCoverageId());
+        $coverage->append($data, $event->getTestCase());
     }
 
     public function onCoverageRefresh()
@@ -60,6 +74,12 @@ class LocalCoverage implements EventSubscriberInterface
 
     public function onBeforeReportProcess(ReportEvent $event)
     {
-        $event->setCoverage($this->coverage);
+        $coverage       = $this->coverage;
+        $driver = $coverage->getDriver();
+        $reportCoverage = new ReportCodeCoverage($driver);
+
+        $reportCoverage->setData($coverage->getData(true));
+        $reportCoverage->setTests($coverage->getTests());
+        $event->setCoverage($reportCoverage);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace spec\Doyo\Behat\Coverage\Bridge;
 
+use SebastianBergmann\CodeCoverage\Driver\Driver;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Bridge\Compat;
 use Doyo\Behat\Coverage\Bridge\LocalCoverage;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
@@ -9,7 +11,9 @@ use Doyo\Behat\Coverage\Event\ReportEvent;
 use PhpSpec\ObjectBehavior;
 use SebastianBergmann\CodeCoverage\Filter;
 use Prophecy\Argument;
-use SebastianBergmann\CodeCoverage\CodeCoverage;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\CodeCoverage;
+use SebastianBergmann\CodeCoverage\CodeCoverage as ReportCodeCoverage;
+use SebastianBergmann\CodeCoverage\Report\Xml\Coverage;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Webmozart\Assert\Assert;
 
@@ -26,15 +30,13 @@ class LocalCoverageSpec extends ObjectBehavior
     private $coverage;
 
     function let(
-        $dummy,
-        CoverageEvent $event
+        Driver $driver,
+        CodeCoverage $coverage
     ){
         $filter = new Filter();
         $filter->addFileToWhitelist(__DIR__.'/TestClass.php');
-        $dummy->beADoubleOf(Compat::getDriverClass('Dummy'));
-        $coverage = new CodeCoverage($dummy->getWrappedObject(), $filter);
+        $coverage->beConstructedWith([$driver->getWrappedObject(), $filter]);
         $this->beConstructedWith($coverage);
-        $this->coverage = $coverage;
     }
 
     function it_is_initializable()
@@ -54,53 +56,56 @@ class LocalCoverageSpec extends ObjectBehavior
         $this->getSubscribedEvents()->shouldHaveKeyWithValue(CoverageEvent::REFRESH, 'onCoverageRefresh');
     }
 
-    function it_should_handle_coverage_start_event($dummy, CoverageEvent $event)
+    function it_should_handle_coverage_start_event(
+        CoverageEvent $event,
+        TestCase $testCase,
+        CodeCoverage $coverage
+    )
     {
-        $event->getCoverageId()->willReturn('some-id');
-        $dummy->start(true)->shouldBeCalled();
+        $event->getTestCase()->willReturn($testCase);
+        $coverage->start($testCase)->shouldBeCalled();
         $this->onCoverageStarted($event);
     }
 
     function it_should_handle_coverage_stop_event(
-        $dummy,
-        CoverageEvent $event
+        CodeCoverage $coverage,
+        CoverageEvent $event,
+        TestCase $testCase
     )
     {
-        $data = [ __DIR__.'/TestClass.php' => [
-            9 => 1,
-            10 => 1,
-            11 => 1,
-            12 => 1,
-            13 => 1,
-        ]];
+        $data = ['somedata'];
 
-        $event->getCoverageId()->willReturn('some-id');
         $event->getCoverage()->willReturn($data);
+        $event->getTestCase()->willReturn($testCase);
 
-        $dummy->start(true)->shouldBeCalled();
-        $dummy->stop(Argument::cetera())->shouldBeCalled()->willReturn($data);
+        $coverage->append($data, $testCase, Argument::cetera())->shouldBeCalled();
+
+        $coverage->start($testCase)->shouldBeCalled();
+        $coverage->stop()->shouldBeCalled();
 
         $this->onCoverageStarted($event);
         $this->onCoverageStopped($event);
     }
 
     function it_should_handle_before_report_process_event(
-        ReportEvent $event
+        ReportEvent $event,
+        CodeCoverage $coverage,
+        Driver $driver
     )
     {
-        $event->setCoverage(Argument::type(CodeCoverage::class))->shouldBeCalled();
+        $coverage->getData(Argument::any())->willReturn([]);
+        $coverage->getTests()->willReturn([]);
+        $coverage->getDriver()->shouldBeCalled()->willReturn($driver);
+
+        $event->setCoverage(Argument::type(ReportCodeCoverage::class))->shouldBeCalled();
         $this->onBeforeReportProcess($event);
     }
 
-    function it_should_handle_coverage_refresh_event()
+    function it_should_handle_coverage_refresh_event(
+        CodeCoverage $coverage
+    )
     {
-        $data = $this->data;
-        $coverage = $this->coverage;
-        $coverage->append($data,'some-id');
-
+        $coverage->clear()->shouldBeCalled();
         $this->onCoverageRefresh();
-
-        $data = $coverage->getData();
-        Assert::eq($data[__DIR__.'/TestClass.php'][10],[]);
     }
 }

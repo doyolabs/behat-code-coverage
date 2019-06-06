@@ -74,7 +74,7 @@ class CachedCoverage implements EventSubscriberInterface
     {
         $cache = $this->cache;
 
-        $cache->setCoverageId($event->getCoverageId());
+        $cache->setTestCase($event->getTestCase());
         $cache->save();
     }
 

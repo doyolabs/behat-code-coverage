@@ -3,9 +3,10 @@
 namespace spec\Doyo\Behat\Coverage\Bridge\CodeCoverage;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Cache;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use SebastianBergmann\CodeCoverage\CodeCoverage;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Filter;
 use spec\Doyo\Behat\Coverage\CoverageHelperTrait;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -31,11 +32,12 @@ class CacheSpec extends ObjectBehavior
         $this->shouldImplement(\Serializable::class);
     }
 
-    function its_coverage_id_should_be_mutable()
+    function its_test_case_should_be_mutable(
+        TestCase $testCase
+    )
     {
-        $id = 'some-id';
-        $this->setCoverageId($id)->shouldReturn($this);
-        $this->getCoverageId()->shouldReturn($id);
+        $this->setTestCase($testCase)->shouldReturn($this);
+        $this->getTestCase()->shouldReturn($testCase);
     }
 
     function its_coverage_should_be_mutable()
@@ -67,22 +69,23 @@ class CacheSpec extends ObjectBehavior
         $this->getNamespace()->shouldReturn('spec-test');
     }
 
-    function it_should_create_and_reset_cache()
+    function it_should_create_and_reset_cache(
+        TestCase $testCase
+    )
     {
-        $id = 'some-id';
         $coverage = ['data'];
 
-        $this->setCoverageId($id);
+        $this->setTestCase($testCase);
         $this->setData($coverage);
         $this->save();
 
         $this->readCache();
-        $this->getCoverageId()->shouldReturn($id);
+        $this->getTestCase()->shouldHaveType(TestCase::class);
         $this->getData()->shouldReturn($coverage);
 
         $this->reset();
 
-        $this->getCoverageId()->shouldBeNull();
+        $this->getTestCase()->shouldBeNull();
         $this->getData()->shouldEqual([]);
     }
 
@@ -107,41 +110,37 @@ class CacheSpec extends ObjectBehavior
     }
 
     function it_should_start_coverage(
-        $driver
+        CodeCoverage $coverage,
+        TestCase $testCase
     )
     {
-        $id = 'some-id';
-        $this->getDriverSubject($driver);
-
-        $driver->start(true)->shouldBeCalledOnce();
-        $driver->stop()->shouldBeCalledOnce()->willReturn([]);
 
         // should not start when coverage id not exist
-        $this->startCoverage($driver);
+        $this->startCoverage();
 
-        $this->setCoverageId($id);
+        $this->setTestCase($testCase);
         $this->save();
 
-        $this->startCoverage($driver);
+        $this->startCoverage();
         $this->shutdown();
         $this->shutdown();
     }
 
     function it_should_handle_error_when_starting_coverage(
-        $driver
+        CodeCoverage $coverage,
+        TestCase $testCase
     )
     {
-        $this->getDriverSubject($driver);
         $this->setCodeCoverageOptions([
             'addUncoveredFilesFromWhitelist' => false,
         ]);
 
+        $this->setCodeCoverage($coverage);
         $e = new \RuntimeException('some error');
-
-        $driver->start(Argument::any())->shouldBeCalledOnce()->willThrow($e);
-
-        $this->setCoverageId('some:id');
-        $this->startCoverage($driver);
+        $coverage->start($testCase)->shouldBeCalledOnce()->willThrow($e);
+        $coverage->setAddUncoveredFilesFromWhitelist(false)->shouldBeCalledOnce();
+        $this->setTestCase($testCase);
+        $this->startCoverage();
         $this->getExceptions()->shouldHaveCount(1);
     }
 }

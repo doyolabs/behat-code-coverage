@@ -15,7 +15,10 @@ namespace Doyo\Behat\Coverage\Listener;
 
 use Behat\Behat\EventDispatcher\Event\ExampleTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
+use Behat\Testwork\EventDispatcher\Event\AfterTested;
 use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
+use Behat\Testwork\Tester\Result\TestResult;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Bridge\Symfony\EventDispatcher;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\RefreshEvent;
@@ -59,7 +62,7 @@ class BehatEventListener implements EventSubscriberInterface
         $event           = new RefreshEvent();
         $coverageEvent   = $this->coverageEvent;
 
-        $coverageEvent->setCoverageId(null);
+        $coverageEvent->setTestCase(null);
         $coverageEvent->setCoverage([]);
         $dispatcher->dispatch($event, CoverageEvent::BEFORE_REFRESH);
         $dispatcher->dispatch($event, CoverageEvent::REFRESH);
@@ -71,19 +74,30 @@ class BehatEventListener implements EventSubscriberInterface
         $id            = $scope->getFeature()->getFile().':'.$scenario->getLine();
         $dispatcher    = $this->dispatcher;
         $coverageEvent = $this->coverageEvent;
+        $coverageId    = new TestCase($id);
 
-        $coverageEvent->setCoverageId($id);
+        $coverageEvent->setTestCase($coverageId);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::BEFORE_START);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::START);
         $this->coverageEvent = $coverageEvent;
     }
 
-    public function stopCoverage()
+    public function stopCoverage(AfterTested $testedEvent)
     {
         $dispatcher = $this->dispatcher;
-        $event      = $this->coverageEvent;
-        $dispatcher->dispatch($event, CoverageEvent::BEFORE_STOP);
-        $dispatcher->dispatch($event, CoverageEvent::STOP);
+        $coverageEvent      = $this->coverageEvent;
+        $result = $testedEvent->getTestResult();
+
+        $map = [
+            TestResult::PASSED => TestCase::RESULT_PASSED,
+            TestResult::FAILED => TestCase::RESULT_FAILED,
+            TestResult::SKIPPED => TestCase::RESULT_SKIPPED,
+            TestResult::PENDING => TestCase::RESULT_SKIPPED
+        ];
+        $result = $map[$result->getResultCode()];
+        $coverageEvent->getTestCase()->setResult($result);
+        $dispatcher->dispatch($coverageEvent, CoverageEvent::BEFORE_STOP);
+        $dispatcher->dispatch($coverageEvent, CoverageEvent::STOP);
     }
 
     public function generateReport()

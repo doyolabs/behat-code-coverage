@@ -13,19 +13,29 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Bridge;
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
-use SebastianBergmann\CodeCoverage\CodeCoverage;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class LocalCoverage implements EventSubscriberInterface
 {
-    private $coverage;
+    /**
+     * @var Processor
+     */
+    private $processor;
+
+    /**
+     * @var TestCase[]
+     */
+    private $testCases;
 
     public function __construct(
-        CodeCoverage $coverage
+        Processor $processor
     ) {
-        $this->coverage = $coverage;
+        $this->processor = $processor;
+        $this->testCases = [];
     }
 
     public static function getSubscribedEvents()
@@ -40,26 +50,30 @@ class LocalCoverage implements EventSubscriberInterface
 
     public function onCoverageStarted(CoverageEvent $event)
     {
-        $this->coverage->start($event->getCoverageId());
+        $this->processor->start($event->getTestCase());
     }
 
     public function onCoverageStopped(CoverageEvent $event)
     {
-        $coverage = $this->coverage;
+        $coverage = $this->processor;
+        $data     = $event->getCoverage();
+        $testCase = $event->getTestCase();
 
         $coverage->stop();
-
-        $data = $event->getCoverage();
-        $coverage->append($data, $event->getCoverageId());
+        $coverage->append($data, $event->getTestCase()->getName());
+        $coverage->addTestCase($testCase);
     }
 
     public function onCoverageRefresh()
     {
-        $this->coverage->clear();
+        $this->processor->clear();
     }
 
     public function onBeforeReportProcess(ReportEvent $event)
     {
-        $event->setCoverage($this->coverage);
+        $processor = $this->processor;
+
+        $processor->complete();
+        $event->setProcessor($processor);
     }
 }

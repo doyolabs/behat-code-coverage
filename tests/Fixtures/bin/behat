@@ -9,5 +9,3 @@ $cache = new Cache('console');
 $cache->startCoverage();
 
 require __DIR__.'/../../../vendor/bin/behat';
-
-

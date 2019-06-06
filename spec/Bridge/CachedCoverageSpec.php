@@ -4,6 +4,8 @@ namespace spec\Doyo\Behat\Coverage\Bridge;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Cache;
 use Doyo\Behat\Coverage\Bridge\CachedCoverage;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
+use Doyo\Behat\Coverage\Bridge\Exception\CacheException;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -52,12 +54,12 @@ class CachedCoverageSpec extends ObjectBehavior
 
     function it_should_handle_coverage_start_event(
         Cache $cache,
-        CoverageEvent $event
+        CoverageEvent $event,
+        TestCase $testCase
     )
     {
-        $id = 'some-id';
-        $event->getCoverageId()->shouldBeCalledOnce()->willReturn($id);
-        $cache->setCoverageId($id)->shouldBeCalledOnce();
+        $event->getTestCase()->shouldBeCalledOnce()->willReturn($testCase);
+        $cache->setTestCase($testCase)->shouldBeCalledOnce();
         $cache->save()->shouldBeCalledOnce();
 
         $this->onCoverageStarted($event);
@@ -69,11 +71,19 @@ class CachedCoverageSpec extends ObjectBehavior
     )
     {
         $data = ['onCoverageStop'];
-        $cache->readCache()->shouldBeCalledOnce();
-        $cache->getCoverage()->shouldBeCalledOnce()->willReturn($data);
-        $event->updateCoverage($data)->shouldBeCalledOnce();
+        $cache->readCache()->shouldBeCalled();
+        $cache->getData()->shouldBeCalled()->willReturn($data);
+        $cache->hasExceptions()->willReturn(false);
+        $event->updateCoverage($data)->shouldBeCalled();
 
         $this->onCoverageStopped($event);
+
+        $cache->hasExceptions()->willReturn(true);
+        $cache->getExceptions()->willReturn(['Test Message']);
+
+        $this
+            ->shouldThrow(CacheException::class)
+            ->during('onCoverageStopped',[$event]);
     }
 
 }

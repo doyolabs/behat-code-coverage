@@ -11,24 +11,12 @@
 
 declare(strict_types=1);
 
-namespace Doyo\Behat\Coverage\Bridge\Driver;
+namespace Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Compat;
 
-use Doyo\Behat\Coverage\Event\CoverageEvent;
 use SebastianBergmann\CodeCoverage\Driver\Driver;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-/**
- * A dumb driver to prevent error.
- */
-class Dummy implements Driver, EventSubscriberInterface
+class BaseDummy6 implements Driver
 {
-    public static function getSubscribedEvents()
-    {
-        return [
-            CoverageEvent::STOP => ['stop', -1],
-        ];
-    }
-
     public function start(bool $determineUnusedAndDead = true): void
     {
     }

@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Event;
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Doyo\Behat\Coverage\Bridge\Symfony\Event;
 use Doyo\Behat\Coverage\Exception\ReportProcessException;
-use SebastianBergmann\CodeCoverage\CodeCoverage;
 use Symfony\Component\Console\Style\StyleInterface;
 
 class ReportEvent extends Event
@@ -25,9 +25,9 @@ class ReportEvent extends Event
     const AFTER_PROCESS  = 'doyo.coverage.report_post';
 
     /**
-     * @var CodeCoverage|null
+     * @var Processor|null
      */
-    private $coverage;
+    private $processor;
 
     /**
      * @var StyleInterface|null
@@ -40,21 +40,21 @@ class ReportEvent extends Event
     private $exceptions = [];
 
     /**
-     * @return CodeCoverage|null
+     * @return Processor|null
      */
-    public function getCoverage()
+    public function getProcessor()
     {
-        return $this->coverage;
+        return $this->processor;
     }
 
     /**
-     * @param CodeCoverage $coverage
+     * @param Processor $processor
      *
      * @return static
      */
-    public function setCoverage(CodeCoverage $coverage)
+    public function setProcessor(Processor $processor)
     {
-        $this->coverage = $coverage;
+        $this->processor = $processor;
 
         return $this;
     }

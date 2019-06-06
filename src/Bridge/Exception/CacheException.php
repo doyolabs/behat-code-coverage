@@ -11,12 +11,8 @@
 
 declare(strict_types=1);
 
-namespace Test\Doyo\Behat\Coverage\Fixtures\src\blacklist;
+namespace Doyo\Behat\Coverage\Bridge\Exception;
 
-class blacklist
+class CacheException extends \Exception
 {
-    public static function say()
-    {
-        return 'blacklist';
-    }
 }

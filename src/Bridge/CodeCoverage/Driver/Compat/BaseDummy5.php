@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Doyo\Behat\Coverage\Bridge\Driver\Compat;
+namespace Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Compat;
 
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use SebastianBergmann\CodeCoverage\Driver\Driver;
@@ -20,7 +20,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 /**
  * A dumb driver to prevent error.
  */
-class Dummy implements Driver, EventSubscriberInterface
+class BaseDummy5 implements Driver, EventSubscriberInterface
 {
     public static function getSubscribedEvents()
     {

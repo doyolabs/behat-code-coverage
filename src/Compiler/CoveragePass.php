@@ -64,7 +64,7 @@ class CoveragePass implements CompilerPassInterface
     {
         $options = $container->getParameterBag()->get('doyo.coverage.options');
 
-        $definitions = $container->findTaggedServiceIds('doyo.code_coverage');
+        $definitions = $container->findTaggedServiceIds('doyo.coverage.processor');
         /* @var \Symfony\Component\DependencyInjection\Definition $definition */
         foreach ($definitions as $id => $test) {
             $definition = $container->getDefinition($id);

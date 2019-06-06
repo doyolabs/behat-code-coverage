@@ -103,7 +103,7 @@ class Report implements EventSubscriberInterface
 
     public function onReportProcess(ReportEvent $event)
     {
-        $coverage = $event->getCoverage();
+        $coverage = $event->getProcessor()->getCodeCoverage();
         $io       = $event->getIO();
         /* @todo process this error message */
         try {

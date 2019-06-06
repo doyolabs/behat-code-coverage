@@ -8,9 +8,12 @@ use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\StyleInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class CoverageControllerSpec extends ObjectBehavior
@@ -25,6 +28,15 @@ class CoverageControllerSpec extends ObjectBehavior
     function it_is_initializable()
     {
         $this->shouldHaveType(CoverageController::class);
+    }
+
+    function it_should_add_coverage_option_during_configure(
+        Command $command
+    )
+    {
+        $command->addOption(Argument::cetera())->shouldBeCalled();
+
+        $this->configure($command);
     }
 
     function it_should_subscribe_to_coverage_before_event()
@@ -75,5 +87,32 @@ class CoverageControllerSpec extends ObjectBehavior
     {
         $input->hasParameterOption(['--coverage'])->willReturn(false);
         $this->execute($input, $output);
+    }
+
+    function it_should_show_success_message_when_process_completed(
+        ReportEvent $event,
+        SymfonyStyle $io
+    )
+    {
+        $event->getExceptions()->willReturn([]);
+        $event->getIO()->willReturn($io);
+        $io->success(Argument::any())->shouldBeCalled();
+
+        $this->onAfterReportProcess($event);
+    }
+    function it_should_handle_report_process_exceptions(
+        ReportEvent $event,
+        SymfonyStyle $io
+    )
+    {
+        $e = new \Exception('some exception');
+        $event->getExceptions()->shouldBeCalledOnce()->willReturn([$e]);
+        $event->getIO()->willReturn($io);
+
+        $io->newLine(2)->shouldBeCalled();
+        $io->section(Argument::any())->shouldBeCalled();
+        $io->error('some exception')->shouldBeCalledOnce();
+
+        $this->onAfterReportProcess($event);
     }
 }

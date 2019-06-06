@@ -2,8 +2,19 @@ default:
     suites:
         default:
             contexts:
+                - Behat\MinkExtension\Context\MinkContext
+                - behatch:context:json
+                - behatch:context:rest
                 - FeatureContext
+            filter: "~@remote"
+            
     extensions:
+        Behat\MinkExtension:
+            sessions:
+                default:
+                    goutte:
+            base_url: http://localhost:8000
+        Behatch\Extension: ~
         Doyo\Behat\Coverage\Extension:
             drivers:
                 - test
@@ -24,3 +35,9 @@ default:
                 php: build/cov/behat.cov
                 crap4j: build/crap4j.xml
                 text: true
+
+remote:
+    suites:
+        default:
+            filters: 
+                tags: '@remote'

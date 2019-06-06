@@ -11,12 +11,8 @@
 
 declare(strict_types=1);
 
-namespace Test\Doyo\Behat\Coverage\Fixtures\src\blacklist;
+namespace Doyo\Behat\Coverage\Bridge\CodeCoverage;
 
-class blacklist
+class RemoteController
 {
-    public static function say()
-    {
-        return 'blacklist';
-    }
 }

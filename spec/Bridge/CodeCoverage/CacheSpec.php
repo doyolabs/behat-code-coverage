@@ -3,16 +3,19 @@
 namespace spec\Doyo\Behat\Coverage\Bridge\CodeCoverage;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Cache;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
+use Doyo\Behat\Coverage\Bridge\Exception\CacheException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
+use SebastianBergmann\CodeCoverage\Driver\Driver;
 use SebastianBergmann\CodeCoverage\Filter;
-use spec\Doyo\Behat\Coverage\CoverageHelperTrait;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Webmozart\Assert\Assert;
+use SebastianBergmann\CodeCoverage\CodeCoverage as CodeCoverage;
 
 class CacheSpec extends ObjectBehavior
 {
-    use CoverageHelperTrait;
-
     function let()
     {
         $this->beConstructedWith('spec-test');
@@ -29,19 +32,20 @@ class CacheSpec extends ObjectBehavior
         $this->shouldImplement(\Serializable::class);
     }
 
-    function its_coverage_id_should_be_mutable()
+    function its_test_case_should_be_mutable(
+        TestCase $testCase
+    )
     {
-        $id = 'some-id';
-        $this->setCoverageId($id)->shouldReturn($this);
-        $this->getCoverageId()->shouldReturn($id);
+        $this->setTestCase($testCase)->shouldReturn($this);
+        $this->getTestCase()->shouldReturn($testCase);
     }
 
     function its_coverage_should_be_mutable()
     {
         $value = ['some'];
-        $this->getCoverage()->shouldReturn([]);
-        $this->setCoverage($value)->shouldReturn($this);
-        $this->getCoverage()->shouldReturn($value);
+        $this->getData()->shouldReturn([]);
+        $this->setData($value)->shouldReturn($this);
+        $this->getData()->shouldReturn($value);
     }
 
     function its_code_coverage_options_should_be_mutable()
@@ -65,29 +69,30 @@ class CacheSpec extends ObjectBehavior
         $this->getNamespace()->shouldReturn('spec-test');
     }
 
-    function it_should_create_and_reset_cache()
+    function it_should_create_and_reset_cache(
+        TestCase $testCase
+    )
     {
-        $id = 'some-id';
         $coverage = ['data'];
 
-        $this->setCoverageId($id);
-        $this->setCoverage($coverage);
+        $this->setTestCase($testCase);
+        $this->setData($coverage);
         $this->save();
 
         $this->readCache();
-        $this->getCoverageId()->shouldReturn($id);
-        $this->getCoverage()->shouldReturn($coverage);
+        $this->getTestCase()->shouldHaveType(TestCase::class);
+        $this->getData()->shouldReturn($coverage);
 
         $this->reset();
 
-        $this->getCoverageId()->shouldBeNull();
-        $this->getCoverage()->shouldEqual([]);
+        $this->getTestCase()->shouldBeNull();
+        $this->getData()->shouldEqual([]);
     }
 
     function its_filter_should_be_mutable()
     {
         $filter = ['some-filter'];
-        $this->getFilter()->shouldReturn([]);
+        $this->reset();
         $this->setFilter($filter)->shouldReturn($this);
         $this->getFilter()->shouldReturn($filter);
     }
@@ -104,19 +109,26 @@ class CacheSpec extends ObjectBehavior
         $filter->getWhitelistedFiles()->shouldHaveKeyWithValue(__FILE__, true);
     }
 
-    function it_should_start_coverage(
-        $driver
+    function it_should_handle_error_when_starting_coverage(
+        Processor $coverage,
+        TestCase $testCase,
+        Driver $driver
     )
     {
-        $id = 'some-id';
-        $this->getDriverSubject($driver);
+        //$coverage->setAddUncoveredFilesFromWhitelist(false)->shouldBeCalled();
 
-        $driver->start(true)->shouldBeCalledOnce();
-        $driver->stop()->shouldBeCalledOnce()->willReturn([]);
-        $this->setCoverageId($id);
-        $this->save();
+        /*
+        $this->setCodeCoverageOptions([
+            'addUncoveredFilesFromWhitelist' => false,
+        ]);
+        */
+        $e = new \RuntimeException('some error');
+        $this->setTestCase($testCase);
+        $coverage->start($testCase)->shouldBeCalledOnce()->willThrow($e);
+        $this->setProcessor($coverage);
+
 
         $this->startCoverage($driver);
-        $this->shutdown();
+        $this->hasExceptions()->shouldBe(true);
     }
 }

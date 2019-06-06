@@ -2,14 +2,15 @@
 
 namespace spec\Doyo\Behat\Coverage\Bridge;
 
-use Doyo\Behat\Coverage\Bridge\Compat;
+use SebastianBergmann\CodeCoverage\Driver\Driver;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Bridge\LocalCoverage;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use PhpSpec\ObjectBehavior;
 use SebastianBergmann\CodeCoverage\Filter;
 use Prophecy\Argument;
-use SebastianBergmann\CodeCoverage\CodeCoverage;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Webmozart\Assert\Assert;
 
@@ -23,18 +24,14 @@ class LocalCoverageSpec extends ObjectBehavior
         13 => 1,
     ]];
 
-    private $coverage;
-
     function let(
-        $dummy,
-        CoverageEvent $event
+        Driver $driver,
+        Processor $coverage
     ){
         $filter = new Filter();
         $filter->addFileToWhitelist(__DIR__.'/TestClass.php');
-        $dummy->beADoubleOf(Compat::getDriverClass('Dummy'));
-        $coverage = new CodeCoverage($dummy->getWrappedObject(), $filter);
+        $coverage->beConstructedWith([$driver->getWrappedObject(), $filter]);
         $this->beConstructedWith($coverage);
-        $this->coverage = $coverage;
     }
 
     function it_is_initializable()
@@ -54,53 +51,55 @@ class LocalCoverageSpec extends ObjectBehavior
         $this->getSubscribedEvents()->shouldHaveKeyWithValue(CoverageEvent::REFRESH, 'onCoverageRefresh');
     }
 
-    function it_should_handle_coverage_start_event($dummy, CoverageEvent $event)
+    function it_should_handle_coverage_start_event(
+        CoverageEvent $event,
+        TestCase $testCase,
+        Processor $coverage
+    )
     {
-        $event->getCoverageId()->willReturn('some-id');
-        $dummy->start(true)->shouldBeCalled();
+        $event->getTestCase()->willReturn($testCase);
+        $coverage->start($testCase)->shouldBeCalled();
         $this->onCoverageStarted($event);
     }
 
     function it_should_handle_coverage_stop_event(
-        $dummy,
-        CoverageEvent $event
+        Processor $coverage,
+        CoverageEvent $event,
+        TestCase $testCase
     )
     {
-        $data = [ __DIR__.'/TestClass.php' => [
-            9 => 1,
-            10 => 1,
-            11 => 1,
-            12 => 1,
-            13 => 1,
-        ]];
+        $data = ['somedata'];
+        $name = 'some-name';
+        $testCase->getName()->willReturn($name);
 
-        $event->getCoverageId()->willReturn('some-id');
         $event->getCoverage()->willReturn($data);
+        $event->getTestCase()->willReturn($testCase);
 
-        $dummy->start(true)->shouldBeCalled();
-        $dummy->stop(Argument::cetera())->shouldBeCalled()->willReturn($data);
+        $coverage->append($data, $name, Argument::cetera())->shouldBeCalled();
+
+        $coverage->start($testCase)->shouldBeCalled();
+        $coverage->stop()->shouldBeCalled();
+        $coverage->addTestCase($testCase)->shouldBeCalled();
 
         $this->onCoverageStarted($event);
         $this->onCoverageStopped($event);
     }
 
     function it_should_handle_before_report_process_event(
-        ReportEvent $event
+        ReportEvent $event,
+        Processor $coverage
     )
     {
-        $event->setCoverage(Argument::type(CodeCoverage::class))->shouldBeCalled();
+        $coverage->complete()->shouldBeCalledOnce();
+
         $this->onBeforeReportProcess($event);
     }
 
-    function it_should_handle_coverage_refresh_event()
+    function it_should_handle_coverage_refresh_event(
+        Processor $coverage
+    )
     {
-        $data = $this->data;
-        $coverage = $this->coverage;
-        $coverage->append($data,'some-id');
-
+        $coverage->clear()->shouldBeCalled();
         $this->onCoverageRefresh();
-
-        $data = $coverage->getData();
-        Assert::eq($data[__DIR__.'/TestClass.php'][10],[]);
     }
 }

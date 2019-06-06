@@ -32,7 +32,7 @@ cache:
   - &run-test-coverage
     robo coverage
   - &start-php-server
-    php -S localhost:8000 -t tests/Fixtures/public --timeout=0 > /dev/null 2>&1 &
+    php -S localhost:8000 -t tests/Fixtures/public > /dev/null 2>&1 &
 
 jobs:
   include:

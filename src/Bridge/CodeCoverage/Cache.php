@@ -48,7 +48,7 @@ class Cache implements \Serializable
     /**
      * @var Processor
      */
-    private $codeCoverage;
+    private $processor;
 
     /**
      * @var array
@@ -80,7 +80,7 @@ class Cache implements \Serializable
         $this->testCase     = null;
         $this->data         = [];
         $this->exceptions   = [];
-        $this->codeCoverage = null;
+        $this->processor = null;
 
         $this->save();
     }
@@ -214,19 +214,19 @@ class Cache implements \Serializable
     /**
      * @return Processor|null
      */
-    public function getCodeCoverage()
+    public function getProcessor()
     {
-        return $this->codeCoverage;
+        return $this->processor;
     }
 
     /**
-     * @param Processor $codeCoverage
+     * @param Processor $processor
      *
      * @return Cache
      */
-    public function setCodeCoverage(Processor $codeCoverage)
+    public function setProcessor(Processor $processor)
     {
-        $this->codeCoverage = $codeCoverage;
+        $this->processor = $processor;
 
         return $this;
     }
@@ -303,17 +303,18 @@ class Cache implements \Serializable
                 $this->namespace,
                 $e->getMessage()
             );
+            $this->exceptions[] = $message;
         }
     }
 
     public function shutdown()
     {
-        $codeCoverage = $this->codeCoverage;
+        $codeCoverage = $this->processor;
         if ($this->hasStarted) {
             try {
                 $data               = $codeCoverage->stop();
                 $this->data         = $data;
-                $this->codeCoverage = null;
+                $this->processor = null;
                 $this->hasStarted   = false;
             } catch (\Exception $e) {
                 $this->exceptions[] = $e->getMessage();
@@ -330,13 +331,13 @@ class Cache implements \Serializable
      */
     private function createCodeCoverage($driver = null)
     {
-        $coverage = $this->codeCoverage;
+        $coverage = $this->processor;
         $filter   = $this->createFilter();
         $options  = $this->codeCoverageOptions;
 
         if (null === $coverage) {
             $coverage           = new Processor($driver, $filter);
-            $this->codeCoverage = $coverage;
+            $this->processor = $coverage;
         }
 
         foreach ($options as $method => $option) {

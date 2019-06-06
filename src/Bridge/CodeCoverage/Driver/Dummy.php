@@ -16,18 +16,18 @@ namespace Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver;
 use SebastianBergmann\CodeCoverage\Version;
 
 if (version_compare(Version::id(), '6.0', '<')) {
-    class BaseDummy extends \Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy5
+    class BaseDummy extends \Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Compat\BaseDummy5
     {
     }
 } else {
-    class BaseBaseDummy extends \Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Compat\BaseDummy6
+    class BaseDummy extends \Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Compat\BaseDummy6
     {
     }
 }
 
 /**
- * A dumb driver to prevent error.
+ * A dumb driver to be used during testing
  */
-class Dummy extends BaseBaseDummy
+class Dummy extends BaseDummy
 {
 }

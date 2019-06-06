@@ -115,8 +115,6 @@ class CacheSpec extends ObjectBehavior
         Driver $driver
     )
     {
-        $phpCoverage = new CodeCoverage($driver->getWrappedObject());
-        $coverage->setCodeCoverage($phpCoverage);
         //$coverage->setAddUncoveredFilesFromWhitelist(false)->shouldBeCalled();
 
         /*
@@ -124,14 +122,13 @@ class CacheSpec extends ObjectBehavior
             'addUncoveredFilesFromWhitelist' => false,
         ]);
         */
-
-        $this->setCodeCoverage($coverage->getWrappedObject());
         $e = new \RuntimeException('some error');
-        $coverage->start($testCase)->shouldBeCalledOnce()->willThrow($e);
-
         $this->setTestCase($testCase);
+        $coverage->start($testCase)->shouldBeCalledOnce()->willThrow($e);
+        $this->setProcessor($coverage);
 
-        $this->shouldThrow(CacheException::class)
-            ->during('startCoverage', []);
+
+        $this->startCoverage($driver);
+        $this->hasExceptions()->shouldBe(true);
     }
 }

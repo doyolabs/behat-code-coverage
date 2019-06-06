@@ -5,8 +5,8 @@ Provide code coverage extension during behat tests
 ### Status
 | Branch  | Status | Coverage | Score | 
 | :---: | :---: | :---: | :---: |
-| **master**  | [![Build Status][travis-master]](travis) | [![Coverage][cover-stat-master]](cover-master) | [![Score][score-stat-master]](score-master)
-| **develop** | [![Build Status][travis-develop]](travis) | [![Coverage][cover-stat-develop]](cover-develop) | [![Score][score-stat-develop]](score-develop) 
+| **master**  | [![Build Status][travis-master]][travis] | [![Coverage][cover-stat-master]][cover-master] | [![Score][score-stat-master]][score-master]
+| **develop** | [![Build Status][travis-develop]][travis] | [![Coverage][cover-stat-develop]][cover-develop] | [![Score][score-stat-develop]][score-develop] 
 
 ### Support
 *  PHP: >=7.0

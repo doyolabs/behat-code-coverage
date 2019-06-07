@@ -16,8 +16,8 @@ namespace Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Compat;
 use SebastianBergmann\CodeCoverage\Driver\Driver;
 
 /**
- * Class BaseDummy6
- * 
+ * Class BaseDummy6.
+ *
  * @codeCoverageIgnore
  */
 class BaseDummy6 implements Driver

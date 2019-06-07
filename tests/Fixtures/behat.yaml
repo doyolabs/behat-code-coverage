@@ -6,18 +6,21 @@ default:
                 - behatch:context:json
                 - behatch:context:rest
                 - FeatureContext
-            filter: "~@remote"
             
     extensions:
         Behat\MinkExtension:
-            sessions:
-                default:
-                    goutte:
             base_url: http://localhost:8000
+            default_session: symfony2
+            sessions:
+                symfony2:
+                    goutte: ~
         Behatch\Extension: ~
         Doyo\Behat\Coverage\Extension:
-            drivers:
-                - test
+            sessions:
+                local: ~
+                remote:
+                    driver: remote
+                    remote_url: http://localhost:8000/coverage.php
             filter:
                 - style1/*.php
                 - directory: src
@@ -36,8 +39,14 @@ default:
                 crap4j: build/crap4j.xml
                 text: true
 
-remote:
+local:
     suites:
         default:
             filters: 
-                tags: '@remote'
+                tags: 'local'
+
+remote:
+    suites:
+        default:
+            filters:
+                tags: 'remote'

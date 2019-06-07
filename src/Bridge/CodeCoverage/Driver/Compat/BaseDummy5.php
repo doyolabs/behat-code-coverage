@@ -19,6 +19,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * A dumb driver to prevent error.
+ *
  * @codeCoverageIgnore
  */
 class BaseDummy5 implements Driver, EventSubscriberInterface

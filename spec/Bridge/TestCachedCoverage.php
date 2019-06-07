@@ -8,7 +8,7 @@ use Doyo\Behat\Coverage\Bridge\CachedCoverage;
 
 class TestCachedCoverage extends CachedCoverage
 {
-    public function __construct($namespace)
+    public function __construct($sessionName)
     {
 
     }

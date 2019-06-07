@@ -11,125 +11,139 @@
 
 declare(strict_types=1);
 
-namespace Doyo\Behat\Coverage\Bridge\CodeCoverage;
+namespace Doyo\Behat\Coverage\Bridge\CodeCoverage\Session;
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Bridge\Exception\CacheException;
 use SebastianBergmann\CodeCoverage\Filter;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
-class Cache implements \Serializable
+abstract class Session implements \Serializable, SessionInterface
 {
-    const CACHE_KEY = 'subject';
+    const CACHE_KEY = 'session';
 
     /**
      * @var string|null
      */
-    private $namespace;
+    protected $name;
 
     /**
      * @var TestCase
      */
-    private $testCase;
+    protected $testCase;
 
     /**
      * @var FilesystemAdapter|null
      */
-    private $adapter;
+    protected $adapter;
 
     /**
      * @var array
      */
-    private $data = [];
+    protected $data = [];
 
     /**
      * @var array
      */
-    private $filter = [];
+    protected $filterOptions = [];
 
     /**
      * @var Processor
      */
-    private $processor;
+    protected $processor;
 
     /**
      * @var array
      */
-    private $codeCoverageOptions = [];
+    protected $codeCoverageOptions = [];
 
     /**
      * @var \Exception[]
      */
-    private $exceptions = [];
+    protected $exceptions = [];
 
     /**
      * @var bool
      */
-    private $hasStarted = false;
+    protected $hasStarted = false;
 
-    public function __construct($namespace)
+    public function __construct($sessionName)
     {
-        $dir             = sys_get_temp_dir().'/doyo/behat-coverage-extension';
-        $adapter         = new FilesystemAdapter($namespace, 0, $dir);
-        $this->adapter   = $adapter;
-        $this->namespace = $namespace;
+        $dir               = sys_get_temp_dir().'/doyo/behat-coverage-extension';
+        $adapter           = new FilesystemAdapter($sessionName, 0, $dir);
+        $this->adapter     = $adapter;
+        $this->name = $sessionName;
 
-        $this->readCache();
+        $this->refresh();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function reset()
     {
-        $this->testCase     = null;
-        $this->data         = [];
-        $this->exceptions   = [];
-        $this->processor = null;
+        $this->testCase   = null;
+        $this->data       = [];
+        $this->processor  = null;
+        $this->exceptions = [];
 
         $this->save();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function serialize()
     {
         $data = [
             $this->testCase,
             $this->data,
             $this->codeCoverageOptions,
-            $this->filter,
+            $this->filterOptions,
             $this->exceptions,
         ];
 
         return serialize($data);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function unserialize($serialized)
     {
         list(
             $this->testCase,
             $this->data,
             $this->codeCoverageOptions,
-            $this->filter,
+            $this->filterOptions,
             $this->exceptions
         ) = unserialize($serialized);
     }
 
-    public function readCache()
+    /**
+     * {@inheritdoc}
+     */
+    public function refresh()
     {
         $adapter = $this->adapter;
         $cached  = $adapter->getItem(static::CACHE_KEY)->get();
 
         if ($cached instanceof self) {
-            $this->testCase            = $cached->getTestCase();
-            $this->data                = $cached->getData()?:[];
-            $this->exceptions          = $cached->getExceptions();
-            $this->filter              = $cached->getFilter();
-            $this->codeCoverageOptions = $cached->getCodeCoverageOptions();
+            $this->testCase                   = $cached->getTestCase();
+            $this->data                       = $cached->getData() ?: [];
+            $this->exceptions                 = $cached->getExceptions();
+            $this->filterOptions              = $cached->getFilterOptions();
+            $this->codeCoverageOptions        = $cached->getCodeCoverageOptions();
         }
     }
 
     /**
      * @return string|null
      */
-    public function getNamespace()
+    public function getName()
     {
-        return $this->namespace;
+        return $this->name;
     }
 
     /**
@@ -141,9 +155,7 @@ class Cache implements \Serializable
     }
 
     /**
-     * @param TestCase $testCase
-     *
-     * @return Cache
+     * {@inheritdoc}
      */
     public function setTestCase(TestCase $testCase = null)
     {
@@ -173,7 +185,7 @@ class Cache implements \Serializable
     }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
     public function getData()
     {
@@ -199,9 +211,7 @@ class Cache implements \Serializable
     }
 
     /**
-     * @param array $codeCoverageOptions
-     *
-     * @return Cache
+     * {@inheritdoc}
      */
     public function setCodeCoverageOptions(array $codeCoverageOptions): self
     {
@@ -227,39 +237,65 @@ class Cache implements \Serializable
         return $this->processor;
     }
 
-    public function getFilter(): array
+    public function getFilterOptions(): array
     {
-        return $this->filter;
+        return $this->filterOptions;
     }
 
     /**
-     * @param Filter|array $filter
-     *
-     * @return $this
+     * {@inheritdoc}
      */
-    public function setFilter($filter)
+    public function setFilterOptions(array $filterOptions)
     {
-        if ($filter instanceof Filter) {
-            $whitelistedFiles              = $filter->getWhitelistedFiles();
-            $filter                        = [];
-            $filter['addFilesToWhitelist'] = $whitelistedFiles;
-        }
-
-        $this->filter = $filter;
+        $this->filterOptions = $filterOptions;
 
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function hasExceptions()
     {
         return \count($this->exceptions) > 0;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getExceptions()
     {
         return $this->exceptions;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    final public function start($driver = null)
+    {
+        if (null === $this->testCase) {
+            return;
+        }
+        try {
+            $processor = $this->processor;
+            if (null === $processor) {
+                $processor = $this->createCodeCoverage($driver);
+            }
+            $processor->start($this->testCase);
+            $this->hasStarted = true;
+        } catch (\Exception $e) {
+            $message = sprintf(
+                "Can not start code coverage in namespace: %s :\n%s",
+                $this->name,
+                $e->getMessage()
+            );
+            $this->exceptions[] = $message;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function save()
     {
         $adapter = $this->adapter;
@@ -272,51 +308,28 @@ class Cache implements \Serializable
     /**
      * @return Filter
      */
-    private function createCodeCoverageFilter()
+    protected function createCodeCoverageFilter()
     {
-        $config = $this->filter;
+        $config = $this->filterOptions;
         $filter = new Filter();
         foreach ($config as $method => $value) {
+            $method = 'set'.ucfirst($method);
             \call_user_func_array([$filter, $method], [$value]);
         }
 
         return $filter;
     }
 
-    public function startCoverage($driver = null)
-    {
-        if (null === $this->testCase) {
-            return;
-        }
-        try {
-            $processor = $this->processor;
-            if(is_null($processor)){
-                $processor = $this->createCodeCoverage($driver);
-            }
-            $processor->start($this->getTestCase());
-            register_shutdown_function([$this, 'shutdown']);
-            $this->hasStarted = true;
-        } catch (\Exception $e) {
-            $message = sprintf(
-                "Can not start code coverage in namespace: %s :\n%s",
-                $this->namespace,
-                $e->getMessage()
-            );
-            $this->exceptions[] = $message;
-        }
-    }
-
     public function shutdown()
     {
-        $processor = $this->processor;
         if ($this->hasStarted) {
             try {
-                $data               = $processor->stop();
-                $this->data         = $data;
+                $this->stop();
             } catch (\Exception $e) {
                 $this->exceptions[] = new CacheException($e->getMessage());
             }
         }
+
         $this->processor    = null;
         $this->hasStarted   = false;
         $this->save();
@@ -327,7 +340,7 @@ class Cache implements \Serializable
      *
      * @return Processor
      */
-    private function createCodeCoverage($driver = null)
+    protected function createCodeCoverage($driver = null)
     {
         $coverage = $this->processor;
         $filter   = $this->createCodeCoverageFilter();

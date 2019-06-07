@@ -28,6 +28,8 @@ use SebastianBergmann\CodeCoverage\Filter;
  * @method Driver getDriver()
  * @method Filter filter()
  * @method array  stop(bool $append = true, $linesToBeCovered = [], array $linesToBeUsed = [], bool $ignoreForceCoversAnnotation = false)
+ * @method void setData(array $data)
+ * @method array getData(bool $raw = false)
  */
 class Processor
 {
@@ -39,7 +41,7 @@ class Processor
     /**
      * @var TestCase[]
      */
-    private $testCases;
+    private $testCases = [];
 
     private $completed = false;
 
@@ -85,6 +87,25 @@ class Processor
     public function start(TestCase $testCase, $clear = false)
     {
         $this->codeCoverage->start($testCase->getName(), $clear);
+    }
+
+    public function updateCoverage($coverage)
+    {
+        $aggregate = $this->getData();
+
+        foreach ($coverage as $class => $counts) {
+            if (!isset($this->coverage[$class])) {
+                $aggregate[$class] = $counts;
+                continue;
+            }
+
+            foreach ($counts as $line => $status) {
+                $status                   = !$status ? -1 : ($status > 1 ? 1 : $status);
+                $aggregate[$class][$line] = $status;
+            }
+        }
+
+        $this->setData($aggregate);
     }
 
     public function __call($name, $arguments)

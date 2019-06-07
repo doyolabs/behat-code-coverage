@@ -3,9 +3,15 @@
 
 require __DIR__.'/../../../vendor/autoload.php';
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Cache;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\LocalSession;
 
-$cache = new Cache('console');
-$cache->startCoverage();
+LocalSession::create('console')->start();
 
 require __DIR__.'/../../../vendor/bin/behat';
+
+
+define('BEHAT_BIN_PATH',     realpath(__DIR__.'/../../../vendor/behat/behat/bin'));
+
+$factory = new \Behat\Behat\ApplicationFactory();
+$factory->createApplication()->run();
+

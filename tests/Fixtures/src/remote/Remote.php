@@ -11,8 +11,12 @@
 
 declare(strict_types=1);
 
-namespace Doyo\Behat\Coverage\Bridge\Exception;
+namespace Test\Doyo\Behat\Coverage\Fixtures\src\remote;
 
-class ProcessorException extends \RuntimeException
+class Remote
 {
+    public static function say()
+    {
+        return 'hello from remote';
+    }
 }

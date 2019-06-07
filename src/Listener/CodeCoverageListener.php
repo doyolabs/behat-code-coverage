@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Doyo\Behat\Coverage\Bridge;
+namespace Doyo\Behat\Coverage\Listener;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
@@ -19,7 +19,7 @@ use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-class LocalCoverage implements EventSubscriberInterface
+class CodeCoverageListener implements EventSubscriberInterface
 {
     /**
      * @var Processor

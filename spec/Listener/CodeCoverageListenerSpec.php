@@ -1,10 +1,10 @@
 <?php
 
-namespace spec\Doyo\Behat\Coverage\Bridge;
+namespace spec\Doyo\Behat\Coverage\Listener;
 
+use Doyo\Behat\Coverage\Listener\CodeCoverageListener;
 use SebastianBergmann\CodeCoverage\Driver\Driver;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
-use Doyo\Behat\Coverage\Bridge\LocalCoverage;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use PhpSpec\ObjectBehavior;
@@ -14,7 +14,7 @@ use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Webmozart\Assert\Assert;
 
-class LocalCoverageSpec extends ObjectBehavior
+class CodeCoverageListenerSpec extends ObjectBehavior
 {
     protected $data = [ __DIR__.'/TestClass.php' => [
         9 => 1,
@@ -36,7 +36,7 @@ class LocalCoverageSpec extends ObjectBehavior
 
     function it_is_initializable()
     {
-        $this->shouldHaveType(LocalCoverage::class);
+        $this->shouldHaveType(CodeCoverageListener::class);
     }
 
     function it_should_be_an_event_subscriber()

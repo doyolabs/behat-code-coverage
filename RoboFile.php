@@ -136,9 +136,9 @@ class RoboFile extends Tasks
         if ($this->coverage) {
             $task->option('coverage');
             $command = $task->getCommand();
-            $task = $this->taskExec('phpdbg -qrr '.$command);
-        }else{
-            $task->option('tags','~@remote');
+            $task    = $this->taskExec('phpdbg -qrr '.$command);
+        } else {
+            $task->option('tags', '~@remote');
         }
 
         return $task;

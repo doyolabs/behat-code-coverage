@@ -15,7 +15,6 @@ namespace Doyo\Behat\Coverage\Event;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Doyo\Behat\Coverage\Bridge\Symfony\Event;
-use Doyo\Behat\Coverage\Exception\ReportProcessException;
 use Symfony\Component\Console\Style\StyleInterface;
 
 class ReportEvent extends Event
@@ -35,7 +34,7 @@ class ReportEvent extends Event
     private $io;
 
     /**
-     * @var ReportProcessException[]
+     * @var \Exception[]
      */
     private $exceptions = [];
 
@@ -79,13 +78,13 @@ class ReportEvent extends Event
         return $this;
     }
 
-    public function addException(ReportProcessException $exception)
+    public function addException(\Exception $exception)
     {
         $this->exceptions[] = $exception;
     }
 
     /**
-     * @return ReportProcessException[]
+     * @return \Exception[]
      */
     public function getExceptions()
     {

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Compiler;
 
+use Behat\Testwork\ServiceContainer\Exception\ConfigurationLoadingException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -23,7 +24,7 @@ class CoveragePass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         $this->compileFilterOptions($container);
-        $this->compileDrivers($container);
+        $this->processSessions($container);
         $this->compileCoverageOptions($container);
 
         $definition = $container->getDefinition('doyo.coverage.dispatcher');
@@ -34,30 +35,71 @@ class CoveragePass implements CompilerPassInterface
         }
     }
 
-    private function compileDrivers(ContainerBuilder $container)
+    private function processSessions(ContainerBuilder $container)
     {
-        $drivers             = $container->getParameterBag()->get('doyo.coverage.drivers');
-        $codeCoverageOptions = $container->getParameterBag()->get('doyo.coverage.options');
+        $sessions             = $container->getParameterBag()->get('doyo.coverage.sessions');
+        $codeCoverageOptions  = $container->getParameterBag()->get('doyo.coverage.options');
 
-        $map = [
-            'cached' => $container->getParameterBag()->get('doyo.coverage.cached.class'),
+        $driverMap = [
+            'local'  => $container->getParameterBag()->get('doyo.coverage.session.local.class'),
+            'remote' => $container->getParameterBag()->get('doyo.coverage.session.remote.class'),
         ];
-
-        foreach ($drivers as $config) {
-            $namespace = $config['namespace'];
+        foreach ($sessions as $name => $config) {
             $driver    = $config['driver'];
-            $class     = $map[$driver];
-            $id        = 'doyo.coverage.cached.'.$namespace;
+            $class     = $driverMap[$driver];
+            $id        = 'doyo.coverage.sessions.'.$name;
+            $driverId  = $this->createSessionDriverDefinition($container, $name, $config);
 
             $definition = new Definition($class);
             $definition->addTag('doyo.dispatcher.subscriber');
-            $definition->addArgument($namespace);
+            $definition->addArgument(new Reference($driverId));
             $definition->addArgument($codeCoverageOptions);
             $definition->addArgument(new Reference('doyo.coverage.filter'));
             $definition->setPublic(true);
 
+            if('remote' === $driver){
+                $this->configureRemoteSession($container, $definition, $config);
+
+            }
+
             $container->setDefinition($id, $definition);
         }
+    }
+
+    private function configureRemoteSession(ContainerBuilder $container, Definition $definition, array $config)
+    {
+        $mink = 'mink';
+        if($container->has($mink)){
+            $definition->addMethodCall('setMink', [new Reference($mink)]);
+        }
+
+        if(!isset($config['remote_url'])){
+            throw new ConfigurationLoadingException(sprintf(
+                'driver parameters: %s should be set when using code coverage remote driver',
+                'coverage_url'
+            ));
+        }
+
+        $client = $container->get('doyo.coverage.http_client');
+        $definition->addMethodCall('setHttpClient', [$client]);
+        $definition->addMethodCall('setRemoteUrl',[$config['remote_url']]);
+    }
+
+    private function createSessionDriverDefinition(ContainerBuilder $container, $name, $config)
+    {
+        $driver = $config['driver'];
+        $map = [
+            'local'  => 'doyo.coverage.local_session.class',
+            'remote' => 'doyo.coverage.remote_session.class',
+        ];
+        $class      = $container->getParameterBag()->get($map[$driver]);
+        $id         = 'doyo.coverage.sessions.'.$name.'.driver';
+        $definition = new Definition($class);
+        $definition->setPublic(true);
+        $definition->addArgument($name);
+
+        $container->setDefinition($id, $definition);
+        return $id;
     }
 
     private function compileCoverageOptions(ContainerBuilder $container)

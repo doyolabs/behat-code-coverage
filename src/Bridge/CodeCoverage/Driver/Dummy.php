@@ -26,7 +26,7 @@ if (version_compare(Version::id(), '6.0', '<')) {
 }
 
 /**
- * A dumb driver to be used during testing
+ * A dumb driver to be used during testing.
  */
 class Dummy extends BaseDummy
 {

@@ -1,21 +1,19 @@
 <?php
 
-namespace spec\Doyo\Behat\Coverage\Bridge\CodeCoverage;
+namespace spec\Doyo\Behat\Coverage\Bridge\CodeCoverage\Session;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Cache;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\Session;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
-use Doyo\Behat\Coverage\Bridge\Exception\CacheException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
-use SebastianBergmann\CodeCoverage\Driver\Driver;
 use SebastianBergmann\CodeCoverage\Filter;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Webmozart\Assert\Assert;
 use SebastianBergmann\CodeCoverage\CodeCoverage as CodeCoverage;
 
-class CacheSpec extends ObjectBehavior
+class SessionSpec extends ObjectBehavior
 {
     /**
      * @var CodeCoverage
@@ -28,6 +26,7 @@ class CacheSpec extends ObjectBehavior
         TestCase $testCase
     )
     {
+        $this->beAnInstanceOf(TestSession::class);
         $this->beConstructedWith('spec-test');
         $this->reset();
 
@@ -43,7 +42,7 @@ class CacheSpec extends ObjectBehavior
 
     function it_is_initializable()
     {
-        $this->shouldHaveType(Cache::class);
+        $this->shouldHaveType(Session::class);
     }
 
     function it_should_be_serializable()
@@ -85,7 +84,7 @@ class CacheSpec extends ObjectBehavior
 
     function its_namespace_should_be_mutable()
     {
-        $this->getNamespace()->shouldReturn('spec-test');
+        $this->getName()->shouldReturn('spec-test');
     }
 
     function it_should_create_and_reset_cache(
@@ -98,7 +97,7 @@ class CacheSpec extends ObjectBehavior
         $this->setData($coverage);
         $this->save();
 
-        $this->readCache();
+        $this->refresh();
         $this->getTestCase()->shouldHaveType(TestCase::class);
         $this->getData()->shouldReturn($coverage);
 
@@ -112,25 +111,26 @@ class CacheSpec extends ObjectBehavior
     {
         $filter = ['some-filter'];
         $this->reset();
-        $this->setFilter($filter)->shouldReturn($this);
-        $this->getFilter()->shouldReturn($filter);
+        $this->setFilterOptions($filter)->shouldReturn($this);
+        $this->getFilterOptions()->shouldReturn($filter);
     }
 
     function it_should_create_processor_when_not_exist(
         Dummy $driver
     )
     {
-        $this->setFilter([
-            'addFilesToWhitelist' => [
-                __FILE__
+        $this->setFilterOptions([
+            'whitelistedFiles' => [
+                __FILE__ => true,
             ]
         ]);
         $this->setCodeCoverageOptions([
             'addUncoveredFilesFromWhitelist' => true
         ]);
-        $driver->stop()->willReturn([]);
+        $driver->start(Argument::any())->shouldBeCalled();
         $this->setProcessor(null);
-        $this->startCoverage($driver);
+        $this->start($driver);
+
         //$this->getProcessor()->getCodeCoverage()->setAddUncoveredFilesFromWhitelist(true)
 
         $this->getProcessor()->shouldBeAnInstanceOf(Processor::class);
@@ -148,7 +148,7 @@ class CacheSpec extends ObjectBehavior
         $processor->start(Argument::any())->shouldNotBeCalled();
         $this->setTestCase(null);
 
-        $this->startCoverage();
+        $this->start();
     }
 
     function it_should_handle_error_when_starting_coverage(
@@ -163,7 +163,7 @@ class CacheSpec extends ObjectBehavior
         $this->setProcessor($processor);
 
 
-        $this->startCoverage();
+        $this->start();
         $this->hasExceptions()->shouldBe(true);
     }
 
@@ -175,7 +175,7 @@ class CacheSpec extends ObjectBehavior
         $processor->start($testCase)->shouldBeCalledOnce();
         $processor->stop()->shouldBeCalledOnce();
 
-        $this->startCoverage();
+        $this->start();
         $this->shutdown();
     }
 
@@ -191,7 +191,7 @@ class CacheSpec extends ObjectBehavior
         $this->setTestCase($testCase);
         $this->setProcessor($processor);
 
-        $this->startCoverage();
+        $this->start();
 
         $this->shutdown();
         $this->hasExceptions()->shouldBe(true);

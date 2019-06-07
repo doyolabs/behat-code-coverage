@@ -86,8 +86,6 @@ class ExtensionTest extends TestCase
             ['doyo.coverage.report.clover', Report::class],
             ['doyo.coverage.sessions.local.driver', LocalSession::class],
             ['doyo.coverage.sessions.local', LocalCoverageListener::class],
-            ['doyo.coverage.sessions.remote.driver', RemoteSession::class],
-            ['doyo.coverage.sessions.remote', RemoteCoverageListener::class],
         ];
     }
 

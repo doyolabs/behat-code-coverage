@@ -56,11 +56,6 @@ class RemoteCoverageListener extends AbstractSessionCoverageListener implements 
         $this->mink = $mink;
     }
 
-    public function setMinkParameters(array $parameters)
-    {
-        $this->minkParameters = $parameters;
-    }
-
     public function setRemoteUrl($url)
     {
         $this->remoteUrl = $url;

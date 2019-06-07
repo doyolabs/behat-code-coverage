@@ -14,10 +14,12 @@ declare(strict_types=1);
 include __DIR__.'/../../../vendor/autoload.php';
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\LocalSession;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Test\Doyo\Behat\Coverage\Fixtures\src\remote\Remote;
 
 RemoteSession::startSession();
+LocalSession::create('console')->start();
 
 $data = [
     'remote'       => Remote::say(),

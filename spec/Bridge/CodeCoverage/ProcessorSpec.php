@@ -51,12 +51,6 @@ class ProcessorSpec extends ObjectBehavior
         $this->stop();
     }
 
-    function it_should_throw_when_method_not_callable()
-    {
-        $this->shouldThrow(ProcessorException::class)
-            ->during('fooBar');
-    }
-
     function it_should_patch_coverage_data_when_test_completed(
         TestCase $testCase
     )

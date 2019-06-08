@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Bridge\CodeCoverage\Session;
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 
 /**
@@ -21,11 +22,53 @@ use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 interface SessionInterface
 {
     /**
-     * Returns current session name
+     * Returns current session name.
      *
      * @return string
      */
     public function getName();
+
+    /**
+     * Set code coverage options for this session.
+     *
+     * @param array $options
+     */
+    public function setCodeCoverageOptions(array $options);
+
+    /**
+     * Get code coverage options for this session.
+     *
+     * @return array
+     */
+    public function getCodeCoverageOptions();
+
+    /**
+     * Set code filter options for this session.
+     *
+     * @param array $options
+     */
+    public function setFilterOptions(array  $options);
+
+    /**
+     * Get code filter options for this session.
+     *
+     * @return array
+     */
+    public function getFilterOptions(): array;
+
+    /**
+     * Set processor for this session.
+     *
+     * @param ProcessorInterface $processor
+     */
+    public function setProcessor(ProcessorInterface $processor);
+
+    /**
+     * Get processor for this session.
+     *
+     * @return ProcessorInterface|null
+     */
+    public function getProcessor();
 
     /**
      * Refresh current state from cache.
@@ -43,11 +86,6 @@ interface SessionInterface
     public function save();
 
     /**
-     * @return array
-     */
-    public function getData();
-
-    /**
      * Returns true if have error.
      *
      * @return bool
@@ -60,16 +98,6 @@ interface SessionInterface
      * @return \Exception[]
      */
     public function getExceptions();
-
-    /**
-     * @param array
-     */
-    public function setFilterOptions(array $filter);
-
-    /**
-     * @param array $options
-     */
-    public function setCodeCoverageOptions(array $options);
 
     /**
      * Set current TestCase to be used in code coverage.

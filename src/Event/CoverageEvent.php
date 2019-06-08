@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Event;
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Bridge\Symfony\Event;
 
@@ -24,6 +25,7 @@ class CoverageEvent extends Event
     const START          = 'doyo.coverage.start';
     const STOP           = 'doyo.coverage.stop';
     const REFRESH        = 'doyo.coverage.refresh';
+    const COMPLETED      = 'doyo.coverage.completed';
 
     /**
      * @var TestCase
@@ -31,46 +33,14 @@ class CoverageEvent extends Event
     private $testCase;
 
     /**
-     * @var array
+     * @var ProcessorInterface
      */
-    private $coverage;
+    private $processor;
 
     public function __construct(TestCase $testCase = null)
     {
         $this->testCase   = $testCase;
         $this->coverage   = [];
-    }
-
-    public function updateCoverage($coverage)
-    {
-        $aggregate = $this->coverage;
-
-        foreach ($coverage as $class => $counts) {
-            if (!isset($this->coverage[$class])) {
-                $aggregate[$class] = $counts;
-                continue;
-            }
-
-            foreach ($counts as $line => $status) {
-                $status                   = !$status ? -1 : ($status > 1 ? 1 : $status);
-                $aggregate[$class][$line] = $status;
-            }
-        }
-
-        $this->coverage = $aggregate;
-    }
-
-    public function setCoverage(array $coverage)
-    {
-        $this->coverage = $coverage;
-    }
-
-    /**
-     * @return array
-     */
-    public function getCoverage()
-    {
-        return $this->coverage;
     }
 
     /**
@@ -87,5 +57,15 @@ class CoverageEvent extends Event
     public function setTestCase($testCase=null)
     {
         $this->testCase = $testCase;
+    }
+
+    public function setProcessor($processor)
+    {
+        $this->processor = $processor;
+    }
+
+    public function getProcessor()
+    {
+        return $this->processor;
     }
 }

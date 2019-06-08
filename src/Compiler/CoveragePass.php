@@ -23,9 +23,9 @@ class CoveragePass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $this->compileFilterOptions($container);
+        $this->processFilterOptions($container);
         $this->processSessions($container);
-        $this->compileCoverageOptions($container);
+        $this->processCoverageOptions($container);
 
         $definition = $container->getDefinition('doyo.coverage.dispatcher');
         $tagged     = $container->findTaggedServiceIds('doyo.dispatcher.subscriber');
@@ -57,9 +57,8 @@ class CoveragePass implements CompilerPassInterface
             $definition->addArgument(new Reference('doyo.coverage.filter'));
             $definition->setPublic(true);
 
-            if('remote' === $driver){
+            if ('remote' === $driver) {
                 $this->configureRemoteSession($container, $definition, $config);
-
             }
 
             $container->setDefinition($id, $definition);
@@ -69,11 +68,11 @@ class CoveragePass implements CompilerPassInterface
     private function configureRemoteSession(ContainerBuilder $container, Definition $definition, array $config)
     {
         $mink = 'mink';
-        if($container->has($mink)){
+        if ($container->has($mink)) {
             $definition->addMethodCall('setMink', [new Reference($mink)]);
         }
 
-        if(!isset($config['remote_url'])){
+        if (!isset($config['remote_url'])) {
             throw new ConfigurationLoadingException(sprintf(
                 'driver parameters: %s should be set when using code coverage remote driver',
                 'coverage_url'
@@ -82,13 +81,13 @@ class CoveragePass implements CompilerPassInterface
 
         $client = $container->get('doyo.coverage.http_client');
         $definition->addMethodCall('setHttpClient', [$client]);
-        $definition->addMethodCall('setRemoteUrl',[$config['remote_url']]);
+        $definition->addMethodCall('setRemoteUrl', [$config['remote_url']]);
     }
 
     private function createSessionDriverDefinition(ContainerBuilder $container, $name, $config)
     {
         $driver = $config['driver'];
-        $map = [
+        $map    = [
             'local'  => 'doyo.coverage.local_session.class',
             'remote' => 'doyo.coverage.remote_session.class',
         ];
@@ -97,12 +96,34 @@ class CoveragePass implements CompilerPassInterface
         $definition = new Definition($class);
         $definition->setPublic(true);
         $definition->addArgument($name);
-
         $container->setDefinition($id, $definition);
+
+        $processorId = $this->createSessionProcessor($container, $name);
+        $definition->addMethodCall('setProcessor', [new Reference($processorId)]);
+
         return $id;
     }
 
-    private function compileCoverageOptions(ContainerBuilder $container)
+    private function createSessionProcessor(ContainerBuilder $container, $sessionName)
+    {
+        $id =  'doyo.coverage.sessions.'.$sessionName.'.processor';
+
+        $driverId = $id.'.driver';
+        $driver   = new Definition($container->getParameterBag()->get('doyo.coverage.driver.dummy.class'));
+        $container->setDefinition($driverId, $driver);
+
+        $class     = $container->getParameterBag()->get('doyo.coverage.processor.class');
+        $processor = new Definition($class);
+        $processor->addArgument(new Reference($driverId));
+        $processor->addArgument(new Reference('doyo.coverage.filter'));
+
+        $processor->addTag('doyo.coverage.processor');
+        $container->setDefinition($id, $processor);
+
+        return $id;
+    }
+
+    private function processCoverageOptions(ContainerBuilder $container)
     {
         $options = $container->getParameterBag()->get('doyo.coverage.options');
 
@@ -110,19 +131,11 @@ class CoveragePass implements CompilerPassInterface
         /* @var \Symfony\Component\DependencyInjection\Definition $definition */
         foreach ($definitions as $id => $test) {
             $definition = $container->getDefinition($id);
-            $this->addCoverageOption($definition, $options);
+            $definition->addMethodCall('setCodeCoverageOptions', [$options]);
         }
     }
 
-    private function addCoverageOption(Definition $definition, array $options)
-    {
-        foreach ($options as $name => $value) {
-            $method = 'set'.ucfirst($name);
-            $definition->addMethodCall($method, [$value]);
-        }
-    }
-
-    private function compileFilterOptions(ContainerBuilder $container)
+    private function processFilterOptions(ContainerBuilder $container)
     {
         $config     = $container->getParameterBag()->get('doyo.coverage.config');
         $filter     = $config['filter'];

@@ -13,25 +13,14 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Bridge\CodeCoverage;
 
-use Doyo\Behat\Coverage\Bridge\Exception\ProcessorException;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Driver\Driver;
 use SebastianBergmann\CodeCoverage\Filter;
 
 /**
  * Provide bridge to PHP Code Coverage.
- *
- * @method        append(array $data, $id = null, $append = true, $linesToBeCovered = [], array $linesToBeUsed = [], $ignoreForceCoversAnnotation = false)
- * @method        setAddUncoveredFilesFromWhitelist(bool $flag)
- * @method        clear()
- * @method array  getTests()
- * @method Driver getDriver()
- * @method Filter filter()
- * @method array  stop(bool $append = true, $linesToBeCovered = [], array $linesToBeUsed = [], bool $ignoreForceCoversAnnotation = false)
- * @method void setData(array $data)
- * @method array getData(bool $raw = false)
  */
-class Processor
+class Processor implements ProcessorInterface
 {
     /**
      * @var CodeCoverage
@@ -45,10 +34,64 @@ class Processor
 
     private $completed = false;
 
+    /**
+     * @var Driver
+     */
+    private $driver;
+
+    /**
+     * @var Filter
+     */
+    private $filter;
+
+    /**
+     * @var array
+     */
+    private $coverageOptions;
+
     public function __construct($driver = null, $filter = null)
     {
-        $codeCoverage       = new CodeCoverage($driver, $filter);
-        $this->codeCoverage = $codeCoverage;
+        $this->driver = $driver;
+        $this->filter = $filter;
+    }
+
+    public function setCodeCoverageOptions(array $options)
+    {
+        $this->coverageOptions = $options;
+    }
+
+    public function getCodeCoverageOptions()
+    {
+        return $this->coverageOptions;
+    }
+
+    public function getCodeCoverageFilter()
+    {
+        return $this->filter;
+    }
+
+    public function start(TestCase $testCase, $clear = false)
+    {
+        $this->getCodeCoverage()->start($testCase->getName(), $clear);
+    }
+
+    public function stop(bool $append = true, $linesToBeCovered = [], array $linesToBeUsed = [], bool $ignoreForceCoversAnnotation = false): array
+    {
+        return $this->getCodeCoverage()->stop($append, $linesToBeCovered, $linesToBeUsed, $ignoreForceCoversAnnotation);
+    }
+
+    public function merge($processor)
+    {
+        $codeCoverage = $processor;
+        if ($processor instanceof self) {
+            $codeCoverage = $processor->getCodeCoverage();
+        }
+        $this->getCodeCoverage()->merge($codeCoverage);
+    }
+
+    public function clear()
+    {
+        $this->getCodeCoverage()->clear();
     }
 
     public function setCodeCoverage(CodeCoverage $codeCoverage)
@@ -61,6 +104,10 @@ class Processor
      */
     public function getCodeCoverage()
     {
+        if (null === $this->codeCoverage) {
+            $this->codeCoverage = new CodeCoverage($this->driver, $this->filter);
+        }
+
         return $this->codeCoverage;
     }
 
@@ -71,7 +118,7 @@ class Processor
 
     public function complete()
     {
-        $coverage  = $this->codeCoverage;
+        $coverage  = $this->getCodeCoverage();
         $testCases = $this->testCases;
         $tests     = $coverage->getTests();
 
@@ -82,38 +129,5 @@ class Processor
 
         $coverage->setTests($tests);
         $this->completed = true;
-    }
-
-    public function start(TestCase $testCase, $clear = false)
-    {
-        $this->codeCoverage->start($testCase->getName(), $clear);
-    }
-
-    public function updateCoverage($coverage)
-    {
-        $aggregate = $this->getData();
-
-        foreach ($coverage as $class => $counts) {
-            if (!isset($this->coverage[$class])) {
-                $aggregate[$class] = $counts;
-                continue;
-            }
-
-            foreach ($counts as $line => $status) {
-                $status                   = !$status ? -1 : ($status > 1 ? 1 : $status);
-                $aggregate[$class][$line] = $status;
-            }
-        }
-
-        $this->setData($aggregate);
-    }
-
-    public function __call($name, $arguments)
-    {
-        $codeCoverage = $this->codeCoverage;
-        if (method_exists($codeCoverage, $name)) {
-            return \call_user_func_array([$codeCoverage, $name], $arguments);
-        }
-        throw new ProcessorException('Method name: '.$name.' not supported.');
     }
 }

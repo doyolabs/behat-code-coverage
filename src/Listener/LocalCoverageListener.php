@@ -13,11 +13,7 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Listener;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\SessionInterface;
-use Doyo\Behat\Coverage\Bridge\Exception\CacheException;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
-use Doyo\Behat\Coverage\Event\ReportEvent;
-use SebastianBergmann\CodeCoverage\Filter;
 use spec\Doyo\Behat\Coverage\Listener\AbstractSessionCoverageListener;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -26,19 +22,18 @@ class LocalCoverageListener extends AbstractSessionCoverageListener implements E
     public static function getSubscribedEvents()
     {
         return [
-            CoverageEvent::REFRESH      => 'onCoverageRefresh',
-            CoverageEvent::START        => 'onCoverageStarted',
-            CoverageEvent::STOP         => ['onCoverageStopped', 100],
-            ReportEvent::BEFORE_PROCESS => 'onReportBeforeProcess',
+            CoverageEvent::REFRESH      => 'coverageRefresh',
+            CoverageEvent::START        => 'coverageStarted',
+            CoverageEvent::COMPLETED    => 'coverageCompleted',
         ];
     }
 
-    public function onCoverageRefresh()
+    public function coverageRefresh()
     {
         $this->session->reset();
     }
 
-    public function onCoverageStarted(CoverageEvent $event)
+    public function coverageStarted(CoverageEvent $event)
     {
         $session = $this->session;
 
@@ -46,30 +41,14 @@ class LocalCoverageListener extends AbstractSessionCoverageListener implements E
         $session->save();
     }
 
-    public function onCoverageStopped(CoverageEvent $event)
-    {
-        $session = $this->session;
-
-        $session->refresh();
-        $event->updateCoverage($session->getData());
-
-        if ($session->hasExceptions()) {
-            $message = implode("\n", $session->getExceptions());
-            throw new CacheException($message);
-        }
-    }
-
-    public function onReportBeforeProcess(ReportEvent $event)
+    public function coverageCompleted(CoverageEvent $event)
     {
         $session = $this->session;
         $session->refresh();
 
-        if (!$session->hasExceptions()) {
-            return;
-        }
-
-        foreach ($session->getExceptions() as $exception) {
-            $event->addException($exception);
+        $processor = $this->session->getProcessor();
+        if (null !== $processor) {
+            $event->getProcessor()->merge($processor);
         }
     }
 }

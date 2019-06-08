@@ -81,7 +81,6 @@ class RemoteController
 
         $session = new RemoteSession($name);
         $session->init($config);
-        $session->save();
 
         $data = [
             'message' => 'coverage session: '.$name.' initialized.',
@@ -96,15 +95,17 @@ class RemoteController
             return $this->unsupportedMethodAction($request, Request::METHOD_GET);
         }
 
-        if(!$request->get('session')){
+        if (!$request->get('session')) {
             $data = [
-                'message' => 'code coverage session not exists'
+                'message' => 'code coverage session not exists',
             ];
+
             return new JsonResponse($data, Response::HTTP_NOT_FOUND);
         }
         $session = $request->get('session');
         $session = new RemoteSession($session);
+        $data    = serialize($session->getProcessor()->getCodeCoverage());
 
-        return new JsonResponse($session->getData(), Response::HTTP_OK);
+        return new Response($data, Response::HTTP_OK);
     }
 }

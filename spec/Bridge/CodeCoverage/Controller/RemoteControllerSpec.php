@@ -2,11 +2,15 @@
 
 namespace spec\Doyo\Behat\Coverage\Bridge\CodeCoverage\Controller;
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\OldSession;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Controller\RemoteController;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\SessionInterface;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Filter;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -58,6 +62,18 @@ class RemoteControllerSpec extends ObjectBehavior
             'haveContent' => function($subject, $expected){
                 Assert::isInstanceOf($subject, Response::class);
                 Assert::contains($subject->getContent(), $expected);
+
+                return true;
+            },
+            'beAHttpResponse' => function($subject){
+                Assert::isInstanceOf($subject, Response::class);
+
+                return true;
+            },
+            'beASerializedObject' => function($subject, $expected){
+                /* @var \Symfony\Component\HttpFoundation\Response $subject */
+                $serialized = unserialize($subject->getContent());
+                Assert::eq(get_class($serialized), get_class($expected));
 
                 return true;
             }
@@ -120,7 +136,7 @@ class RemoteControllerSpec extends ObjectBehavior
                 ]
             ],
             'codeCoverageOptions' => [
-                'addFilesToWhiteList' => true
+                'addUncoveredFilesFromWhitelist' => true
             ]
         ];
 
@@ -152,12 +168,15 @@ class RemoteControllerSpec extends ObjectBehavior
     }
 
     function its_readAction_returns_code_coverage_data(
-        Request $request
+        Request $request,
+        ProcessorInterface $processor,
+        SessionInterface $session
     )
     {
-        $session = new RemoteSession('spec-remote');
-        $session->setData($data = ['data' => 'coverage-data']);
-        $session->save();
+        $codeCoverage  = new CodeCoverage(new Dummy());
+        $processor->getCodeCoverage()->willReturn($codeCoverage);
+        $session->getProcessor()->willReturn($processor);
+        $processor->getCodeCoverage()->willReturn($codeCoverage);
 
         $request->isMethod('GET')->willReturn(true);
         $request
@@ -167,8 +186,7 @@ class RemoteControllerSpec extends ObjectBehavior
         ;
 
         $response = $this->readAction($request);
-        $response->shouldBeInJson();
-        $response->shouldHaveStatusCode(Response::HTTP_OK);
-        $response->shouldHaveContent('{"data":"coverage-data"}');
+        $response->shouldBeAHttpResponse();
+        $response->shouldBeASerializedObject($codeCoverage);
     }
 }

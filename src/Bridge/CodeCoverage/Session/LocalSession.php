@@ -22,9 +22,4 @@ class LocalSession extends Session
 
         return $self;
     }
-
-    public function stop()
-    {
-        $this->data = $this->processor->stop();
-    }
 }

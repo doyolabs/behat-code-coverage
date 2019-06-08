@@ -4,6 +4,9 @@
 namespace spec\Doyo\Behat\Coverage\Listener;
 
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\SessionInterface;
 use SebastianBergmann\CodeCoverage\Filter;
 
@@ -14,22 +17,10 @@ class AbstractSessionCoverageListener
      */
     protected $session;
 
-    protected $codeCoverageOptions;
-
-    protected $filterOptions;
-
-    public function __construct(SessionInterface $session, array $codeCoverageOptions, Filter $filter)
+    public function __construct(
+        SessionInterface $session
+    )
     {
-        $whitelistedFiles              = $filter->getWhitelistedFiles();
-        $filter                        = [];
-        $filter['whitelistedFiles'] = $whitelistedFiles;
-
-        $session->setCodeCoverageOptions($codeCoverageOptions);
-        $session->setFilterOptions($filter);
-        $session->save();
-
         $this->session = $session;
-        $this->codeCoverageOptions = $codeCoverageOptions;
-        $this->filterOptions = $filter;
     }
 }

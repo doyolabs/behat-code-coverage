@@ -13,19 +13,20 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Bridge\CodeCoverage\Session;
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
-use phpDocumentor\Reflection\Types\Parent_;
-use Symfony\Component\HttpFoundation\Request;
+use SebastianBergmann\CodeCoverage\Filter;
 
 class RemoteSession extends Session
 {
     const HEADER_SESSION_KEY   = 'HTTP_DOYO_COVERAGE_SESSION';
     const HEADER_TEST_CASE_KEY = 'HTTP_DOYO_COVERAGE_TESTCASE';
 
-    public static function startSession(Request $request = null)
+    public static function startSession()
     {
         if (!isset($_SERVER[static::HEADER_SESSION_KEY])) {
-            return;
+            return null;
         }
 
         $name    = $_SERVER[static::HEADER_SESSION_KEY];
@@ -36,66 +37,29 @@ class RemoteSession extends Session
             $session->setTestCase($testCase);
 
             $session->start();
-            register_shutdown_function([$session,'shutdown']);
-
-            $session->xdebugPatch();
+            register_shutdown_function([$session, 'shutdown']);
         }
 
         return $session;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
-    public function xdebugPatch()
-    {
-        $options = $this->filterOptions;
-        $filterKey = 'whitelistedFiles';
-
-        if(
-            !extension_loaded('xdebug')
-            || !function_exists('xdebug_set_filter')
-            || !isset($options[$filterKey])
-        ){
-            return;
-        }
-
-        $dirs = [];
-        foreach($options[$filterKey] as $fileName => $status){
-            $dir = dirname($fileName);
-            if(!in_array($dir, $dirs)){
-                $dirs[] = $dir;
-            }
-        }
-
-        xdebug_set_filter(
-            XDEBUG_FILTER_CODE_COVERAGE,
-            XDEBUG_PATH_WHITELIST,
-            $dirs
-        );
-    }
-
     public function init(array $config)
     {
-        if (isset($config['codeCoverageOptions'])) {
-            $this->setCodeCoverageOptions($config['codeCoverageOptions']);
-        }
-
+        $filter = new Filter();
         if (isset($config['filterOptions'])) {
-            $this->setFilterOptions($config['filterOptions']);
+            $filter->setWhitelistedFiles($config['filterOptions']['whitelistedFiles']);
         }
 
+        $processor    = new Processor(new Dummy(), $filter);
+        $codeCoverage = $processor->getCodeCoverage();
+        if (isset($config['codeCoverageOptions'])) {
+            foreach ($config['codeCoverageOptions'] as $method => $option) {
+                $method = 'set'.ucfirst($method);
+                \call_user_func_array([$codeCoverage, $method], [$option]);
+            }
+            $processor->setCodeCoverageOptions($config['codeCoverageOptions']);
+        }
+        $this->setProcessor($processor);
         $this->reset();
-    }
-
-    public function stop()
-    {
-        $processor = $this->processor;
-        $aggregate = $this->data;
-
-        $processor->stop();
-        $processor->updateCoverage($aggregate);
-
-        $this->data = $processor->getData();
     }
 }

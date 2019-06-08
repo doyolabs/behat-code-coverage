@@ -4,30 +4,33 @@ namespace spec\Doyo\Behat\Coverage\Listener;
 
 use Behat\Mink\Driver\DriverInterface;
 use Behat\Mink\Mink;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\SessionInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
-use Doyo\Behat\Coverage\Event\ReportEvent;
 use Doyo\Behat\Coverage\Listener\RemoteCoverageListener;
 use GuzzleHttp\ClientInterface;
 use PhpSpec\ObjectBehavior;
-use Psr\Http\Message\StreamInterface;
 use SebastianBergmann\CodeCoverage\Filter;
 use Prophecy\Argument;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Behat\Mink\Session as MinkSession;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\HttpFoundation\Response;
 
 class RemoteCoverageListenerSpec extends ObjectBehavior
 {
     function let(
         SessionInterface $session,
-        ClientInterface $client
+        ClientInterface $client,
+        ProcessorInterface $processor
     )
     {
+        $filter = new Filter();
+        $processor->getCodeCoverageFilter()->willReturn($filter);
+        $processor->getCodeCoverageOptions()->willReturn([]);
+        $session->getProcessor()->willReturn($processor);
+
         $session->setCodeCoverageOptions(Argument::any())->willReturn(null);
         $session->setFilterOptions(Argument::any())->willReturn(null);
         $session->save()->willReturn(null);
@@ -48,13 +51,14 @@ class RemoteCoverageListenerSpec extends ObjectBehavior
         $this->shouldImplement(EventSubscriberInterface::class);
 
         $this->getSubscribedEvents()->shouldHaveKey(CoverageEvent::BEFORE_START);
-        $this->getSubscribedEvents()->shouldHaveKey(ReportEvent::BEFORE_PROCESS);
+        $this->getSubscribedEvents()->shouldHaveKey(CoverageEvent::COMPLETED);
     }
 
     function its_coverageRefresh_should_init_new_coverage_session(
         ClientInterface $client,
         SessionInterface $session,
-        ResponseInterface $response
+        ResponseInterface $response,
+        ProcessorInterface $processor
     )
     {
         $client->request('POST','http://example.org', Argument::any())
@@ -104,59 +108,5 @@ class RemoteCoverageListenerSpec extends ObjectBehavior
 
 
         $this->beforeCoverageStart($event);
-    }
-
-    function its_beforeReportProcess_should_update_coverage_data(
-        SessionInterface $session,
-        ReportEvent $event,
-        Processor $processor,
-        ClientInterface $client,
-        ResponseInterface $response,
-        StreamInterface $body
-    )
-    {
-        $json = <<<EOC
-{
-    "data": "some-coverage-data"
-}
-EOC;
-
-        $data = json_decode($json, true);
-
-        $client->request('GET','http://example.org', Argument::any())
-            ->shouldBeCalled()
-            ->willReturn($response);
-        $client->request(Argument::allOf())
-            ->willThrow(new \Exception('some error'));
-
-        $response->getStatusCode()
-            ->shouldBeCalled()
-            ->willReturn(Response::HTTP_OK);
-        $response->getBody()
-            ->shouldBeCalled()
-            ->willReturn($body);
-        $body->getContents()->shouldBeCalled()->willReturn($json);
-
-        $processor->updateCoverage($data)->shouldBeCalledOnce();
-        $event->getProcessor()->willReturn($processor);
-        $this->beforeReportProcess($event);
-
-        // should not call coverage data when response not 200
-        $response->getStatusCode()->willReturn(Response::HTTP_NOT_ACCEPTABLE);
-        $this->beforeReportProcess($event);
-    }
-
-    function its_beforeReportProcess_add_exception_when_error_occurs(
-        ReportEvent $event,
-        ClientInterface $client
-    )
-    {
-        $exception = new \Exception('some error');
-        $client->request(Argument::any(), Argument::any(), Argument::any())
-            ->willThrow($exception);
-        $event->addException($exception)->shouldBeCalledOnce();
-
-        $this->beforeReportProcess($event);
-
     }
 }

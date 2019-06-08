@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Doyo\Behat\Coverage\Event;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\Symfony\Event;
 use Symfony\Component\Console\Style\StyleInterface;
 
@@ -24,7 +25,7 @@ class ReportEvent extends Event
     const AFTER_PROCESS  = 'doyo.coverage.report_post';
 
     /**
-     * @var Processor|null
+     * @var ProcessorInterface|null
      */
     private $processor;
 
@@ -39,7 +40,7 @@ class ReportEvent extends Event
     private $exceptions = [];
 
     /**
-     * @return Processor|null
+     * @return ProcessorInterface|null
      */
     public function getProcessor()
     {
@@ -47,11 +48,11 @@ class ReportEvent extends Event
     }
 
     /**
-     * @param Processor $processor
+     * @param ProcessorInterface $processor
      *
      * @return static
      */
-    public function setProcessor(Processor $processor)
+    public function setProcessor(ProcessorInterface $processor)
     {
         $this->processor = $processor;
 

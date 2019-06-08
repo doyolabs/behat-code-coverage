@@ -1,70 +1,72 @@
 <?php
 
 namespace spec\Doyo\Behat\Coverage\Bridge\CodeCoverage\Session;
-
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use Symfony\Component\HttpFoundation\HeaderBag;
+use SebastianBergmann\CodeCoverage\Filter;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Process\Process;
 
 class RemoteSessionSpec extends ObjectBehavior
 {
-    function let()
+    function let(
+        ProcessorInterface $processor
+    )
     {
         $this->beConstructedWith('spec-remote');
-        $this->reset();
-        $this->refresh();
+
+        $processor->getCodeCoverageOptions()->willReturn([]);
+        $processor->clear()->willReturn(null);
+        $this->setProcessor($processor);
     }
 
     function it_is_initializable()
     {
         $this->shouldHaveType(RemoteSession::class);
-        $this->reset();
     }
 
     function it_should_init_coverage_session()
     {
         $config =[
-            'filterOptions' => ['filter'],
-            'codeCoverageOptions' => ['coverage'],
+            'filterOptions' => [
+                'whitelistedFiles' => [
+                    __FILE__ => true
+                ]
+            ],
+            'codeCoverageOptions' => [
+                'addUncoveredFilesFromWhitelist' => false
+            ],
         ];
-
         $this->init($config);
-
-        $this->getFilterOptions()->shouldContain('filter');
-        $this->getCodeCoverageOptions()->shouldContain('coverage');
+        $processor = $this->getProcessor();
+        $processor->shouldHaveType(Processor::class);
+        $processor->getCodeCoverageOptions()->shouldHaveKeyWithValue('addUncoveredFilesFromWhitelist', false);
+        $processor->getCodeCoverageFilter()->shouldHaveType(Filter::class);
+        $processor->getCodeCoverageFilter()->getWhitelistedFiles()->shouldHaveKeyWithValue(__FILE__,true);
     }
 
-    function it_should_start_new_session(Request $request)
-    {
-        $_SERVER[RemoteSession::HEADER_SESSION_KEY] = 'spec-remote-session-test';
-        $_SERVER[RemoteSession::HEADER_TEST_CASE_KEY] = 'spec-test-case';
-
-        $sesion = $this->startSession($request);
-        $sesion->shouldHaveType(RemoteSession::class);
-        $sesion->getTestCase()->getName()->shouldReturn('spec-test-case');
-        $sesion->getName()->shouldReturn('spec-remote-session-test');
-    }
-
-    function its_stop_should_merge_coverage_data(
-        Processor $processor
+    function it_should_start_new_session(
+        Request $request,
+        ProcessorInterface $processor
     )
     {
-        $data = ['aggregate'];
-        $merged = ['merged'];
-        $this->setData($data);
+        $this->startSession()->shouldReturn(null);
 
-        $processor->updateCoverage($data)->shouldBeCalled();
-        $processor->getData()->shouldBeCalled()->willReturn($merged);
-        $processor->stop()->shouldBeCalled();
 
+        $_SERVER[RemoteSession::HEADER_SESSION_KEY] = 'spec-remote';
+        $_SERVER[RemoteSession::HEADER_TEST_CASE_KEY] = 'spec-test-case';
+
+        $filter = new Filter();
+        $processor->getCodeCoverageFilter()->willReturn($filter);
         $this->setProcessor($processor);
-        $this->stop();
+        $this->save();
 
-        $this->getData()->shouldReturn($merged);
+        $session = $this->startSession($request);
+        $session->shouldHaveType(RemoteSession::class);
+        $session->getName()->shouldReturn('spec-remote');
+        $session->getTestCase()->getName()->shouldReturn('spec-test-case');
     }
-
 }

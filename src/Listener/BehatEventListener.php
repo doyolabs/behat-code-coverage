@@ -18,10 +18,10 @@ use Behat\Behat\EventDispatcher\Event\ScenarioTested;
 use Behat\Testwork\EventDispatcher\Event\AfterTested;
 use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Behat\Testwork\Tester\Result\TestResult;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Bridge\Symfony\EventDispatcher;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
-use Doyo\Behat\Coverage\Event\RefreshEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -37,11 +37,17 @@ class BehatEventListener implements EventSubscriberInterface
      */
     protected $coverageEvent;
 
+    /**
+     * @var ProcessorInterface
+     */
+    private $processor;
+
     public function __construct(
-        EventDispatcher $dispatcher
+        EventDispatcher $dispatcher,
+        ProcessorInterface $processor
     ) {
-        $this->dispatcher    = $dispatcher;
-        $this->coverageEvent = new CoverageEvent();
+        $this->dispatcher   = $dispatcher;
+        $this->processor    = $processor;
     }
 
     public static function getSubscribedEvents()
@@ -59,11 +65,9 @@ class BehatEventListener implements EventSubscriberInterface
     public function refreshCoverage()
     {
         $dispatcher      = $this->dispatcher;
-        $event           = new RefreshEvent();
-        $coverageEvent   = $this->coverageEvent;
+        $event           = new CoverageEvent();
 
-        $coverageEvent->setTestCase(null);
-        $coverageEvent->setCoverage([]);
+        $this->processor->clear();
         $dispatcher->dispatch($event, CoverageEvent::BEFORE_REFRESH);
         $dispatcher->dispatch($event, CoverageEvent::REFRESH);
     }
@@ -73,40 +77,56 @@ class BehatEventListener implements EventSubscriberInterface
         $scenario      = $scope->getScenario();
         $id            = $scope->getFeature()->getFile().':'.$scenario->getLine();
         $dispatcher    = $this->dispatcher;
-        $coverageEvent = $this->coverageEvent;
-        $coverageId    = new TestCase($id);
+        $coverageEvent = new CoverageEvent();
+        $testCase      = new TestCase($id);
+        $processor     = $this->processor;
 
-        $coverageEvent->setTestCase($coverageId);
+        $processor->start($testCase);
+        $coverageEvent->setTestCase($testCase);
+        $coverageEvent->setProcessor($processor);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::BEFORE_START);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::START);
+
         $this->coverageEvent = $coverageEvent;
     }
 
     public function stopCoverage(AfterTested $testedEvent)
     {
-        $dispatcher         = $this->dispatcher;
-        $coverageEvent      = $this->coverageEvent;
-        $result             = $testedEvent->getTestResult();
-
-        $map = [
+        $dispatcher    = $this->dispatcher;
+        $coverageEvent = $this->coverageEvent;
+        $testCase      = $coverageEvent->getTestCase();
+        $result        = $testedEvent->getTestResult();
+        $map           = [
             TestResult::PASSED  => TestCase::RESULT_PASSED,
             TestResult::FAILED  => TestCase::RESULT_FAILED,
             TestResult::SKIPPED => TestCase::RESULT_SKIPPED,
             TestResult::PENDING => TestCase::RESULT_SKIPPED,
         ];
-        $result = $map[$result->getResultCode()];
-        $coverageEvent->getTestCase()->setResult($result);
+        $processor = $this->processor;
+        $result    = $map[$result->getResultCode()];
+
+        $testCase->setResult($result);
+        $processor->stop();
+        $processor->addTestCase($testCase);
+
         $dispatcher->dispatch($coverageEvent, CoverageEvent::BEFORE_STOP);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::STOP);
     }
 
     public function generateReport()
     {
-        $dispatcher = $this->dispatcher;
-        $event      = new ReportEvent();
+        $dispatcher    = $this->dispatcher;
+        $processor     = $this->processor;
+        $reportEvent   = new ReportEvent();
+        $coverageEvent = new CoverageEvent();
 
-        $dispatcher->dispatch($event, ReportEvent::BEFORE_PROCESS);
-        $dispatcher->dispatch($event, ReportEvent::PROCESS);
-        $dispatcher->dispatch($event, ReportEvent::AFTER_PROCESS);
+        $processor->complete();
+        $coverageEvent->setProcessor($processor);
+        $reportEvent->setProcessor($processor);
+
+        $dispatcher->dispatch($coverageEvent, CoverageEvent::COMPLETED);
+        $dispatcher->dispatch($reportEvent, ReportEvent::BEFORE_PROCESS);
+        $dispatcher->dispatch($reportEvent, ReportEvent::PROCESS);
+        $dispatcher->dispatch($reportEvent, ReportEvent::AFTER_PROCESS);
     }
 }

@@ -11,8 +11,8 @@
 
 declare(strict_types=1);
 
-namespace Doyo\Behat\Coverage\Client;
+namespace Doyo\Behat\Coverage\Bridge\CodeCoverage\Exception;
 
-interface ClientInterface
+class SessionException extends \Exception
 {
 }

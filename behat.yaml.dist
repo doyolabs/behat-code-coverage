@@ -19,6 +19,9 @@ default:
         Doyo\Behat\Coverage\Extension:
             sessions:
                 console: ~
+                coverage: ~
+                index: ~
+                live: ~
             filter:
                 - directory: src/*.php
                   exclude:

@@ -2,9 +2,9 @@
 
 namespace spec\Doyo\Behat\Coverage\Listener;
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\SessionInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
-use Doyo\Behat\Coverage\Bridge\Exception\CacheException;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Listener\LocalCoverageListener;
 use PhpSpec\ObjectBehavior;
@@ -15,13 +15,12 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class LocalCoverageListenerSpec extends ObjectBehavior
 {
     function let(
-        SessionInterface $session
+        SessionInterface $session,
+        ProcessorInterface $processor
     )
     {
         $filter = new Filter();
-        $session->setCodeCoverageOptions(Argument::any())->willReturn(null);
-        $session->setFilterOptions(Argument::any())->willReturn(null);
-        $session->save()->willReturn(null);
+        $session->setProcessor($processor);
         $this->beConstructedWith($session, [], $filter);
     }
 
@@ -35,7 +34,7 @@ class LocalCoverageListenerSpec extends ObjectBehavior
         $this->shouldImplement(EventSubscriberInterface::class);
         $this->getSubscribedEvents()->shouldHaveKey(CoverageEvent::REFRESH);
         $this->getSubscribedEvents()->shouldHaveKey(CoverageEvent::START);
-        $this->getSubscribedEvents()->shouldHaveKey(CoverageEvent::STOP);
+        $this->getSubscribedEvents()->shouldHaveKey(CoverageEvent::COMPLETED);
     }
 
     function it_should_handle_coverage_refresh_event(
@@ -43,7 +42,7 @@ class LocalCoverageListenerSpec extends ObjectBehavior
     )
     {
         $session->reset()->shouldBeCalledOnce();
-        $this->onCoverageRefresh();
+        $this->coverageRefresh();
     }
 
     function it_should_handle_coverage_start_event(
@@ -54,29 +53,23 @@ class LocalCoverageListenerSpec extends ObjectBehavior
     {
         $event->getTestCase()->shouldBeCalledOnce()->willReturn($testCase);
         $session->setTestCase($testCase)->shouldBeCalledOnce();
-        $session->save()->shouldBeCalledTimes(2);
+        $session->save()->shouldBeCalledOnce();
 
-        $this->onCoverageStarted($event);
+        $this->coverageStarted($event);
     }
 
-    function it_should_handle_on_coverage_stop_event(
-        CoverageEvent $event,
-        SessionInterface $session
+    function it_should_handle_coverage_completed_event(
+        SessionInterface $session,
+        ProcessorInterface $processor,
+        CoverageEvent $event
     )
     {
-        $data = ['onCoverageStop'];
         $session->refresh()->shouldBeCalled();
-        $session->getData()->shouldBeCalled()->willReturn($data);
-        $session->hasExceptions()->willReturn(false);
-        $event->updateCoverage($data)->shouldBeCalled();
+        $session->getProcessor()->willReturn($processor);
+        $event->getProcessor()->willReturn($processor);
 
-        $this->onCoverageStopped($event);
+        $processor->merge($processor)->shouldBeCalled();
 
-        $session->hasExceptions()->willReturn(true);
-        $session->getExceptions()->willReturn(['Test Message']);
-
-        $this
-            ->shouldThrow(CacheException::class)
-            ->during('onCoverageStopped',[$event]);
+        $this->coverageCompleted($event);
     }
 }

@@ -13,9 +13,11 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Bridge\CodeCoverage\Session;
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Exception\SessionException;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
-use Doyo\Behat\Coverage\Bridge\Exception\CacheException;
+use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Filter;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
@@ -44,19 +46,9 @@ abstract class Session implements \Serializable, SessionInterface
     protected $data = [];
 
     /**
-     * @var array
-     */
-    protected $filterOptions = [];
-
-    /**
-     * @var Processor
+     * @var ProcessorInterface
      */
     protected $processor;
-
-    /**
-     * @var array
-     */
-    protected $codeCoverageOptions = [];
 
     /**
      * @var \Exception[]
@@ -68,14 +60,56 @@ abstract class Session implements \Serializable, SessionInterface
      */
     protected $hasStarted = false;
 
-    public function __construct($sessionName)
+    /**
+     * Code coverage for this session.
+     *
+     * @var CodeCoverage
+     */
+    protected $codeCoverage;
+
+    /**
+     * @var array
+     */
+    protected $filterOptions = [];
+
+    /**
+     * @var array
+     */
+    protected $codeCoverageOptions = [];
+
+    public function __construct($name)
     {
         $dir               = sys_get_temp_dir().'/doyo/behat-coverage-extension';
-        $adapter           = new FilesystemAdapter($sessionName, 0, $dir);
+        $adapter           = new FilesystemAdapter($name, 0, $dir);
         $this->adapter     = $adapter;
-        $this->name = $sessionName;
-
+        $this->name        = $name;
         $this->refresh();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setCodeCoverageOptions(array $options)
+    {
+        $this->codeCoverageOptions = $options;
+    }
+
+    public function getCodeCoverageOptions()
+    {
+        return $this->codeCoverageOptions;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setFilterOptions(array $options)
+    {
+        $this->filterOptions = $options;
+    }
+
+    public function getFilterOptions(): array
+    {
+        return $this->filterOptions;
     }
 
     /**
@@ -84,9 +118,8 @@ abstract class Session implements \Serializable, SessionInterface
     public function reset()
     {
         $this->testCase   = null;
-        $this->data       = [];
-        $this->processor  = null;
         $this->exceptions = [];
+        $this->processor->clear();
 
         $this->save();
     }
@@ -98,10 +131,8 @@ abstract class Session implements \Serializable, SessionInterface
     {
         $data = [
             $this->testCase,
-            $this->data,
-            $this->codeCoverageOptions,
-            $this->filterOptions,
             $this->exceptions,
+            $this->processor,
         ];
 
         return serialize($data);
@@ -114,10 +145,8 @@ abstract class Session implements \Serializable, SessionInterface
     {
         list(
             $this->testCase,
-            $this->data,
-            $this->codeCoverageOptions,
-            $this->filterOptions,
-            $this->exceptions
+            $this->exceptions,
+            $this->processor
         ) = unserialize($serialized);
     }
 
@@ -131,10 +160,8 @@ abstract class Session implements \Serializable, SessionInterface
 
         if ($cached instanceof self) {
             $this->testCase                   = $cached->getTestCase();
-            $this->data                       = $cached->getData() ?: [];
             $this->exceptions                 = $cached->getExceptions();
-            $this->filterOptions              = $cached->getFilterOptions();
-            $this->codeCoverageOptions        = $cached->getCodeCoverageOptions();
+            $this->processor                  = $cached->getProcessor();
         }
     }
 
@@ -185,71 +212,19 @@ abstract class Session implements \Serializable, SessionInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param ProcessorInterface $processor
      */
-    public function getData()
-    {
-        return $this->data;
-    }
-
-    /**
-     * @param array $data
-     *
-     * @return Cache
-     */
-    public function setData(array $data)
-    {
-        $this->data = $data;
-    }
-
-    /**
-     * @return array
-     */
-    public function getCodeCoverageOptions(): array
-    {
-        return $this->codeCoverageOptions;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setCodeCoverageOptions(array $codeCoverageOptions): self
-    {
-        $this->codeCoverageOptions = $codeCoverageOptions;
-
-        return $this;
-    }
-
-    /**
-     * @param Processor $processor
-     *
-     * @return Cache
-     */
-    public function setProcessor(Processor $processor = null)
+    public function setProcessor(ProcessorInterface $processor = null)
     {
         $this->processor = $processor;
-
-        return $this;
     }
 
+    /**
+     * @return ProcessorInterface|null
+     */
     public function getProcessor()
     {
         return $this->processor;
-    }
-
-    public function getFilterOptions(): array
-    {
-        return $this->filterOptions;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setFilterOptions(array $filterOptions)
-    {
-        $this->filterOptions = $filterOptions;
-
-        return $this;
     }
 
     /**
@@ -269,6 +244,45 @@ abstract class Session implements \Serializable, SessionInterface
     }
 
     /**
+     * @param \Exception $e
+     */
+    public function addException(\Exception $e)
+    {
+        $this->exceptions[] = $e;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     */
+    public function xdebugPatch()
+    {
+        $options   = $this->filterOptions;
+        $filterKey = 'whitelistedFiles';
+
+        if (
+            !\extension_loaded('xdebug')
+            || !\function_exists('xdebug_set_filter')
+            || !isset($options[$filterKey])
+        ) {
+            return;
+        }
+
+        $dirs = [];
+        foreach ($options[$filterKey] as $fileName => $status) {
+            $dir = \dirname($fileName);
+            if (!\in_array($dir, $dirs, true)) {
+                $dirs[] = $dir;
+            }
+        }
+
+        xdebug_set_filter(
+            XDEBUG_FILTER_CODE_COVERAGE,
+            XDEBUG_PATH_WHITELIST,
+            $dirs
+        );
+    }
+
+    /**
      * {@inheritdoc}
      */
     final public function start($driver = null)
@@ -277,11 +291,9 @@ abstract class Session implements \Serializable, SessionInterface
             return;
         }
         try {
-            $processor = $this->processor;
-            if (null === $processor) {
-                $processor = $this->createCodeCoverage($driver);
-            }
-            $processor->start($this->testCase);
+            $this->codeCoverage = $this->createCodeCoverage($driver);
+            $this->xdebugPatch();
+            $this->codeCoverage->start($this->testCase->getName());
             $this->hasStarted = true;
         } catch (\Exception $e) {
             $message = sprintf(
@@ -289,8 +301,30 @@ abstract class Session implements \Serializable, SessionInterface
                 $this->name,
                 $e->getMessage()
             );
-            $this->exceptions[] = $message;
+            $exception = new SessionException($message);
+            throw $exception;
         }
+    }
+
+    public function stop()
+    {
+        try {
+            $codeCoverage = $this->codeCoverage;
+            $processor    = $this->processor;
+
+            $codeCoverage->stop();
+
+            $processor->merge($codeCoverage);
+        } catch (\Exception $e) {
+            throw new SessionException(
+                sprintf(
+                    'Failed to stop coverage for session %s: %s',
+                    $this->name,
+                    $e->getMessage()
+                )
+            );
+        }
+        $this->hasStarted = false;
     }
 
     /**
@@ -322,15 +356,13 @@ abstract class Session implements \Serializable, SessionInterface
 
     public function shutdown()
     {
-        if ($this->hasStarted) {
+        if ($this->hasStarted && null !== $this->processor) {
             try {
                 $this->stop();
             } catch (\Exception $e) {
-                $this->exceptions[] = new CacheException($e->getMessage());
+                $this->addException(new SessionException($e->getMessage()));
             }
         }
-
-        $this->processor    = null;
         $this->hasStarted   = false;
         $this->save();
     }
@@ -338,19 +370,13 @@ abstract class Session implements \Serializable, SessionInterface
     /**
      * @param mixed|null $driver
      *
-     * @return Processor
+     * @return CodeCoverage
      */
-    protected function createCodeCoverage($driver = null)
+    protected function createCodeCoverage($driver): CodeCoverage
     {
-        $coverage = $this->processor;
-        $filter   = $this->createCodeCoverageFilter();
-        $options  = $this->codeCoverageOptions;
-
-        if (null === $coverage) {
-            $coverage        = new Processor($driver, $filter);
-            $this->processor = $coverage;
-        }
-
+        $filter   = $this->processor->getCodeCoverageFilter();
+        $options  = $this->processor->getCodeCoverageOptions();
+        $coverage = new CodeCoverage($driver, $filter);
         foreach ($options as $method => $option) {
             $method = 'set'.ucfirst($method);
             \call_user_func_array([$coverage, $method], [$option]);

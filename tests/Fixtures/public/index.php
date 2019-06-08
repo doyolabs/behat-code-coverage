@@ -20,6 +20,7 @@ use Test\Doyo\Behat\Coverage\Fixtures\src\Foo;
 use Test\Doyo\Behat\Coverage\Fixtures\src\Hello;
 
 LocalSession::create('local')->start();
+LocalSession::create('index')->start();
 
 $data = [
     'foo'       => Foo::say(),

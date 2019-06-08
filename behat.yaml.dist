@@ -27,7 +27,7 @@ default:
                   exclude:
                       - src/Resources
             report:
-                php: build/cov/behat.cov
+                php: build/cov/02-behat.cov
                 html:
                     target: build/behat
                     lowUpperBound: 30

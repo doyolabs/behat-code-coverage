@@ -12,5 +12,5 @@ extensions:
             - php
             - html
         output:
-            php: build/cov/phpspec.cov
+            php: build/cov/03-phpspec.cov
             html: build/phpspec

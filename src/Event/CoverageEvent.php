@@ -37,10 +37,14 @@ class CoverageEvent extends Event
      */
     private $processor;
 
+    /**
+     * @var \Exception[]
+     */
+    private $exceptions;
+
     public function __construct(TestCase $testCase = null)
     {
         $this->testCase   = $testCase;
-        $this->coverage   = [];
     }
 
     /**
@@ -67,5 +71,14 @@ class CoverageEvent extends Event
     public function getProcessor()
     {
         return $this->processor;
+    }
+
+    public function addException(\Exception $exception)
+    {
+        $id = md5($exception->getMessage());
+
+        if (!isset($this->exceptions[$id])) {
+            $this->exceptions[$id] = $exception;
+        }
     }
 }

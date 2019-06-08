@@ -4,6 +4,7 @@ namespace spec\Doyo\Behat\Coverage\Bridge\CodeCoverage\Session;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession;
+use PhpSpec\Exception\Example\SkippingException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use SebastianBergmann\CodeCoverage\Filter;
@@ -53,6 +54,9 @@ class RemoteSessionSpec extends ObjectBehavior
         ProcessorInterface $processor
     )
     {
+        if(!extension_loaded('xdebug')){
+            throw new SkippingException('xdebug not loaded');
+        }
         $this->startSession()->shouldReturn(null);
 
 

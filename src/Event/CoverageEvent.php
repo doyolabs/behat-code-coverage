@@ -16,6 +16,7 @@ namespace Doyo\Behat\Coverage\Event;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Bridge\Symfony\Event;
+use Doyo\Behat\Coverage\Console\ConsoleIO;
 
 class CoverageEvent extends Event
 {
@@ -38,47 +39,38 @@ class CoverageEvent extends Event
     private $processor;
 
     /**
-     * @var \Exception[]
+     * @var ConsoleIO
      */
-    private $exceptions;
+    private $consoleIO;
 
-    public function __construct(TestCase $testCase = null)
+    public function __construct(ProcessorInterface $processor, ConsoleIO $consoleIO, TestCase $testCase = null)
     {
-        $this->testCase   = $testCase;
+        $this->processor = $processor;
+        $this->testCase = $testCase;
+        $this->consoleIO = $consoleIO;
     }
 
     /**
      * @return TestCase
      */
-    public function getTestCase()
+    public function getTestCase(): TestCase
     {
         return $this->testCase;
     }
 
     /**
-     * @param TestCase $testCase
+     * @return ProcessorInterface
      */
-    public function setTestCase($testCase=null)
-    {
-        $this->testCase = $testCase;
-    }
-
-    public function setProcessor($processor)
-    {
-        $this->processor = $processor;
-    }
-
-    public function getProcessor()
+    public function getProcessor(): ProcessorInterface
     {
         return $this->processor;
     }
 
-    public function addException(\Exception $exception)
+    /**
+     * @return ConsoleIO
+     */
+    public function getConsoleIO(): ConsoleIO
     {
-        $id = md5($exception->getMessage());
-
-        if (!isset($this->exceptions[$id])) {
-            $this->exceptions[$id] = $exception;
-        }
+        return $this->consoleIO;
     }
 }

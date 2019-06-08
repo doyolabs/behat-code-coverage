@@ -3,6 +3,7 @@
 namespace spec\Doyo\Behat\Coverage\Controller\Cli;
 
 use Doyo\Behat\Coverage\Bridge\Symfony\Event;
+use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Controller\Cli\CoverageController;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
@@ -18,13 +19,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class CoverageControllerSpec extends ObjectBehavior
 {
-    function let(
-        StyleInterface $style
-    )
-    {
-        $this->beConstructedWith($style);
-    }
-
     function it_is_initializable()
     {
         $this->shouldHaveType(CoverageController::class);
@@ -53,16 +47,6 @@ class CoverageControllerSpec extends ObjectBehavior
         $this->getSubscribedEvents()->shouldHaveKey(ReportEvent::AFTER_PROCESS);
     }
 
-    function it_should_handle_before_report_process_event(
-        ReportEvent $event,
-        StyleInterface $style
-    )
-    {
-        $event->setIO($style)->shouldBeCalled();
-
-        $this->onBeforeReportProcess($event);
-    }
-
     function it_should_validate_coverage_and_report_events(
         InputInterface $input,
         OutputInterface $output,
@@ -87,32 +71,5 @@ class CoverageControllerSpec extends ObjectBehavior
     {
         $input->hasParameterOption(['--coverage'])->willReturn(false);
         $this->execute($input, $output);
-    }
-
-    function it_should_show_success_message_when_process_completed(
-        ReportEvent $event,
-        SymfonyStyle $io
-    )
-    {
-        $event->getExceptions()->willReturn([]);
-        $event->getIO()->willReturn($io);
-        $io->success(Argument::any())->shouldBeCalled();
-
-        $this->onAfterReportProcess($event);
-    }
-    function it_should_handle_report_process_exceptions(
-        ReportEvent $event,
-        SymfonyStyle $io
-    )
-    {
-        $e = new \Exception('some exception');
-        $event->getExceptions()->shouldBeCalledOnce()->willReturn([$e]);
-        $event->getIO()->willReturn($io);
-
-        $io->newLine(2)->shouldBeCalled();
-        $io->section(Argument::any())->shouldBeCalled();
-        $io->error('some exception')->shouldBeCalledOnce();
-
-        $this->onAfterReportProcess($event);
     }
 }

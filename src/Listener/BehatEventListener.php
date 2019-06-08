@@ -21,6 +21,7 @@ use Behat\Testwork\Tester\Result\TestResult;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Bridge\Symfony\EventDispatcher;
+use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -42,12 +43,19 @@ class BehatEventListener implements EventSubscriberInterface
      */
     private $processor;
 
+    /**
+     * @var ConsoleIO
+     */
+    private $consoleIO;
+
     public function __construct(
         EventDispatcher $dispatcher,
-        ProcessorInterface $processor
+        ProcessorInterface $processor,
+        ConsoleIO $consoleIO
     ) {
-        $this->dispatcher   = $dispatcher;
-        $this->processor    = $processor;
+        $this->dispatcher = $dispatcher;
+        $this->processor = $processor;
+        $this->consoleIO = $consoleIO;
     }
 
     public static function getSubscribedEvents()
@@ -65,7 +73,7 @@ class BehatEventListener implements EventSubscriberInterface
     public function refreshCoverage()
     {
         $dispatcher      = $this->dispatcher;
-        $event           = new CoverageEvent();
+        $event           = new CoverageEvent($this->processor, $this->consoleIO);
 
         $this->processor->clear();
         $dispatcher->dispatch($event, CoverageEvent::BEFORE_REFRESH);
@@ -74,16 +82,15 @@ class BehatEventListener implements EventSubscriberInterface
 
     public function startCoverage($scope)
     {
-        $scenario      = $scope->getScenario();
-        $id            = $scope->getFeature()->getFile().':'.$scenario->getLine();
-        $dispatcher    = $this->dispatcher;
-        $coverageEvent = new CoverageEvent();
-        $testCase      = new TestCase($id);
-        $processor     = $this->processor;
+        $scenario = $scope->getScenario();
+        $id = $scope->getFeature()->getFile().':'.$scenario->getLine();
+        $dispatcher = $this->dispatcher;
+        $testCase = new TestCase($id);
+        $processor = $this->processor;
+        $consoleIO = $this->consoleIO;
+        $coverageEvent = new CoverageEvent($processor, $consoleIO, $testCase);
 
         $processor->start($testCase);
-        $coverageEvent->setTestCase($testCase);
-        $coverageEvent->setProcessor($processor);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::BEFORE_START);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::START);
 
@@ -117,14 +124,14 @@ class BehatEventListener implements EventSubscriberInterface
     {
         $dispatcher    = $this->dispatcher;
         $processor     = $this->processor;
-        $reportEvent   = new ReportEvent();
-        $coverageEvent = new CoverageEvent();
-
-        $processor->complete();
-        $coverageEvent->setProcessor($processor);
-        $reportEvent->setProcessor($processor);
+        $consoleIO = $this->consoleIO;
+        $coverageEvent = new CoverageEvent($processor, $consoleIO);
 
         $dispatcher->dispatch($coverageEvent, CoverageEvent::COMPLETED);
+        $processor->complete();
+
+
+        $reportEvent   = new ReportEvent($processor, $consoleIO);
         $dispatcher->dispatch($reportEvent, ReportEvent::BEFORE_PROCESS);
         $dispatcher->dispatch($reportEvent, ReportEvent::PROCESS);
         $dispatcher->dispatch($reportEvent, ReportEvent::AFTER_PROCESS);

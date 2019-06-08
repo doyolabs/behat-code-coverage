@@ -248,7 +248,8 @@ abstract class Session implements \Serializable, SessionInterface
      */
     public function addException(\Exception $e)
     {
-        $this->exceptions[] = $e;
+        $id = md5($e->getMessage());
+        $this->exceptions[$id] = $e;
     }
 
     /**

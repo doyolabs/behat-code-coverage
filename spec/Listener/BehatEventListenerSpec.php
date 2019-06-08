@@ -11,8 +11,8 @@ use Behat\Testwork\Tester\Result\TestResult;
 use Behat\Testwork\Tester\Result\TestResults;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
+use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
-use Doyo\Behat\Coverage\Event\RefreshEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use Doyo\Behat\Coverage\Listener\BehatEventListener;
 use PhpSpec\ObjectBehavior;
@@ -23,11 +23,12 @@ class BehatEventListenerSpec extends ObjectBehavior
 {
     function let(
         EventDispatcher $dispatcher,
-        ProcessorInterface $processor
+        ProcessorInterface $processor,
+        ConsoleIO $consoleIO
     )
     {
         $this->beAnInstanceOf(TestBehatEventListener::class);
-        $this->beConstructedWith($dispatcher, $processor);
+        $this->beConstructedWith($dispatcher, $processor, $consoleIO);
     }
 
     function it_is_initializable()

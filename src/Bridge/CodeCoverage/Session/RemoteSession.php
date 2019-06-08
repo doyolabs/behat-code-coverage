@@ -32,12 +32,7 @@ class RemoteSession extends Session
         $name    = $_SERVER[static::HEADER_SESSION_KEY];
         $session = new static($name);
         if (isset($_SERVER[static::HEADER_TEST_CASE_KEY])) {
-            $name     = $_SERVER[static::HEADER_TEST_CASE_KEY];
-            $testCase = new TestCase($name);
-            $session->setTestCase($testCase);
-
-            $session->start();
-            register_shutdown_function([$session, 'shutdown']);
+            $session->doStartSession();
         }
 
         return $session;
@@ -61,5 +56,19 @@ class RemoteSession extends Session
         }
         $this->setProcessor($processor);
         $this->reset();
+    }
+
+    public function doStartSession()
+    {
+        $name     = $_SERVER[static::HEADER_TEST_CASE_KEY];
+        $testCase = new TestCase($name);
+        $this->setTestCase($testCase);
+
+        try{
+            $this->start();
+            register_shutdown_function([$this, 'shutdown']);
+        }catch (\Exception $e){
+            $this->exceptions[] = $e->getMessage();
+        }
     }
 }

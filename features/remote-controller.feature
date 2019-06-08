@@ -14,7 +14,9 @@ Feature: Remote Server Coverage
     And I send a POST request to "/coverage.php?action=init&session=foo" with body:
     """
     {
-      "filter": {},
+      "filterOptions": {
+        "whitelistedFiles": []
+      },
       "codeCoverageOptions": {}
     }
     """

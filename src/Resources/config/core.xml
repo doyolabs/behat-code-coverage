@@ -4,7 +4,7 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
     <parameters>
-        <parameter key="doyo.coverage.io.class">Symfony\Component\Console\Style\SymfonyStyle</parameter>
+        <parameter key="doyo.coverage.io.class">Doyo\Behat\Coverage\Console\IO</parameter>
         <parameter key="doyo.coverage.controller.cli.class">Doyo\Behat\Coverage\Controller\Cli\CoverageController</parameter>
         <parameter key="doyo.coverage.listener.behat.class">Doyo\Behat\Coverage\Listener\BehatEventListener</parameter>
         <parameter key="doyo.coverage.dispatcher.class">Doyo\Behat\Coverage\Bridge\Symfony\EventDispatcher</parameter>
@@ -18,10 +18,10 @@
             <argument type="service" id="cli.input"/>
             <argument type="service" id="cli.output"/>
         </service>
+
         <!-- Code Coverage Cli Controller -->
         <service id="doyo.coverage.controller.cli"
                  class="%doyo.coverage.controller.cli.class%">
-            <argument type="service" id="doyo.coverage.io" />
             <tag name="cli.controller" priority="80000" />
             <tag name="doyo.dispatcher.subscriber" priority="1"/>
         </service>
@@ -33,6 +33,7 @@
         <service id="doyo.coverage.listener.behat" class="%doyo.coverage.listener.behat.class%">
             <argument type="service" id="doyo.coverage.dispatcher"/>
             <argument type="service" id="doyo.coverage.main.processor"/>
+            <argument type="service" id="doyo.coverage.io"/>
             <tag name="event_dispatcher.subscriber"/>
         </service>
     </services>

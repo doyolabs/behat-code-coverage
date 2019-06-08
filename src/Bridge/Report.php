@@ -104,8 +104,8 @@ class Report implements EventSubscriberInterface
     public function onReportProcess(ReportEvent $event)
     {
         $coverage = $event->getProcessor()->getCodeCoverage();
-        $io       = $event->getIO();
-        /* @todo process this error message */
+        $io       = $event->getConsoleIO();
+
         try {
             $this->reportProcessor->process($coverage, $this->target, $this->name);
             $io->text(
@@ -120,7 +120,7 @@ class Report implements EventSubscriberInterface
                 $this->name,
                 $e->getMessage()
             );
-            $event->addException(new ReportProcessException($message));
+            $io->error($message);
         }
     }
 }

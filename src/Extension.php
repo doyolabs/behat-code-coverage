@@ -22,21 +22,11 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\DependencyInjection\Reference;
 
 class Extension implements ExtensionInterface
 {
     public function process(ContainerBuilder $container)
     {
-        /*
-        $definition = $container->getDefinition('doyo.coverage.dispatcher');
-        foreach ($container->findTaggedServiceIds('doyo.dispatcher.subscriber') as $id=>$arguments) {
-            $service  = new Reference($id);
-            $priority = $arguments[0];
-            $priority = $priority['priority'] ?? null;
-            $definition->addMethodCall('addSubscriber', [$service, $priority]);
-        }
-        */
     }
 
     public function getConfigKey()
@@ -62,7 +52,7 @@ class Extension implements ExtensionInterface
 
         $container->setParameter('doyo.coverage.options', $config['coverage']);
         $container->setParameter('doyo.coverage.config', $config);
-        $container->setParameter('doyo.coverage.drivers', $config['drivers']);
+        $container->setParameter('doyo.coverage.sessions', $config['sessions']);
 
         $reportFormats = ['clover', 'crap4j', 'html', 'php', 'text', 'xml'];
         foreach ($reportFormats as $format) {

@@ -3,6 +3,7 @@
 namespace spec\Doyo\Behat\Coverage\Event;
 
 use Doyo\Behat\Coverage\Bridge\Aggregate;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use PhpSpec\ObjectBehavior;
@@ -21,14 +22,6 @@ class CoverageEventSpec extends ObjectBehavior
         $this->shouldHaveType(CoverageEvent::class);
     }
 
-    function its_coverage_should_be_mutable()
-    {
-        $data = ['some-data'];
-        $this->getCoverage()->shouldBeArray();
-        $this->setCoverage($data);
-        $this->getCoverage()->shouldReturn($data);
-    }
-
     function its_test_case_should_be_mutable(
         TestCase $testCase
     )
@@ -39,37 +32,12 @@ class CoverageEventSpec extends ObjectBehavior
         $this->getTestCase()->shouldReturn($testCase);
     }
 
-    function its_updateCoverage_should_merge_coverage_data()
+    function its_processor_should_be_mutable(
+        Processor $processor
+    )
     {
-        $data = [
-            __FILE__ => [
-                10 => -4,
-                11 => -4,
-                12 => -4,
-            ]
-        ];
-        $this->updateCoverage($data);
-        $this->getCoverage()->shouldReturn($data);
-
-        $data = [
-            __FILE__ => [
-                10 => -1,
-                11 => -2,
-                12 => 2,
-            ]
-        ];
-
-        $expected = [
-            __FILE__ => [
-                10 => -1,
-                11 => -2,
-                12 => 1,
-            ]
-        ];
-        $this->updateCoverage($data);
-        $result = $this->getCoverage()->getWrappedObject();
-        Assert::eq($result, $expected);
-
+        $this->getProcessor()->shouldReturn(null);
+        $this->setProcessor($processor);
+        $this->getProcessor()->shouldReturn($processor);
     }
-
 }

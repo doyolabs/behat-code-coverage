@@ -26,7 +26,7 @@ class ReportPass implements CompilerPassInterface
 
         // configure processors
         foreach ($container->findTaggedServiceIds('doyo.coverage.report.processor') as $id => $tagArguments) {
-            $this->configureProcessor($container, $id, $tagArguments);
+            $this->configureReportProcessor($container, $id, $tagArguments);
         }
         // configure report
         foreach ($services as $id => $tagArguments) {
@@ -34,7 +34,7 @@ class ReportPass implements CompilerPassInterface
         }
     }
 
-    private function configureProcessor(ContainerBuilder $container, $id, array $tagArguments)
+    private function configureReportProcessor(ContainerBuilder $container, $id, array $tagArguments)
     {
         $definition = $container->getDefinition($id);
         $format     = $tagArguments[0]['format'];
@@ -45,11 +45,11 @@ class ReportPass implements CompilerPassInterface
         unset($options['target']);
         $definition->setClass($class);
         if (!empty($options) && \in_array($format, $hasOptions, true)) {
-            $this->configureProcessorOptions($definition, $class, $options);
+            $this->configureReportProcessorOptions($definition, $class, $options);
         }
     }
 
-    private function configureProcessorOptions(Definition $definition, $class, $options)
+    private function configureReportProcessorOptions(Definition $definition, $class, $options)
     {
         $r           = new \ReflectionClass($class);
         $constructor = $r->getConstructor();
@@ -85,7 +85,7 @@ class ReportPass implements CompilerPassInterface
         if (isset($config['target'])) {
             $target = $basePath.'/'.$config['target'];
             $definition->addMethodCall('setTarget', [$target]);
-            $definition->addMethodCall('setProcessor', [new Reference($id.'.processor')]);
+            $definition->addMethodCall('setReportProcessor', [new Reference($id.'.processor')]);
             $definition->addMethodCall('setName', [$format]);
             $dispatcher->addMethodCall('addSubscriber', [new Reference($id)]);
             $this->ensureDir($type, $target);

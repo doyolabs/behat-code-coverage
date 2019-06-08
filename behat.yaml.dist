@@ -4,24 +4,30 @@ default:
             contexts:
                 - Behat\MinkExtension\Context\MinkContext
                 - behatch:context:system
+                - behatch:context:rest
+                - behatch:context:json
                 - FeatureContext
 
     extensions:
         Behat\MinkExtension:
+            default_session: symfony2
             sessions:
-                default:
-                    goutte:
-            base_url: http://example.org
+                symfony2:
+                    goutte: ~
+            base_url: http://localhost:8000
         Behatch\Extension: ~
         Doyo\Behat\Coverage\Extension:
-            drivers:
-                - console
+            sessions:
+                console: ~
+                coverage: ~
+                index: ~
+                live: ~
             filter:
                 - directory: src/*.php
                   exclude:
                       - src/Resources
             report:
-                php: build/cov/behat.cov
+                php: build/cov/02-behat.cov
                 html:
                     target: build/behat
                     lowUpperBound: 30

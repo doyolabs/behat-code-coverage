@@ -5,9 +5,12 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
     <parameters>
         <parameter key="doyo.coverage.filter.class">SebastianBergmann\CodeCoverage\Filter</parameter>
-        <parameter key="doyo.coverage.local.class">Doyo\Behat\Coverage\Bridge\LocalCoverage</parameter>
         <parameter key="doyo.coverage.processor.class">Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor</parameter>
-        <parameter key="doyo.coverage.cached.class">Doyo\Behat\Coverage\Bridge\CachedCoverage</parameter>
+        <parameter key="doyo.coverage.session.local.class">Doyo\Behat\Coverage\Listener\LocalCoverageListener</parameter>
+        <parameter key="doyo.coverage.session.remote.class">Doyo\Behat\Coverage\Listener\RemoteCoverageListener</parameter>
+        <parameter key="doyo.coverage.local_session.class">Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\LocalSession</parameter>
+        <parameter key="doyo.coverage.remote_session.class">Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession</parameter>
+        <parameter key="doyo.coverage.http_client.class">GuzzleHttp\Client</parameter>
         <parameter key="doyo.coverage.config.filter"/>
     </parameters>
 
@@ -15,18 +18,14 @@
         <defaults public="true"/>
         <service id="doyo.coverage.filter" class="%doyo.coverage.filter.class%"/>
 
+        <service id="doyo.coverage.http_client" class="%doyo.coverage.http_client.class%"/>
+
         <service id="doyo.coverage.local.processor"
                  class="%doyo.coverage.processor.class%"
         >
             <argument type="service" id="doyo.coverage.local.driver"/>
             <argument type="service" id="doyo.coverage.filter"/>
             <tag name="doyo.coverage.processor"/>
-        </service>
-
-        <!-- setup local coverage -->
-        <service id="doyo.coverage.local" class="%doyo.coverage.local.class%">
-            <argument type="service" id="doyo.coverage.local.processor"/>
-            <tag name="doyo.dispatcher.subscriber"/>
         </service>
     </services>
 </container>

@@ -26,8 +26,13 @@
             <tag name="doyo.dispatcher.subscriber" priority="1"/>
         </service>
 
+        <service id="doyo.coverage.main.processor" class="%doyo.coverage.processor.class%">
+            <argument type="service" id="doyo.coverage.local.driver"/>
+            <argument type="service" id="doyo.coverage.filter"/>
+        </service>
         <service id="doyo.coverage.listener.behat" class="%doyo.coverage.listener.behat.class%">
             <argument type="service" id="doyo.coverage.dispatcher"/>
+            <argument type="service" id="doyo.coverage.main.processor"/>
             <tag name="event_dispatcher.subscriber"/>
         </service>
     </services>

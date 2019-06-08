@@ -9,6 +9,7 @@ use Behat\Testwork\EventDispatcher\Event\AfterTested;
 use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Behat\Testwork\Tester\Result\TestResult;
 use Behat\Testwork\Tester\Result\TestResults;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\RefreshEvent;
@@ -22,14 +23,11 @@ class BehatEventListenerSpec extends ObjectBehavior
 {
     function let(
         EventDispatcher $dispatcher,
-        CoverageEvent $event,
-        TestCase $testCase
+        ProcessorInterface $processor
     )
     {
         $this->beAnInstanceOf(TestBehatEventListener::class);
-        $this->beConstructedWith($dispatcher);
-        $event->beConstructedWith([$testCase->getWrappedObject()]);
-        $this->setCoverageEvent($event);
+        $this->beConstructedWith($dispatcher, $processor);
     }
 
     function it_is_initializable()
@@ -45,17 +43,16 @@ class BehatEventListenerSpec extends ObjectBehavior
 
     function it_should_dispatch_coverage_refresh_event(
         EventDispatcher $dispatcher,
-        CoverageEvent $event
+        ProcessorInterface $processor
     )
     {
-        $event->setTestCase(null)->shouldBeCalled();
-        $event->setCoverage(Argument::type('array'))->shouldBeCalled();
+        $processor->clear()->shouldBeCalled();
 
         $dispatcher
-            ->dispatch(Argument::type(RefreshEvent::class), CoverageEvent::BEFORE_REFRESH)
+            ->dispatch(Argument::type(CoverageEvent::class), CoverageEvent::BEFORE_REFRESH)
             ->shouldBeCalled();
         $dispatcher
-            ->dispatch(Argument::type(RefreshEvent::class), CoverageEvent::REFRESH)
+            ->dispatch(Argument::type(CoverageEvent::class), CoverageEvent::REFRESH)
             ->shouldBeCalled();
 
         $this->refreshCoverage();
@@ -66,8 +63,8 @@ class BehatEventListenerSpec extends ObjectBehavior
         ScenarioTested $scope,
         ScenarioInterface $scenario,
         FeatureNode $feature,
-        CoverageEvent $event,
-        TestResult $results
+        TestResult $results,
+        ProcessorInterface $processor
     )
     {
         $scope->getFeature()->willReturn($feature);
@@ -76,12 +73,12 @@ class BehatEventListenerSpec extends ObjectBehavior
         $scenario->getLine()->willReturn('line');
         $results->getResultCode()->willReturn(TestResults::PASSED);
 
-        $event->setTestCase(Argument::type(TestCase::class))->shouldBeCalled();
+        $processor->start(Argument::type(TestCase::class))->shouldBeCalled();
         $dispatcher
-            ->dispatch($event, CoverageEvent::BEFORE_START)
+            ->dispatch(Argument::type(CoverageEvent::class), CoverageEvent::BEFORE_START)
             ->shouldBeCalled();
         $dispatcher
-            ->dispatch($event, CoverageEvent::START)
+            ->dispatch(Argument::type(CoverageEvent::class), CoverageEvent::START)
             ->shouldBeCalled();
 
         $this->startCoverage($scope);
@@ -89,29 +86,40 @@ class BehatEventListenerSpec extends ObjectBehavior
 
     function it_should_dispatch_coverage_stop_event(
         EventDispatcher $dispatcher,
-        CoverageEvent $event,
         AfterTested $afterTested,
         TestResult $result,
-        TestCase $testCase
+        TestCase $testCase,
+        CoverageEvent $coverageEvent,
+        ProcessorInterface $processor
     )
     {
-        $dispatcher->dispatch($event, CoverageEvent::BEFORE_STOP)
-            ->shouldBeCalled();
-        $dispatcher->dispatch($event, CoverageEvent::STOP)
-            ->shouldBeCalled();
-
         $afterTested->getTestResult()->willReturn($result)->shouldBeCalledOnce();
         $result->getResultCode()->willReturn(0)->shouldBeCalledOnce();
-        $event->getTestCase()->willReturn($testCase)->shouldBeCalledOnce();
-        $testCase->setResult(0)->shouldBeCalledOnce();
 
+        $coverageEvent->getTestCase()->shouldBeCalled()->willReturn($testCase);
+        $testCase->setResult(0)->shouldBeCalled();
+        $processor->addTestCase($testCase)->shouldBeCalled();
+        $processor->stop()->shouldBeCalled();
+
+        $dispatcher->dispatch(Argument::type(CoverageEvent::class), CoverageEvent::BEFORE_STOP)
+            ->shouldBeCalled();
+        $dispatcher->dispatch(Argument::type(CoverageEvent::class), CoverageEvent::STOP)
+            ->shouldBeCalled();
+
+        $this->setCoverageEvent($coverageEvent);
         $this->stopCoverage($afterTested);
     }
 
     function it_should_dispatch_report_events(
-        EventDispatcher $dispatcher
+        EventDispatcher $dispatcher,
+        ProcessorInterface $processor
     )
     {
+        $processor->complete()->shouldBeCalled();
+
+        $dispatcher
+            ->dispatch(Argument::any(), CoverageEvent::COMPLETED)
+            ->shouldBeCalled();
         $dispatcher
             ->dispatch(Argument::any(), ReportEvent::BEFORE_PROCESS)
             ->shouldBeCalled();

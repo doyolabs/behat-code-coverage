@@ -20,7 +20,7 @@ class Configuration
     public function configure(ArrayNodeDefinition $node)
     {
         $this->configureCoverageSection($node);
-        $this->configureDriversSection($node);
+        $this->configureSessionSection($node);
         $this->configureReportSection($node);
         $this->configureFilterSection($node);
     }
@@ -53,26 +53,20 @@ class Configuration
      *
      * @return ArrayNodeDefinition
      */
-    private function configureDriversSection(ArrayNodeDefinition $node)
+    private function configureSessionSection(ArrayNodeDefinition $node)
     {
-        $normalizer = function ($v) {
-            return ['namespace' => $v];
-        };
-
         $node
             ->addDefaultsIfNotSet()
             ->children()
-                ->arrayNode('drivers')
+                ->arrayNode('sessions')
+                    ->useAttributeAsKey('name', false)
                     ->arrayPrototype()
-                        ->beforeNormalization()
-                            ->ifString()->then($normalizer)
-                        ->end()
                         ->children()
-                            ->scalarNode('namespace')->isRequired()->end()
-                            ->scalarNode('driver')->defaultValue('cached')->end()
-                            ->arrayNode('options')
-                                ->scalarPrototype()->end()
+                            ->enumNode('driver')
+                                ->values(['local', 'remote'])
+                                ->defaultValue('local')
                             ->end()
+                            ->scalarNode('remote_url')->end()
                         ->end()
                     ->end()
                 ->end()

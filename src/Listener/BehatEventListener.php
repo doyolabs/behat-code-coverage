@@ -88,8 +88,8 @@ class BehatEventListener implements EventSubscriberInterface
         $testCase = new TestCase($id);
         $processor = $this->processor;
         $consoleIO = $this->consoleIO;
-        $coverageEvent = new CoverageEvent($processor, $consoleIO, $testCase);
 
+        $coverageEvent = new CoverageEvent($processor, $consoleIO, $testCase);
         $processor->start($testCase);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::BEFORE_START);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::START);

@@ -173,7 +173,7 @@ class RemoteCoverageListener extends AbstractSessionCoverageListener implements 
         }
     }
 
-    private function getExceptionMessage(\Exception $exception)
+    private function getExceptionMessage(\Exception $exception): string
     {
         $message = $exception->getMessage();
 
@@ -183,7 +183,7 @@ class RemoteCoverageListener extends AbstractSessionCoverageListener implements 
 
         $response = $exception->getResponse();
         if(!$response instanceof ResponseInterface){
-            return;
+            return $message;
         }
 
         $contentType = $response->getHeader('Content-Type');

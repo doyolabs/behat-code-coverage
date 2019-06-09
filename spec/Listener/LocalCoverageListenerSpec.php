@@ -7,6 +7,7 @@ use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\SessionInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Listener\LocalCoverageListener;
+use Doyo\Behat\Coverage\Console\ConsoleIO;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use SebastianBergmann\CodeCoverage\Filter;
@@ -21,6 +22,7 @@ class LocalCoverageListenerSpec extends ObjectBehavior
     {
         $filter = new Filter();
         $session->setProcessor($processor);
+        $session->refresh()->willReturn(null);
         $this->beConstructedWith($session, [], $filter);
     }
 
@@ -61,11 +63,20 @@ class LocalCoverageListenerSpec extends ObjectBehavior
     function it_should_handle_coverage_completed_event(
         SessionInterface $session,
         ProcessorInterface $processor,
-        CoverageEvent $event
+        CoverageEvent $event,
+        ConsoleIO $consoleIO
     )
     {
+        $e = new \Exception('some error');
+
         $session->refresh()->shouldBeCalled();
         $session->getProcessor()->willReturn($processor);
+        $session->hasExceptions()->willReturn(true);
+        $session->getExceptions()->willReturn([$e]);
+        $session->getName()->shouldBeCalledOnce()->willReturn('some-session');
+        $consoleIO->sessionError('some-session', 'some error')->shouldBeCalledOnce();
+
+        $event->getConsoleIO()->willReturn($consoleIO);
         $event->getProcessor()->willReturn($processor);
 
         $processor->merge($processor)->shouldBeCalled();

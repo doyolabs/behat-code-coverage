@@ -26,16 +26,19 @@ class RemoteSession extends Session
     public static function startSession()
     {
         if (!isset($_SERVER[static::HEADER_SESSION_KEY])) {
-            return null;
+            return false;
         }
 
         $name    = $_SERVER[static::HEADER_SESSION_KEY];
         $session = new static($name);
         if (isset($_SERVER[static::HEADER_TEST_CASE_KEY])) {
             $session->doStartSession();
+        }else{
+            return false;
         }
+        $session->save();
 
-        return $session;
+        return true;
     }
 
     public function init(array $config)
@@ -68,7 +71,8 @@ class RemoteSession extends Session
             $this->start();
             register_shutdown_function([$this, 'shutdown']);
         }catch (\Exception $e){
-            $this->exceptions[] = $e->getMessage();
+            $this->reset();
+            $this->exceptions[] = $e;
         }
     }
 }

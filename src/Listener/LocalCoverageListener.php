@@ -36,7 +36,7 @@ class LocalCoverageListener extends AbstractSessionCoverageListener implements E
     public function coverageStarted(CoverageEvent $event)
     {
         $session = $this->session;
-
+        $session->refresh();
         $session->setTestCase($event->getTestCase());
         $session->save();
     }
@@ -49,6 +49,12 @@ class LocalCoverageListener extends AbstractSessionCoverageListener implements E
         $processor = $this->session->getProcessor();
         if (null !== $processor) {
             $event->getProcessor()->merge($processor);
+        }
+
+        if($session->hasExceptions()){
+            foreach($session->getExceptions() as $exception){
+                $event->getConsoleIO()->sessionError($session->getName(),$exception->getMessage());
+            }
         }
     }
 }

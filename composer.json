@@ -29,7 +29,8 @@
     "autoload-dev": {
         "psr-4": {
             "Test\\Doyo\\Behat\\Coverage\\": "tests/",
-            "spec\\Doyo\\Behat\\Coverage\\": "spec/"
+            "spec\\Doyo\\Behat\\Coverage\\": "spec/",
+            "Test\\Doyo\\Behat\\Coverage\\Contexts\\": "features/contexts/"
         }
     },
     "require": {

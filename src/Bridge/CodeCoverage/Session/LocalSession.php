@@ -15,11 +15,17 @@ namespace Doyo\Behat\Coverage\Bridge\CodeCoverage\Session;
 
 class LocalSession extends Session
 {
-    public static function create($name)
+    public static function startSession($name): bool
     {
         $self = new static($name);
-        register_shutdown_function([$self, 'shutdown']);
-
-        return $self;
+        try{
+            $self->start();
+            register_shutdown_function([$self, 'shutdown']);
+            return true;
+        }catch (\Exception $exception){
+            $self->addException($exception);
+            $self->save();
+            return false;
+        }
     }
 }

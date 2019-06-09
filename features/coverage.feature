@@ -8,12 +8,14 @@ Feature: Coverage
     And file "build/cov/behat.cov" should exist
     And file "build/crap4j.xml" should exist
     And console output should contain "generating code coverage report"
+    And console output should contain "behat code coverage generated"
 
   @remote
   Scenario: Run with local coverage
     Given I run behat with coverage and profile "local"
     Then console output should contain "6 steps (6 passed)"
     And console output should contain "generating code coverage report"
+    And console output should contain "behat code coverage generated"
     And file "src/Foo.php" line 20 should be covered
     And file "src/Hello.php" line 20 should be covered
     And file "src/blacklist/blacklist.php" should not be covered
@@ -23,4 +25,5 @@ Feature: Coverage
     Given I run behat with coverage and profile "remote"
     Then console output should contain "5 steps (5 passed)"
     And console output should contain "generating code coverage report"
+    And console output should contain "behat code coverage generated"
     And file "src/remote/Remote.php" line 20 should be covered

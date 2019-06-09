@@ -22,39 +22,19 @@ use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 interface SessionInterface
 {
     /**
+     * Enable or disable xdebug patch
+     *
+     * @param   bool $flag
+     * @return  void
+     */
+    public function setPatchXdebug(bool $flag);
+
+    /**
      * Returns current session name.
      *
      * @return string
      */
     public function getName();
-
-    /**
-     * Set code coverage options for this session.
-     *
-     * @param array $options
-     */
-    public function setCodeCoverageOptions(array $options);
-
-    /**
-     * Get code coverage options for this session.
-     *
-     * @return array
-     */
-    public function getCodeCoverageOptions();
-
-    /**
-     * Set code filter options for this session.
-     *
-     * @param array $options
-     */
-    public function setFilterOptions(array  $options);
-
-    /**
-     * Get code filter options for this session.
-     *
-     * @return array
-     */
-    public function getFilterOptions(): array;
 
     /**
      * Set processor for this session.
@@ -107,7 +87,7 @@ interface SessionInterface
     public function setTestCase(TestCase $testCase);
 
     /**
-     * Starting new code coverage session.
+     * Start code coverage.
      */
     public function start();
 

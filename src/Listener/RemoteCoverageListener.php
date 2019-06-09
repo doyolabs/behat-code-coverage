@@ -13,12 +13,18 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Listener;
 
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Exception\SessionException;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\SessionInterface;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
+use Psr\Http\Message\ResponseInterface;
 use spec\Doyo\Behat\Coverage\Listener\AbstractSessionCoverageListener;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Exception\RequestExceptionInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class RemoteCoverageListener extends AbstractSessionCoverageListener implements EventSubscriberInterface
@@ -33,11 +39,19 @@ class RemoteCoverageListener extends AbstractSessionCoverageListener implements 
      */
     private $httpClient;
 
-    private $hasInitialized = false;
-
     private $minkSessionName;
 
     private $remoteUrl;
+
+    /**
+     * @var bool
+     */
+    private $initialized = false;
+
+    /**
+     * @var SessionException
+     */
+    private $refreshException;
 
     public static function getSubscribedEvents()
     {
@@ -63,11 +77,6 @@ class RemoteCoverageListener extends AbstractSessionCoverageListener implements 
         $this->httpClient = $httpClient;
     }
 
-    public function setMinkSessionName($name)
-    {
-        $this->minkSessionName = $name;
-    }
-
     public function coverageRefresh()
     {
         $client          = $this->httpClient;
@@ -91,27 +100,33 @@ class RemoteCoverageListener extends AbstractSessionCoverageListener implements 
                 'session' => $this->session->getName(),
             ],
         ];
-        $this->hasInitialized = false;
+
         try {
-            $response = $client->request(
-                'POST',
-                $url,
-                $options
-            );
-            if (Response::HTTP_ACCEPTED === $response->getStatusCode()) {
-                $this->hasInitialized = true;
-            }
+            $this->initialized = false;
+            $client->request('POST', $url, $options);
+            $this->initialized = true;
         } catch (\Exception $e) {
-            $this->hasInitialized = false;
+            $message = $this->getExceptionMessage($e);
+            $this->initialized = false;
+            $this->refreshException = new SessionException($message);
         }
     }
 
-    public function hasInitialized()
+    public function beforeCoverageStart(CoverageEvent $event)
     {
-        return $this->hasInitialized;
+        if($this->initialized){
+            $this->doBeforeCoverageStart($event);
+        }
     }
 
-    public function beforeCoverageStart(CoverageEvent $event)
+    public function coverageCompleted(CoverageEvent $event)
+    {
+        if($this->initialized){
+            $this->doCoverageComplete($event);
+        }
+    }
+
+    private function doBeforeCoverageStart(CoverageEvent $event)
     {
         $sessionName  = $this->session->getName();
         $testCaseName = $event->getTestCase()->getName();
@@ -133,7 +148,7 @@ class RemoteCoverageListener extends AbstractSessionCoverageListener implements 
         }
     }
 
-    public function coverageCompleted(CoverageEvent $event)
+    private function doCoverageComplete(CoverageEvent $event)
     {
         $session = $this->session;
         $client  = $this->httpClient;
@@ -145,15 +160,35 @@ class RemoteCoverageListener extends AbstractSessionCoverageListener implements 
                 'session' => $session->getName(),
             ],
         ];
+
         try {
             $response = $client->request('GET', $uri, $options);
-            if (Response::HTTP_OK === $response->getStatusCode()) {
-                $data      = $response->getBody()->getContents();
-                $processor = unserialize($data);
-                $event->getProcessor()->merge($processor);
-            }
+            $data      = $response->getBody()->getContents();
+            $session = unserialize($data);
+            $processor = $session->getProcessor();
+            $event->getProcessor()->merge($processor);
         } catch (\Exception $exception) {
-            $event->addException($exception);
+            $message = $this->getExceptionMessage($exception);
+            $event->getConsoleIO()->sessionError($session->getName(), $message);
         }
+    }
+
+    private function getExceptionMessage(\Exception $exception)
+    {
+        $message = $exception->getMessage();
+
+        if(!$exception instanceof RequestException){
+            return $message;
+        }
+
+        $response = $exception->getResponse();
+
+        $contentType = $response->getHeader('Content-Type');
+        if(in_array('application/json',$contentType)){
+            $data = json_decode($response->getBody()->getContents(), true);
+            $message = $data['message'];
+        }
+
+        return $message;
     }
 }

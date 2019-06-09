@@ -19,6 +19,14 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class CoverageControllerSpec extends ObjectBehavior
 {
+    function let(
+        ReportEvent $reportEvent,
+        ConsoleIO $consoleIO
+    )
+    {
+        $reportEvent->getConsoleIO()->willReturn($consoleIO);
+    }
+
     function it_is_initializable()
     {
         $this->shouldHaveType(CoverageController::class);
@@ -71,5 +79,31 @@ class CoverageControllerSpec extends ObjectBehavior
     {
         $input->hasParameterOption(['--coverage'])->willReturn(false);
         $this->execute($input, $output);
+    }
+
+    function it_should_handle_before_report_events(
+        ReportEvent $reportEvent,
+        ConsoleIO $consoleIO
+    ){
+        $consoleIO
+            ->section(Argument::containingString('generating'))
+            ->shouldBeCalledOnce();
+
+        $this->beforeReportProcess($reportEvent);
+    }
+
+    function it_should_handle_after_report_events(
+        ReportEvent $reportEvent,
+        ConsoleIO $consoleIO
+    )
+    {
+        $consoleIO->success(Argument::any())->shouldBeCalledOnce();
+        $consoleIO->error(Argument::any())->shouldBeCalledOnce();
+
+        $consoleIO->hasError()->willReturn(false);
+        $this->afterReportProcess($reportEvent);
+
+        $consoleIO->hasError()->willReturn(true);
+        $this->afterReportProcess($reportEvent);
     }
 }

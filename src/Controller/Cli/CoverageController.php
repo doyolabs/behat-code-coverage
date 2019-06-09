@@ -50,7 +50,8 @@ class CoverageController implements Controller, EventSubscriberInterface
                 ['validateEvent', 1000],
                 ['beforeReportProcess']
             ],
-            ReportEvent::AFTER_PROCESS    => ['validateEvent', 1000],
+            ReportEvent::AFTER_PROCESS    => ['afterReportProcess', 1000],
+            CoverageEvent::COMPLETED => ['validateEvent', 1000],
             CoverageEvent::BEFORE_REFRESH => ['validateEvent', 1000],
             CoverageEvent::BEFORE_START   => ['validateEvent', 1000],
             CoverageEvent::BEFORE_STOP    => ['validateEvent', 1000],
@@ -77,5 +78,16 @@ class CoverageController implements Controller, EventSubscriberInterface
     public function beforeReportProcess(ReportEvent $event)
     {
         $event->getConsoleIO()->section('generating code coverage report');
+    }
+
+    public function afterReportProcess(ReportEvent $event)
+    {
+        $io = $event->getConsoleIO();
+
+        if(!$io->hasError()){
+            $io->success('behat code coverage generated');
+        }else{
+            $io->error('behat generate code coverage error');
+        }
     }
 }

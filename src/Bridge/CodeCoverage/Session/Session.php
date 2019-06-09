@@ -67,49 +67,16 @@ abstract class Session implements \Serializable, SessionInterface
      */
     protected $codeCoverage;
 
-    /**
-     * @var array
-     */
-    protected $filterOptions = [];
+    protected $patchXdebug = true;
 
-    /**
-     * @var array
-     */
-    protected $codeCoverageOptions = [];
-
-    public function __construct($name)
+    public function __construct($name, $patchXdebug = true)
     {
         $dir               = sys_get_temp_dir().'/doyo/behat-coverage-extension';
         $adapter           = new FilesystemAdapter($name, 0, $dir);
         $this->adapter     = $adapter;
         $this->name        = $name;
+        $this->patchXdebug = $patchXdebug;
         $this->refresh();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setCodeCoverageOptions(array $options)
-    {
-        $this->codeCoverageOptions = $options;
-    }
-
-    public function getCodeCoverageOptions()
-    {
-        return $this->codeCoverageOptions;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setFilterOptions(array $options)
-    {
-        $this->filterOptions = $options;
-    }
-
-    public function getFilterOptions(): array
-    {
-        return $this->filterOptions;
     }
 
     /**
@@ -130,9 +97,11 @@ abstract class Session implements \Serializable, SessionInterface
     public function serialize()
     {
         $data = [
+            $this->name,
             $this->testCase,
             $this->exceptions,
             $this->processor,
+            $this->patchXdebug
         ];
 
         return serialize($data);
@@ -144,9 +113,11 @@ abstract class Session implements \Serializable, SessionInterface
     public function unserialize($serialized)
     {
         list(
+            $this->name,
             $this->testCase,
             $this->exceptions,
-            $this->processor
+            $this->processor,
+            $this->patchXdebug
         ) = unserialize($serialized);
     }
 
@@ -159,10 +130,25 @@ abstract class Session implements \Serializable, SessionInterface
         $cached  = $adapter->getItem(static::CACHE_KEY)->get();
 
         if ($cached instanceof self) {
-            $this->testCase                   = $cached->getTestCase();
-            $this->exceptions                 = $cached->getExceptions();
-            $this->processor                  = $cached->getProcessor();
+            $this->name = $cached->getName();
+            $this->testCase = $cached->getTestCase();
+            $this->exceptions = $cached->getExceptions();
+            $this->processor = $cached->getProcessor();
+            $this->patchXdebug = $cached->getPatchXdebug();
         }
+    }
+
+    public function setPatchXdebug(bool $flag)
+    {
+        $this->patchXdebug = $flag;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getPatchXdebug(): bool
+    {
+        return $this->patchXdebug;
     }
 
     /**
@@ -257,7 +243,12 @@ abstract class Session implements \Serializable, SessionInterface
      */
     public function xdebugPatch()
     {
-        $options   = $this->filterOptions;
+        if(!$this->patchXdebug){
+            return;
+        }
+
+        $filter = $this->getProcessor()->getCodeCoverageFilter();
+        $options = $filter->getWhitelistedFiles();
         $filterKey = 'whitelistedFiles';
 
         if (
@@ -292,14 +283,14 @@ abstract class Session implements \Serializable, SessionInterface
             return;
         }
         try {
+            $this->hasStarted = false;
             $this->codeCoverage = $this->createCodeCoverage($driver);
             $this->xdebugPatch();
             $this->codeCoverage->start($this->testCase->getName());
             $this->hasStarted = true;
         } catch (\Exception $e) {
             $message = sprintf(
-                "Can not start code coverage in namespace: %s :\n%s",
-                $this->name,
+                "Can not start code coverage with error message:\n%s",
                 $e->getMessage()
             );
             $exception = new SessionException($message);
@@ -340,21 +331,6 @@ abstract class Session implements \Serializable, SessionInterface
         $adapter->save($item);
     }
 
-    /**
-     * @return Filter
-     */
-    protected function createCodeCoverageFilter()
-    {
-        $config = $this->filterOptions;
-        $filter = new Filter();
-        foreach ($config as $method => $value) {
-            $method = 'set'.ucfirst($method);
-            \call_user_func_array([$filter, $method], [$value]);
-        }
-
-        return $filter;
-    }
-
     public function shutdown()
     {
         if ($this->hasStarted && null !== $this->processor) {
@@ -379,8 +355,10 @@ abstract class Session implements \Serializable, SessionInterface
         $options  = $this->processor->getCodeCoverageOptions();
         $coverage = new CodeCoverage($driver, $filter);
         foreach ($options as $method => $option) {
-            $method = 'set'.ucfirst($method);
-            \call_user_func_array([$coverage, $method], [$option]);
+            if(method_exists($coverage, $method)){
+                $method = 'set'.ucfirst($method);
+                \call_user_func_array([$coverage, $method], [$option]);
+            }
         }
 
         return $coverage;

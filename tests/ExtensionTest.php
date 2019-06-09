@@ -85,6 +85,9 @@ class ExtensionTest extends TestCase
             ['doyo.coverage.sessions.local.driver', LocalSession::class],
             ['doyo.coverage.sessions.local.processor', Processor::class],
             ['doyo.coverage.sessions.local', LocalCoverageListener::class],
+            ['doyo.coverage.sessions.remote.driver', RemoteSession::class],
+            ['doyo.coverage.sessions.remote.processor', Processor::class],
+            ['doyo.coverage.sessions.remote', RemoteCoverageListener::class],
         ];
     }
 

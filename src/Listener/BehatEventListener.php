@@ -125,11 +125,13 @@ class BehatEventListener implements EventSubscriberInterface
         $dispatcher    = $this->dispatcher;
         $processor     = $this->processor;
         $consoleIO = $this->consoleIO;
-        $coverageEvent = new CoverageEvent($processor, $consoleIO);
 
+
+        $consoleIO->setHasError(false);
+
+        $coverageEvent = new CoverageEvent($processor, $consoleIO);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::COMPLETED);
         $processor->complete();
-
 
         $reportEvent   = new ReportEvent($processor, $consoleIO);
         $dispatcher->dispatch($reportEvent, ReportEvent::BEFORE_PROCESS);

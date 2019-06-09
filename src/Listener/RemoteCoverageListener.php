@@ -182,6 +182,9 @@ class RemoteCoverageListener extends AbstractSessionCoverageListener implements 
         }
 
         $response = $exception->getResponse();
+        if(!$response instanceof ResponseInterface){
+            return;
+        }
 
         $contentType = $response->getHeader('Content-Type');
         if(in_array('application/json',$contentType)){

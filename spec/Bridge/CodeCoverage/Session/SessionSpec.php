@@ -53,7 +53,7 @@ class SessionSpec extends ObjectBehavior
     )
     {
         $this->getAdapter()->shouldHaveType(FilesystemAdapter::class);
-        $this->setAdapter($adapter)->shouldReturn($this);
+        $this->setAdapter($adapter);
         $this->getAdapter()->shouldReturn($adapter);
     }
 

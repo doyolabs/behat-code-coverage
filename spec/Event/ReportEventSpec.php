@@ -3,6 +3,8 @@
 namespace spec\Doyo\Behat\Coverage\Event;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
+use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use Doyo\Behat\Coverage\Exception\ReportProcessException;
 use PhpSpec\ObjectBehavior;
@@ -13,10 +15,11 @@ use Symfony\Component\Console\Style\StyleInterface;
 class ReportEventSpec extends ObjectBehavior
 {
     function let(
-        Processor $processor
+        ProcessorInterface $processor,
+        ConsoleIO $consoleIO
     )
     {
-        $this->setProcessor($processor);
+        $this->beConstructedWith($processor, $consoleIO);
     }
 
     function it_is_initializable()
@@ -24,27 +27,12 @@ class ReportEventSpec extends ObjectBehavior
         $this->shouldHaveType(ReportEvent::class);
     }
 
-    function its_processor_should_be_mutable(
-        Processor $processor
+    function its_properties_should_be_mutable(
+        ProcessorInterface $processor,
+        ConsoleIO $consoleIO
     )
     {
-        $this->setProcessor($processor)->shouldReturn($this);
         $this->getProcessor()->shouldReturn($processor);
-    }
-
-    function its_exceptions_should_be_mutable(
-        ReportProcessException $exception
-    )
-    {
-        $this->addException($exception);
-        $this->getExceptions()->shouldHaveCount(1);
-    }
-
-    function its_IO_should_be_mutable(
-        StyleInterface $style
-    )
-    {
-        $this->setIO($style)->shouldReturn($this);
-        $this->getIO()->shouldReturn($style);
+        $this->getConsoleIO()->shouldReturn($consoleIO);
     }
 }

@@ -3,9 +3,9 @@ default:
         default:
             contexts:
                 - Behat\MinkExtension\Context\MinkContext
+                - Test\Doyo\Behat\Coverage\Contexts\FeatureContext
                 - behatch:context:json
                 - behatch:context:rest
-                - FeatureContext
             
     extensions:
         Behat\MinkExtension:
@@ -16,8 +16,12 @@ default:
                     goutte: ~
         Behatch\Extension: ~
         Doyo\Behat\Coverage\Extension:
+            xdebug_patch: false
             sessions:
                 local: ~
+                remote:
+                    driver: remote
+                    remote_url: http://localhost:8000/coverage.php
             filter:
                 - style1/*.php
                 - directory: src
@@ -42,14 +46,9 @@ local:
             filters: 
                 tags: 'local'
 
+
 remote:
     suites:
         default:
             filters:
                 tags: 'remote'
-    extensions:
-        Doyo\Behat\Coverage\Extension:
-            sessions:
-                remote:
-                    driver: remote
-                    remote_url: http://localhost:8000/coverage.php

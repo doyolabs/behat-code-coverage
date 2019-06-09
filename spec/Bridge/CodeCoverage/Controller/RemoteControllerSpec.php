@@ -6,12 +6,12 @@ use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\OldSession;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Controller\RemoteController;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\SessionInterface;
+use GuzzleHttp\Exception\RequestException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
-use SebastianBergmann\CodeCoverage\Filter;
+use spec\Doyo\Behat\Coverage\ResponseTrait;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +20,8 @@ use Webmozart\Assert\Assert;
 
 class RemoteControllerSpec extends ObjectBehavior
 {
+    use ResponseTrait;
+
     function it_is_initializable()
     {
         $this->shouldHaveType(RemoteController::class);
@@ -28,56 +30,6 @@ class RemoteControllerSpec extends ObjectBehavior
     function its_create_should_create_a_new_instance()
     {
         $this->create()->shouldHaveType(RemoteController::class);
-    }
-
-    public function getMatchers(): array
-    {
-        return [
-            'beInJson' => function($subject){
-                Assert::isInstanceOf($subject,JsonResponse::class);
-                return true;
-            },
-            'containJsonKey' => function($subject, $key){
-                /* @var \Symfony\Component\HttpFoundation\JsonResponse $subject */
-                $json = $subject->getContent();
-                $json = json_decode($json, true);
-                Assert::isArray($json);
-                Assert::keyExists($json,$key);
-
-                return true;
-            },
-            'containJsonKeyWithValue' => function($subject, $key, $expected){
-                /* @var \Symfony\Component\HttpFoundation\JsonResponse $subject */
-                $json = $subject->getContent();
-                $json = json_decode($json, true);
-                Assert::keyExists($json,$key);
-                Assert::contains($json[$key],$expected);
-
-                return true;
-            },
-            'haveStatusCode' => function($subject, $expected){
-                Assert::eq($subject->getStatusCode(), $expected);
-                return true;
-            },
-            'haveContent' => function($subject, $expected){
-                Assert::isInstanceOf($subject, Response::class);
-                Assert::contains($subject->getContent(), $expected);
-
-                return true;
-            },
-            'beAHttpResponse' => function($subject){
-                Assert::isInstanceOf($subject, Response::class);
-
-                return true;
-            },
-            'beASerializedObject' => function($subject, $expected){
-                /* @var \Symfony\Component\HttpFoundation\Response $subject */
-                $serialized = unserialize($subject->getContent());
-                Assert::eq(get_class($serialized), get_class($expected));
-
-                return true;
-            }
-        ];
     }
 
     function its_should_return_404_when_action_not_exist(
@@ -167,6 +119,32 @@ class RemoteControllerSpec extends ObjectBehavior
         $response->shouldHaveStatusCode(Response::HTTP_METHOD_NOT_ALLOWED);
     }
 
+    function its_readAction_will_not_process_undefined_session(
+        Request $request
+    )
+    {
+        $request->isMethod('GET')->willReturn(true);
+        $request->get('session')->willReturn(null);
+
+        $response = $this->readAction($request);
+        $response->shouldBeInJson();
+        $response->shouldHaveStatusCode(404);
+    }
+
+    function its_readAction_will_not_process_uninitialized_session(
+        Request $request
+    )
+    {
+        $request->isMethod('GET')->willReturn(true);
+        $request->get('session')->willReturn('uninitialized');
+
+        $response = $this->readAction($request);
+        $response->shouldBeInJson();
+        $response->shouldHaveStatusCode(404);
+    }
+
+
+
     function its_readAction_returns_code_coverage_data(
         Request $request,
         ProcessorInterface $processor,
@@ -187,6 +165,6 @@ class RemoteControllerSpec extends ObjectBehavior
 
         $response = $this->readAction($request);
         $response->shouldBeAHttpResponse();
-        $response->shouldBeASerializedObject($codeCoverage);
+        $response->shouldBeASerializedObject(SessionInterface::class);
     }
 }

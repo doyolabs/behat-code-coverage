@@ -5,7 +5,7 @@ require __DIR__.'/../../../vendor/autoload.php';
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\LocalSession;
 
-LocalSession::create('console')->start();
+LocalSession::startSession('console');
 
 
 define('BEHAT_BIN_PATH',     realpath(__DIR__.'/../../../vendor/behat/behat/bin'));

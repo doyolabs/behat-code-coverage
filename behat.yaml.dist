@@ -4,9 +4,9 @@ default:
             contexts:
                 - Behat\MinkExtension\Context\MinkContext
                 - behatch:context:system
-                - behatch:context:rest
                 - behatch:context:json
-                - FeatureContext
+                - Test\Doyo\Behat\Coverage\Contexts\FeatureContext
+                - Test\Doyo\Behat\Coverage\Contexts\RemoteContext
 
     extensions:
         Behat\MinkExtension:
@@ -17,6 +17,7 @@ default:
             base_url: http://localhost:8000
         Behatch\Extension: ~
         Doyo\Behat\Coverage\Extension:
+            xdebug_patch: false
             sessions:
                 console: ~
                 coverage: ~

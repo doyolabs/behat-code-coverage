@@ -4,7 +4,9 @@ namespace spec\Doyo\Behat\Coverage\Event;
 
 use Doyo\Behat\Coverage\Bridge\Aggregate;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
+use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -12,9 +14,12 @@ use Webmozart\Assert\Assert;
 
 class CoverageEventSpec extends ObjectBehavior
 {
-    function let(TestCase $testCase)
-    {
-        $this->beConstructedWith($testCase);
+    function let(
+        ProcessorInterface $processor,
+        ConsoleIO $consoleIO,
+        TestCase $testCase
+    ){
+        $this->beConstructedWith($processor, $consoleIO, $testCase);
     }
 
     function it_is_initializable()
@@ -22,22 +27,14 @@ class CoverageEventSpec extends ObjectBehavior
         $this->shouldHaveType(CoverageEvent::class);
     }
 
-    function its_test_case_should_be_mutable(
+    function its_properties_should_be_mutable(
+        ProcessorInterface $processor,
+        ConsoleIO $consoleIO,
         TestCase $testCase
     )
     {
-        $this->setTestCase(null);
-        $this->getTestCase()->shouldReturn(null);
-        $this->setTestCase($testCase);
-        $this->getTestCase()->shouldReturn($testCase);
-    }
-
-    function its_processor_should_be_mutable(
-        Processor $processor
-    )
-    {
-        $this->getProcessor()->shouldReturn(null);
-        $this->setProcessor($processor);
         $this->getProcessor()->shouldReturn($processor);
+        $this->getConsoleIO()->shouldReturn($consoleIO);
+        $this->getTestCase()->shouldReturn($testCase);
     }
 }

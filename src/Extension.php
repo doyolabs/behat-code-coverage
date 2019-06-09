@@ -18,6 +18,7 @@ use Behat\Testwork\ServiceContainer\ExtensionManager;
 use Doyo\Behat\Coverage\Compiler\CoveragePass;
 use Doyo\Behat\Coverage\Compiler\DriverPass;
 use Doyo\Behat\Coverage\Compiler\ReportPass;
+use SebastianBergmann\Environment\Runtime;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -25,6 +26,16 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 class Extension implements ExtensionInterface
 {
+    public static function canCollectCodeCoverage()
+    {
+        static $runtime;
+        if(is_null($runtime)){
+            $runtime = new Runtime();
+        }
+
+        return $runtime->canCollectCodeCoverage();
+    }
+
     public function process(ContainerBuilder $container)
     {
     }
@@ -53,6 +64,7 @@ class Extension implements ExtensionInterface
         $container->setParameter('doyo.coverage.options', $config['coverage']);
         $container->setParameter('doyo.coverage.config', $config);
         $container->setParameter('doyo.coverage.sessions', $config['sessions']);
+        $container->setParameter('doyo.coverage.xdebug_patch', $config['xdebug_patch']);
 
         $reportFormats = ['clover', 'crap4j', 'html', 'php', 'text', 'xml'];
         foreach ($reportFormats as $format) {

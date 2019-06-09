@@ -48,7 +48,7 @@ class CoveragePass implements CompilerPassInterface
             $driver    = $config['driver'];
             $class     = $driverMap[$driver];
             $id        = 'doyo.coverage.sessions.'.$name;
-            $driverId  = $this->createSessionDriverDefinition($container, $name, $config);
+            $driverId  = $this->createSessionDriver($container, $name, $config);
 
             $definition = new Definition($class);
             $definition->addTag('doyo.dispatcher.subscriber');
@@ -84,8 +84,9 @@ class CoveragePass implements CompilerPassInterface
         $definition->addMethodCall('setRemoteUrl', [$config['remote_url']]);
     }
 
-    private function createSessionDriverDefinition(ContainerBuilder $container, $name, $config)
+    private function createSessionDriver(ContainerBuilder $container, $name, $config)
     {
+        $xdebugPatch = $container->getParameterBag()->get('doyo.coverage.xdebug_patch');
         $driver = $config['driver'];
         $map    = [
             'local'  => 'doyo.coverage.local_session.class',
@@ -96,10 +97,13 @@ class CoveragePass implements CompilerPassInterface
         $definition = new Definition($class);
         $definition->setPublic(true);
         $definition->addArgument($name);
+        $definition->addArgument($xdebugPatch);
+
         $container->setDefinition($id, $definition);
 
         $processorId = $this->createSessionProcessor($container, $name);
         $definition->addMethodCall('setProcessor', [new Reference($processorId)]);
+
 
         return $id;
     }
@@ -110,14 +114,15 @@ class CoveragePass implements CompilerPassInterface
 
         $driverId = $id.'.driver';
         $driver   = new Definition($container->getParameterBag()->get('doyo.coverage.driver.dummy.class'));
+        $driver->setPublic(true);
         $container->setDefinition($driverId, $driver);
 
         $class     = $container->getParameterBag()->get('doyo.coverage.processor.class');
         $processor = new Definition($class);
         $processor->addArgument(new Reference($driverId));
         $processor->addArgument(new Reference('doyo.coverage.filter'));
-
         $processor->addTag('doyo.coverage.processor');
+        $processor->setPublic(true);
         $container->setDefinition($id, $processor);
 
         return $id;

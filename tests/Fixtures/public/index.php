@@ -19,8 +19,8 @@ use Test\Doyo\Behat\Coverage\Fixtures\src\blacklist\blacklist;
 use Test\Doyo\Behat\Coverage\Fixtures\src\Foo;
 use Test\Doyo\Behat\Coverage\Fixtures\src\Hello;
 
-LocalSession::create('local')->start();
-LocalSession::create('index')->start();
+LocalSession::startSession('local');
+LocalSession::startSession('index');
 
 $data = [
     'foo'       => Foo::say(),

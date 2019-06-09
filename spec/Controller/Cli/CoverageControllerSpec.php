@@ -3,6 +3,7 @@
 namespace spec\Doyo\Behat\Coverage\Controller\Cli;
 
 use Doyo\Behat\Coverage\Bridge\Symfony\Event;
+use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Controller\Cli\CoverageController;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
@@ -19,10 +20,11 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class CoverageControllerSpec extends ObjectBehavior
 {
     function let(
-        StyleInterface $style
+        ReportEvent $reportEvent,
+        ConsoleIO $consoleIO
     )
     {
-        $this->beConstructedWith($style);
+        $reportEvent->getConsoleIO()->willReturn($consoleIO);
     }
 
     function it_is_initializable()
@@ -53,16 +55,6 @@ class CoverageControllerSpec extends ObjectBehavior
         $this->getSubscribedEvents()->shouldHaveKey(ReportEvent::AFTER_PROCESS);
     }
 
-    function it_should_handle_before_report_process_event(
-        ReportEvent $event,
-        StyleInterface $style
-    )
-    {
-        $event->setIO($style)->shouldBeCalled();
-
-        $this->onBeforeReportProcess($event);
-    }
-
     function it_should_validate_coverage_and_report_events(
         InputInterface $input,
         OutputInterface $output,
@@ -89,30 +81,29 @@ class CoverageControllerSpec extends ObjectBehavior
         $this->execute($input, $output);
     }
 
-    function it_should_show_success_message_when_process_completed(
-        ReportEvent $event,
-        SymfonyStyle $io
-    )
-    {
-        $event->getExceptions()->willReturn([]);
-        $event->getIO()->willReturn($io);
-        $io->success(Argument::any())->shouldBeCalled();
+    function it_should_handle_before_report_events(
+        ReportEvent $reportEvent,
+        ConsoleIO $consoleIO
+    ){
+        $consoleIO
+            ->section(Argument::containingString('generating'))
+            ->shouldBeCalledOnce();
 
-        $this->onAfterReportProcess($event);
+        $this->beforeReportProcess($reportEvent);
     }
-    function it_should_handle_report_process_exceptions(
-        ReportEvent $event,
-        SymfonyStyle $io
+
+    function it_should_handle_after_report_events(
+        ReportEvent $reportEvent,
+        ConsoleIO $consoleIO
     )
     {
-        $e = new \Exception('some exception');
-        $event->getExceptions()->shouldBeCalledOnce()->willReturn([$e]);
-        $event->getIO()->willReturn($io);
+        $consoleIO->success(Argument::any())->shouldBeCalledOnce();
+        $consoleIO->error(Argument::any())->shouldBeCalledOnce();
 
-        $io->newLine(2)->shouldBeCalled();
-        $io->section(Argument::any())->shouldBeCalled();
-        $io->error('some exception')->shouldBeCalledOnce();
+        $consoleIO->hasError()->willReturn(false);
+        $this->afterReportProcess($reportEvent);
 
-        $this->onAfterReportProcess($event);
+        $consoleIO->hasError()->willReturn(true);
+        $this->afterReportProcess($reportEvent);
     }
 }

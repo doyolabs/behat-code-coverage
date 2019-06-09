@@ -29,6 +29,7 @@ class Configuration
     {
         $node
             ->children()
+                ->booleanNode('xdebug_patch')->defaultTrue()->end()
                 ->arrayNode('coverage')
                     ->addDefaultsIfNotSet()
                     ->children()

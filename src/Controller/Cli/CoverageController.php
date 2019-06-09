@@ -21,7 +21,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\StyleInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -32,24 +31,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class CoverageController implements Controller, EventSubscriberInterface
 {
     /**
-     * @var StyleInterface|null
-     */
-    private $style;
-
-    /**
      * @var bool
      */
     private $coverageEnabled = false;
-
-    /**
-     * CoverageController constructor.
-     *
-     * @param StyleInterface|null $style
-     */
-    public function __construct(StyleInterface $style)
-    {
-        $this->style = $style;
-    }
 
     /**
      * {@inheritdoc}
@@ -64,12 +48,13 @@ class CoverageController implements Controller, EventSubscriberInterface
         return [
             ReportEvent::BEFORE_PROCESS => [
                 ['validateEvent', 1000],
-                ['onBeforeReportProcess', 100],
+                ['beforeReportProcess']
             ],
-            ReportEvent::AFTER_PROCESS    => 'onAfterReportProcess',
-            CoverageEvent::BEFORE_REFRESH => ['validateEvent', 1000],
-            CoverageEvent::BEFORE_START   => ['validateEvent', 1000],
-            CoverageEvent::BEFORE_STOP    => ['validateEvent', 1000],
+            ReportEvent::AFTER_PROCESS    => ['afterReportProcess', 10000],
+            CoverageEvent::COMPLETED => ['validateEvent', 10000],
+            CoverageEvent::BEFORE_REFRESH => ['validateEvent', 10000],
+            CoverageEvent::BEFORE_START   => ['validateEvent', 10000],
+            CoverageEvent::BEFORE_STOP    => ['validateEvent', 10000],
         ];
     }
 
@@ -90,27 +75,19 @@ class CoverageController implements Controller, EventSubscriberInterface
         }
     }
 
-    public function onBeforeReportProcess(ReportEvent $event)
+    public function beforeReportProcess(ReportEvent $event)
     {
-        $io = $this->style;
-        $io->section('behat coverage reports process started');
-        $event->setIO($io);
+        $event->getConsoleIO()->section('generating code coverage report');
     }
 
-    public function onAfterReportProcess(ReportEvent $event)
+    public function afterReportProcess(ReportEvent $event)
     {
-        $exceptions = $event->getExceptions();
-        $io         = $event->getIO();
-        if (0 === \count($exceptions)) {
-            $io->success('behat coverage reports process completed');
+        $io = $event->getConsoleIO();
 
-            return;
-        }
-
-        $io->newLine(2);
-        $io->section('behat coverage reports process failed');
-        foreach ($exceptions as $exception) {
-            $io->error($exception->getMessage());
+        if(!$io->hasError()){
+            $io->success('behat code coverage generated');
+        }else{
+            $io->error('behat generate code coverage error');
         }
     }
 }

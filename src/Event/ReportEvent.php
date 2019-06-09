@@ -13,10 +13,9 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Event;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\Symfony\Event;
-use Symfony\Component\Console\Style\StyleInterface;
+use Doyo\Behat\Coverage\Console\ConsoleIO;
 
 class ReportEvent extends Event
 {
@@ -25,22 +24,24 @@ class ReportEvent extends Event
     const AFTER_PROCESS  = 'doyo.coverage.report_post';
 
     /**
-     * @var ProcessorInterface|null
+     * @var ProcessorInterface
      */
     private $processor;
 
     /**
-     * @var StyleInterface|null
+     * @var ConsoleIO
      */
-    private $io;
+    private $consoleIO;
+
+
+    public function __construct(ProcessorInterface $processor, ConsoleIO $consoleIO)
+    {
+        $this->processor = $processor;
+        $this->consoleIO = $consoleIO;
+    }
 
     /**
-     * @var \Exception[]
-     */
-    private $exceptions = [];
-
-    /**
-     * @return ProcessorInterface|null
+     * @return ProcessorInterface
      */
     public function getProcessor()
     {
@@ -48,47 +49,10 @@ class ReportEvent extends Event
     }
 
     /**
-     * @param ProcessorInterface $processor
-     *
-     * @return static
+     * @return ConsoleIO
      */
-    public function setProcessor(ProcessorInterface $processor)
+    public function getConsoleIO(): ConsoleIO
     {
-        $this->processor = $processor;
-
-        return $this;
-    }
-
-    /**
-     * @return StyleInterface|null
-     */
-    public function getIO()
-    {
-        return $this->io;
-    }
-
-    /**
-     * @param StyleInterface|null $io
-     *
-     * @return static
-     */
-    public function setIO(StyleInterface $io)
-    {
-        $this->io = $io;
-
-        return $this;
-    }
-
-    public function addException(\Exception $exception)
-    {
-        $this->exceptions[] = $exception;
-    }
-
-    /**
-     * @return \Exception[]
-     */
-    public function getExceptions()
-    {
-        return $this->exceptions;
+        return $this->consoleIO;
     }
 }

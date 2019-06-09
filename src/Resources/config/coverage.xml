@@ -12,6 +12,7 @@
         <parameter key="doyo.coverage.remote_session.class">Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession</parameter>
         <parameter key="doyo.coverage.http_client.class">GuzzleHttp\Client</parameter>
         <parameter key="doyo.coverage.config.filter"/>
+        <parameter key="doyo.coverage.xdebug_patch"/>
     </parameters>
 
     <services>

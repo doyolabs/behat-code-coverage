@@ -4,10 +4,12 @@ namespace spec\Doyo\Behat\Coverage\Bridge\CodeCoverage\Session;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use PhpSpec\Exception\Example\SkippingException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use SebastianBergmann\CodeCoverage\Filter;
+use SebastianBergmann\Environment\Runtime;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Process\Process;
 
@@ -17,9 +19,10 @@ class RemoteSessionSpec extends ObjectBehavior
         ProcessorInterface $processor
     )
     {
+        $filter = new Filter();
         $this->beConstructedWith('spec-remote');
-
         $processor->getCodeCoverageOptions()->willReturn([]);
+        $processor->getCodeCoverageFilter()->willReturn($filter);
         $processor->clear()->willReturn(null);
         $this->setProcessor($processor);
     }
@@ -50,15 +53,13 @@ class RemoteSessionSpec extends ObjectBehavior
     }
 
     function it_should_start_new_session(
-        Request $request,
         ProcessorInterface $processor
     )
     {
-        if(!extension_loaded('xdebug')){
-            throw new SkippingException('xdebug not loaded');
+        $runtime = new Runtime();
+        if(!$runtime->canCollectCodeCoverage()){
+            throw new SkippingException('not in phpdbg or xdebug');
         }
-        $this->startSession()->shouldReturn(null);
-
 
         $_SERVER[RemoteSession::HEADER_SESSION_KEY] = 'spec-remote';
         $_SERVER[RemoteSession::HEADER_TEST_CASE_KEY] = 'spec-test-case';
@@ -68,9 +69,54 @@ class RemoteSessionSpec extends ObjectBehavior
         $this->setProcessor($processor);
         $this->save();
 
-        $session = $this->startSession($request);
-        $session->shouldHaveType(RemoteSession::class);
-        $session->getName()->shouldReturn('spec-remote');
-        $session->getTestCase()->getName()->shouldReturn('spec-test-case');
+        $this->startSession()->shouldReturn(true);
+        $this->refresh();
+        $this->getName()->shouldReturn('spec-remote');
+        $this->getTestCase()->shouldHaveType(TestCase::class);
+        $this->getTestCase()->getName()->shouldReturn('spec-test-case');
+    }
+
+    function it_should_not_start_session_with_undefined_session()
+    {
+        $this->reset();
+        unset($_SERVER[RemoteSession::HEADER_SESSION_KEY]);
+        unset($_SERVER[RemoteSession::HEADER_TEST_CASE_KEY]);
+        $this->startSession()->shouldBe(false);
+
+        $_SERVER[RemoteSession::HEADER_SESSION_KEY] = 'spec-remote';
+
+        $this->startSession()->shouldBe(false);
+    }
+
+    function its_doStartSession_should_start_coverage()
+    {
+        $runtime = new Runtime();
+        if(!$runtime->canCollectCodeCoverage()){
+            throw new SkippingException('not in phpdbg or xdebug');
+        }
+
+        $this->reset();
+        $_SERVER[RemoteSession::HEADER_SESSION_KEY] = 'spec-remote';
+        $_SERVER[RemoteSession::HEADER_TEST_CASE_KEY] = 'test-case';
+
+        $this->doStartSession();
+        $this->save();
+        $this->refresh();
+        $this->getTestCase()->shouldBeAnInstanceOf(TestCase::class);
+    }
+
+    function its_doStartSession_should_start_coverage_error(
+        ProcessorInterface $processor
+    )
+    {
+        $this->reset();
+        $_SERVER[RemoteSession::HEADER_SESSION_KEY] = 'spec-remote';
+        $_SERVER[RemoteSession::HEADER_TEST_CASE_KEY] = 'test-case';
+
+        $e = new \Exception('some error');
+        $processor->getCodeCoverageFilter()->willThrow($e);
+        $this->hasExceptions()->shouldBe(false);
+        $this->doStartSession();
+        $this->hasExceptions()->shouldBe(true);
     }
 }

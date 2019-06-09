@@ -16,5 +16,5 @@ require __DIR__.'/../../../vendor/autoload.php';
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Controller\RemoteController;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\LocalSession;
 
-LocalSession::create('coverage')->start();
+LocalSession::startSession('coverage');
 RemoteController::create()->getResponse()->send();

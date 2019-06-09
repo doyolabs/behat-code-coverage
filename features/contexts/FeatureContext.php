@@ -11,9 +11,13 @@
 
 declare(strict_types=1);
 
+namespace Test\Doyo\Behat\Coverage\Contexts;
+
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
+use SebastianBergmann\CodeCoverage\CodeCoverage;
+use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 
 /**
@@ -109,7 +113,7 @@ class FeatureContext implements Context
         }
 
         $driver   = new Dummy();
-        $coverage = new \SebastianBergmann\CodeCoverage\CodeCoverage($driver);
+        $coverage = new CodeCoverage($driver);
 
         include $patchedFile;
 
@@ -254,7 +258,7 @@ class FeatureContext implements Context
             '--config='.$config,
         ]);
 
-        $process = new Symfony\Component\Process\Process($commands, $this->fixturesDir);
+        $process = new Process($commands, $this->fixturesDir);
         $process->setTimeout(0);
         $process->run();
 

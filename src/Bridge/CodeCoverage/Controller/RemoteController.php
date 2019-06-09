@@ -20,6 +20,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RemoteController
 {
+    const SERIALIZED_OBJECT_CONTENT_TYPE = 'application/php-serialized-object';
+
     /**
      * @return static
      */
@@ -104,8 +106,18 @@ class RemoteController
         }
         $session = $request->get('session');
         $session = new RemoteSession($session);
-        $data    = serialize($session->getProcessor()->getCodeCoverage());
+        $data    = serialize($session);
 
-        return new Response($data, Response::HTTP_OK);
+        if(is_null($session->getProcessor())){
+            $data = [
+                'message' => 'Session '.$session->getName().' is not initialized.'
+            ];
+            return new JsonResponse($data, Response::HTTP_NOT_FOUND);
+        }
+
+
+        $response =  new Response($data, Response::HTTP_OK);
+        $response->headers->set('Content-Type', static::SERIALIZED_OBJECT_CONTENT_TYPE);
+        return $response;
     }
 }

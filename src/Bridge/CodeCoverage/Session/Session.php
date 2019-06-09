@@ -188,13 +188,11 @@ abstract class Session implements \Serializable, SessionInterface
     /**
      * @param FilesystemAdapter|null $adapter
      *
-     * @return Cache
+     * @return void
      */
-    public function setAdapter(FilesystemAdapter $adapter): self
+    public function setAdapter(FilesystemAdapter $adapter)
     {
         $this->adapter = $adapter;
-
-        return $this;
     }
 
     /**

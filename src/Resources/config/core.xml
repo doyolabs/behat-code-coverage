@@ -7,7 +7,7 @@
         <parameter key="doyo.coverage.io.class">Doyo\Behat\Coverage\Console\IO</parameter>
         <parameter key="doyo.coverage.controller.cli.class">Doyo\Behat\Coverage\Controller\Cli\CoverageController</parameter>
         <parameter key="doyo.coverage.listener.behat.class">Doyo\Behat\Coverage\Listener\BehatEventListener</parameter>
-        <parameter key="doyo.coverage.dispatcher.class">Doyo\Behat\Coverage\Bridge\Symfony\EventDispatcher</parameter>
+        <parameter key="doyo.coverage.dispatcher.class">Doyo\Symfony\Bridge\EventDispatcher\EventDispatcher</parameter>
     </parameters>
     <services>
         <defaults public="true"/>

@@ -15,8 +15,8 @@ namespace Doyo\Behat\Coverage\Event;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
-use Doyo\Behat\Coverage\Bridge\Symfony\Event;
 use Doyo\Behat\Coverage\Console\ConsoleIO;
+use Doyo\Symfony\Bridge\EventDispatcher\Event;
 
 class CoverageEvent extends Event
 {
@@ -46,7 +46,7 @@ class CoverageEvent extends Event
     public function __construct(ProcessorInterface $processor, ConsoleIO $consoleIO, TestCase $testCase = null)
     {
         $this->processor = $processor;
-        $this->testCase = $testCase;
+        $this->testCase  = $testCase;
         $this->consoleIO = $consoleIO;
     }
 

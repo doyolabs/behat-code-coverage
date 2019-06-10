@@ -87,8 +87,8 @@ class CoveragePass implements CompilerPassInterface
     private function createSessionDriver(ContainerBuilder $container, $name, $config)
     {
         $xdebugPatch = $container->getParameterBag()->get('doyo.coverage.xdebug_patch');
-        $driver = $config['driver'];
-        $map    = [
+        $driver      = $config['driver'];
+        $map         = [
             'local'  => 'doyo.coverage.local_session.class',
             'remote' => 'doyo.coverage.remote_session.class',
         ];
@@ -103,7 +103,6 @@ class CoveragePass implements CompilerPassInterface
 
         $processorId = $this->createSessionProcessor($container, $name);
         $definition->addMethodCall('setProcessor', [new Reference($processorId)]);
-
 
         return $id;
     }

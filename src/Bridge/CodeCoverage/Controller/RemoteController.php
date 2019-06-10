@@ -108,16 +108,17 @@ class RemoteController
         $session = new RemoteSession($session);
         $data    = serialize($session);
 
-        if(is_null($session->getProcessor())){
+        if (null === $session->getProcessor()) {
             $data = [
-                'message' => 'Session '.$session->getName().' is not initialized.'
+                'message' => 'Session '.$session->getName().' is not initialized.',
             ];
+
             return new JsonResponse($data, Response::HTTP_NOT_FOUND);
         }
 
-
         $response =  new Response($data, Response::HTTP_OK);
         $response->headers->set('Content-Type', static::SERIALIZED_OBJECT_CONTENT_TYPE);
+
         return $response;
     }
 }

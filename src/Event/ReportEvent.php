@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace Doyo\Behat\Coverage\Event;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
-use Doyo\Behat\Coverage\Bridge\Symfony\Event;
 use Doyo\Behat\Coverage\Console\ConsoleIO;
+use Doyo\Symfony\Bridge\EventDispatcher\Event;
 
 class ReportEvent extends Event
 {
@@ -32,7 +32,6 @@ class ReportEvent extends Event
      * @var ConsoleIO
      */
     private $consoleIO;
-
 
     public function __construct(ProcessorInterface $processor, ConsoleIO $consoleIO)
     {

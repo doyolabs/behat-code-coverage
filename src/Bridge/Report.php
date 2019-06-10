@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Doyo\Behat\Coverage\Bridge;
 
 use Doyo\Behat\Coverage\Event\ReportEvent;
-use Doyo\Behat\Coverage\Exception\ReportProcessException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class Report implements EventSubscriberInterface

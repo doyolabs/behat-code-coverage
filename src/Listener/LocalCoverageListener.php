@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Doyo\Behat\Coverage\Listener;
 
 use Doyo\Behat\Coverage\Event\CoverageEvent;
-use spec\Doyo\Behat\Coverage\Listener\AbstractSessionCoverageListener;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class LocalCoverageListener extends AbstractSessionCoverageListener implements EventSubscriberInterface
@@ -51,9 +50,9 @@ class LocalCoverageListener extends AbstractSessionCoverageListener implements E
             $event->getProcessor()->merge($processor);
         }
 
-        if($session->hasExceptions()){
-            foreach($session->getExceptions() as $exception){
-                $event->getConsoleIO()->sessionError($session->getName(),$exception->getMessage());
+        if ($session->hasExceptions()) {
+            foreach ($session->getExceptions() as $exception) {
+                $event->getConsoleIO()->sessionError($session->getName(), $exception->getMessage());
             }
         }
     }

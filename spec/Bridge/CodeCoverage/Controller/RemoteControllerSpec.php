@@ -1,62 +1,65 @@
 <?php
 
+/*
+ * This file is part of the doyo/behat-coverage-extension project.
+ *
+ * (c) Anthonius Munthi <me@itstoni.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
 namespace spec\Doyo\Behat\Coverage\Bridge\CodeCoverage\Controller;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\OldSession;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Controller\RemoteController;
+use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\SessionInterface;
-use GuzzleHttp\Exception\RequestException;
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use spec\Doyo\Behat\Coverage\ResponseTrait;
 use Symfony\Component\HttpFoundation\HeaderBag;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Webmozart\Assert\Assert;
 
 class RemoteControllerSpec extends ObjectBehavior
 {
     use ResponseTrait;
 
-    function it_is_initializable()
+    public function it_is_initializable()
     {
         $this->shouldHaveType(RemoteController::class);
     }
 
-    function its_create_should_create_a_new_instance()
+    public function its_create_should_create_a_new_instance()
     {
         $this->create()->shouldHaveType(RemoteController::class);
     }
 
-    function its_should_return_404_when_action_not_exist(
+    public function its_should_return_404_when_action_not_exist(
         Request $request
-    )
-    {
+    ) {
         $request->get('action')->willReturn('foo');
 
         $response = $this->getResponse();
         $response->shouldBeInJson();
         $response->shouldContainJsonKey('message');
-        $response->shouldContainJsonKeyWithValue('message','The page you requested');
+        $response->shouldContainJsonKeyWithValue('message', 'The page you requested');
     }
 
-    function its_notFoundAction_should_handle_404_response(
+    public function its_notFoundAction_should_handle_404_response(
         Request $request
-    )
-    {
+    ) {
         $response = $this->notFoundAction();
         $response->shouldBeInJson();
         $response->shouldHaveStatusCode(404);
     }
 
-    function its_methodUnsupported_should_handle_unsupported_method(
+    public function its_methodUnsupported_should_handle_unsupported_method(
         Request $request
-    )
-    {
+    ) {
         $request->get('action')->willReturn('action');
         $request->getMethod()->willReturn('GET');
         $response = $this->unsupportedMethodAction($request, Request::METHOD_POST);
@@ -64,11 +67,9 @@ class RemoteControllerSpec extends ObjectBehavior
         $response->shouldHaveStatusCode(Response::HTTP_METHOD_NOT_ALLOWED);
     }
 
-
-    function its_initAction_only_accept_post_method(
+    public function its_initAction_only_accept_post_method(
         Request $request
-    )
-    {
+    ) {
         $request->isMethod('POST')->willReturn(false);
         $request->getMethod()->willReturn('GET');
         $request->get('action')->willReturn('init');
@@ -77,19 +78,18 @@ class RemoteControllerSpec extends ObjectBehavior
         $response->shouldBeInJson();
     }
 
-    function its_initAction_should_init_new_coverage_session(
+    public function its_initAction_should_init_new_coverage_session(
         Request $request
-    )
-    {
+    ) {
         $config = [
             'filterOptions' => [
                 'whitelistedFiles' => [
-                    __FILE__
-                ]
+                    __FILE__,
+                ],
             ],
             'codeCoverageOptions' => [
-                'addUncoveredFilesFromWhitelist' => true
-            ]
+                'addUncoveredFilesFromWhitelist' => true,
+            ],
         ];
 
         $data = json_encode($config);
@@ -106,10 +106,9 @@ class RemoteControllerSpec extends ObjectBehavior
         $response->shouldHaveStatusCode(Response::HTTP_ACCEPTED);
     }
 
-    function its_readAction_only_accept_get_method(
+    public function its_readAction_only_accept_get_method(
         Request $request
-    )
-    {
+    ) {
         $request->get('action')->willReturn('read');
         $request->getMethod()->willReturn('POST');
         $request->isMethod('GET')->willReturn(false);
@@ -119,10 +118,9 @@ class RemoteControllerSpec extends ObjectBehavior
         $response->shouldHaveStatusCode(Response::HTTP_METHOD_NOT_ALLOWED);
     }
 
-    function its_readAction_will_not_process_undefined_session(
+    public function its_readAction_will_not_process_undefined_session(
         Request $request
-    )
-    {
+    ) {
         $request->isMethod('GET')->willReturn(true);
         $request->get('session')->willReturn(null);
 
@@ -131,10 +129,9 @@ class RemoteControllerSpec extends ObjectBehavior
         $response->shouldHaveStatusCode(404);
     }
 
-    function its_readAction_will_not_process_uninitialized_session(
+    public function its_readAction_will_not_process_uninitialized_session(
         Request $request
-    )
-    {
+    ) {
         $request->isMethod('GET')->willReturn(true);
         $request->get('session')->willReturn('uninitialized');
 
@@ -143,14 +140,11 @@ class RemoteControllerSpec extends ObjectBehavior
         $response->shouldHaveStatusCode(404);
     }
 
-
-
-    function its_readAction_returns_code_coverage_data(
+    public function its_readAction_returns_code_coverage_data(
         Request $request,
         ProcessorInterface $processor,
         SessionInterface $session
-    )
-    {
+    ) {
         $codeCoverage  = new CodeCoverage(new Dummy());
         $processor->getCodeCoverage()->willReturn($codeCoverage);
         $session->getProcessor()->willReturn($processor);
@@ -160,8 +154,7 @@ class RemoteControllerSpec extends ObjectBehavior
         $request
             ->get('session')
             ->willReturn('spec-remote')
-            ->shouldBeCalled()
-        ;
+            ->shouldBeCalled();
 
         $response = $this->readAction($request);
         $response->shouldBeAHttpResponse();

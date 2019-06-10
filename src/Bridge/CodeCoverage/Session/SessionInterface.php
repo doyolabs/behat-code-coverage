@@ -22,10 +22,9 @@ use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 interface SessionInterface
 {
     /**
-     * Enable or disable xdebug patch
+     * Enable or disable xdebug patch.
      *
-     * @param   bool $flag
-     * @return  void
+     * @param bool $flag
      */
     public function setPatchXdebug(bool $flag);
 

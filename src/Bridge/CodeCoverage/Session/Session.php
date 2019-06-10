@@ -18,7 +18,6 @@ use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
-use SebastianBergmann\CodeCoverage\Filter;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
 abstract class Session implements \Serializable, SessionInterface
@@ -101,7 +100,7 @@ abstract class Session implements \Serializable, SessionInterface
             $this->testCase,
             $this->exceptions,
             $this->processor,
-            $this->patchXdebug
+            $this->patchXdebug,
         ];
 
         return serialize($data);
@@ -130,10 +129,10 @@ abstract class Session implements \Serializable, SessionInterface
         $cached  = $adapter->getItem(static::CACHE_KEY)->get();
 
         if ($cached instanceof self) {
-            $this->name = $cached->getName();
-            $this->testCase = $cached->getTestCase();
-            $this->exceptions = $cached->getExceptions();
-            $this->processor = $cached->getProcessor();
+            $this->name        = $cached->getName();
+            $this->testCase    = $cached->getTestCase();
+            $this->exceptions  = $cached->getExceptions();
+            $this->processor   = $cached->getProcessor();
             $this->patchXdebug = $cached->getPatchXdebug();
         }
     }
@@ -187,8 +186,6 @@ abstract class Session implements \Serializable, SessionInterface
 
     /**
      * @param FilesystemAdapter|null $adapter
-     *
-     * @return void
      */
     public function setAdapter(FilesystemAdapter $adapter)
     {
@@ -232,7 +229,7 @@ abstract class Session implements \Serializable, SessionInterface
      */
     public function addException(\Exception $e)
     {
-        $id = md5($e->getMessage());
+        $id                    = md5($e->getMessage());
         $this->exceptions[$id] = $e;
     }
 
@@ -241,12 +238,12 @@ abstract class Session implements \Serializable, SessionInterface
      */
     public function xdebugPatch()
     {
-        if(!$this->patchXdebug){
+        if (!$this->patchXdebug) {
             return;
         }
 
-        $filter = $this->getProcessor()->getCodeCoverageFilter();
-        $options = $filter->getWhitelistedFiles();
+        $filter    = $this->getProcessor()->getCodeCoverageFilter();
+        $options   = $filter->getWhitelistedFiles();
         $filterKey = 'whitelistedFiles';
 
         if (
@@ -281,7 +278,7 @@ abstract class Session implements \Serializable, SessionInterface
             return;
         }
         try {
-            $this->hasStarted = false;
+            $this->hasStarted   = false;
             $this->codeCoverage = $this->createCodeCoverage($driver);
             $this->xdebugPatch();
             $this->codeCoverage->start($this->testCase->getName());
@@ -353,7 +350,7 @@ abstract class Session implements \Serializable, SessionInterface
         $options  = $this->processor->getCodeCoverageOptions();
         $coverage = new CodeCoverage($driver, $filter);
         foreach ($options as $method => $option) {
-            if(method_exists($coverage, $method)){
+            if (method_exists($coverage, $method)) {
                 $method = 'set'.ucfirst($method);
                 \call_user_func_array([$coverage, $method], [$option]);
             }

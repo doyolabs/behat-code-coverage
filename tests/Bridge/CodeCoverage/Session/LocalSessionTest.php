@@ -1,24 +1,34 @@
 <?php
 
+/*
+ * This file is part of the doyo/behat-coverage-extension project.
+ *
+ * (c) Anthonius Munthi <me@itstoni.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
 namespace Test\Doyo\Behat\Coverage\Bridge\CodeCoverage\Session;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Exception\SessionException;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\LocalSession;
-use Doyo\Behat\Coverage\Extension;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase as CoverageTestCase;
+use Doyo\Behat\Coverage\Extension;
 use PHPUnit\Framework\TestCase;
 use SebastianBergmann\CodeCoverage\Filter;
 
 /**
- * Class LocalSessionTest
+ * Class LocalSessionTest.
  */
 class LocalSessionTest extends TestCase
 {
-
-    public function setUp()
+    protected function setUp()
     {
-        if(!Extension::canCollectCodeCoverage()){
+        if (!Extension::canCollectCodeCoverage()) {
             $this->markTestSkipped('xdebug or phpdbg not available');
         }
     }
@@ -27,14 +37,13 @@ class LocalSessionTest extends TestCase
     {
         $name = 'test.local';
 
-        $filter = new Filter();
+        $filter    = new Filter();
         $processor = $this->createMock(ProcessorInterface::class);
         $processor->method('getCodeCoverageOptions')
             ->willReturn([]);
         $processor->method('getCodeCoverageFilter')
             ->willReturn($filter);
         $testCase = new CoverageTestCase('test');
-
 
         $session = new LocalSession($name, false);
         $session->setTestCase($testCase);
@@ -52,7 +61,6 @@ class LocalSessionTest extends TestCase
         $processor->method('getCodeCoverageFilter')
             ->willThrowException(new SessionException());
         $testCase = new CoverageTestCase('test');
-
 
         $session = new LocalSession($name, false);
         $session->setTestCase($testCase);

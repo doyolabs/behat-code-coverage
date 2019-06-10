@@ -14,9 +14,9 @@ declare(strict_types=1);
 namespace Doyo\Behat\Coverage\Controller\Cli;
 
 use Behat\Testwork\Cli\Controller;
-use Doyo\Symfony\Bridge\EventDispatcher\Event;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
+use Doyo\Symfony\Bridge\EventDispatcher\Event;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -48,10 +48,10 @@ class CoverageController implements Controller, EventSubscriberInterface
         return [
             ReportEvent::BEFORE_PROCESS => [
                 ['validateEvent', 1000],
-                ['beforeReportProcess']
+                ['beforeReportProcess'],
             ],
             ReportEvent::AFTER_PROCESS    => ['afterReportProcess', 10000],
-            CoverageEvent::COMPLETED => ['validateEvent', 10000],
+            CoverageEvent::COMPLETED      => ['validateEvent', 10000],
             CoverageEvent::BEFORE_REFRESH => ['validateEvent', 10000],
             CoverageEvent::BEFORE_START   => ['validateEvent', 10000],
             CoverageEvent::BEFORE_STOP    => ['validateEvent', 10000],
@@ -84,9 +84,9 @@ class CoverageController implements Controller, EventSubscriberInterface
     {
         $io = $event->getConsoleIO();
 
-        if(!$io->hasError()){
+        if (!$io->hasError()) {
             $io->success('behat code coverage generated');
-        }else{
+        } else {
             $io->error('behat generate code coverage error');
         }
     }

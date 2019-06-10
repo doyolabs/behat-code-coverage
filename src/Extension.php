@@ -29,7 +29,7 @@ class Extension implements ExtensionInterface
     public static function canCollectCodeCoverage()
     {
         static $runtime;
-        if(is_null($runtime)){
+        if (null === $runtime) {
             $runtime = new Runtime();
         }
 

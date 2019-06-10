@@ -20,10 +20,10 @@ use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Behat\Testwork\Tester\Result\TestResult;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
-use Doyo\Symfony\Bridge\EventDispatcher\EventDispatcher;
 use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
+use Doyo\Symfony\Bridge\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class BehatEventListener implements EventSubscriberInterface
@@ -54,8 +54,8 @@ class BehatEventListener implements EventSubscriberInterface
         ConsoleIO $consoleIO
     ) {
         $this->dispatcher = $dispatcher;
-        $this->processor = $processor;
-        $this->consoleIO = $consoleIO;
+        $this->processor  = $processor;
+        $this->consoleIO  = $consoleIO;
     }
 
     public static function getSubscribedEvents()
@@ -82,12 +82,12 @@ class BehatEventListener implements EventSubscriberInterface
 
     public function startCoverage($scope)
     {
-        $scenario = $scope->getScenario();
-        $id = $scope->getFeature()->getFile().':'.$scenario->getLine();
+        $scenario   = $scope->getScenario();
+        $id         = $scope->getFeature()->getFile().':'.$scenario->getLine();
         $dispatcher = $this->dispatcher;
-        $testCase = new TestCase($id);
-        $processor = $this->processor;
-        $consoleIO = $this->consoleIO;
+        $testCase   = new TestCase($id);
+        $processor  = $this->processor;
+        $consoleIO  = $this->consoleIO;
 
         $coverageEvent = new CoverageEvent($processor, $consoleIO, $testCase);
         $processor->start($testCase);
@@ -124,8 +124,7 @@ class BehatEventListener implements EventSubscriberInterface
     {
         $dispatcher    = $this->dispatcher;
         $processor     = $this->processor;
-        $consoleIO = $this->consoleIO;
-
+        $consoleIO     = $this->consoleIO;
 
         $consoleIO->setHasError(false);
 

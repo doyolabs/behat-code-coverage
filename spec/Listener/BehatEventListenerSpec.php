@@ -1,5 +1,16 @@
 <?php
 
+/*
+ * This file is part of the doyo/behat-coverage-extension project.
+ *
+ * (c) Anthonius Munthi <me@itstoni.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
 namespace spec\Doyo\Behat\Coverage\Listener;
 
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
@@ -15,38 +26,36 @@ use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use Doyo\Behat\Coverage\Listener\BehatEventListener;
+use Doyo\Symfony\Bridge\EventDispatcher\EventDispatcher;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use Doyo\Symfony\Bridge\EventDispatcher\EventDispatcher;
 
 class BehatEventListenerSpec extends ObjectBehavior
 {
-    function let(
+    public function let(
         EventDispatcher $dispatcher,
         ProcessorInterface $processor,
         ConsoleIO $consoleIO
-    )
-    {
+    ) {
         $this->beAnInstanceOf(TestBehatEventListener::class);
         $this->beConstructedWith($dispatcher, $processor, $consoleIO);
     }
 
-    function it_is_initializable()
+    public function it_is_initializable()
     {
         $this->shouldHaveType(BehatEventListener::class);
     }
 
-    function it_should_listen_to_behat_events()
+    public function it_should_listen_to_behat_events()
     {
         $this->getSubscribedEvents()->shouldHaveKey(ExerciseCompleted::BEFORE);
         $this->getSubscribedEvents()->shouldHaveKey(ExerciseCompleted::AFTER);
     }
 
-    function it_should_dispatch_coverage_refresh_event(
+    public function it_should_dispatch_coverage_refresh_event(
         EventDispatcher $dispatcher,
         ProcessorInterface $processor
-    )
-    {
+    ) {
         $processor->clear()->shouldBeCalled();
 
         $dispatcher
@@ -59,15 +68,14 @@ class BehatEventListenerSpec extends ObjectBehavior
         $this->refreshCoverage();
     }
 
-    function it_should_dispatch_coverage_start_event(
+    public function it_should_dispatch_coverage_start_event(
         EventDispatcher $dispatcher,
         ScenarioTested $scope,
         ScenarioInterface $scenario,
         FeatureNode $feature,
         TestResult $results,
         ProcessorInterface $processor
-    )
-    {
+    ) {
         $scope->getFeature()->willReturn($feature);
         $scope->getScenario()->willReturn($scenario);
         $feature->getFile()->willReturn('some.feature');
@@ -85,15 +93,14 @@ class BehatEventListenerSpec extends ObjectBehavior
         $this->startCoverage($scope);
     }
 
-    function it_should_dispatch_coverage_stop_event(
+    public function it_should_dispatch_coverage_stop_event(
         EventDispatcher $dispatcher,
         AfterTested $afterTested,
         TestResult $result,
         TestCase $testCase,
         CoverageEvent $coverageEvent,
         ProcessorInterface $processor
-    )
-    {
+    ) {
         $afterTested->getTestResult()->willReturn($result)->shouldBeCalledOnce();
         $result->getResultCode()->willReturn(0)->shouldBeCalledOnce();
 
@@ -111,11 +118,10 @@ class BehatEventListenerSpec extends ObjectBehavior
         $this->stopCoverage($afterTested);
     }
 
-    function it_should_dispatch_report_events(
+    public function it_should_dispatch_report_events(
         EventDispatcher $dispatcher,
         ProcessorInterface $processor
-    )
-    {
+    ) {
         $processor->complete()->shouldBeCalled();
 
         $dispatcher

@@ -18,13 +18,15 @@ class LocalSession extends Session
     public static function startSession($name): bool
     {
         $self = new static($name);
-        try{
+        try {
             $self->start();
             register_shutdown_function([$self, 'shutdown']);
+
             return true;
-        }catch (\Exception $exception){
+        } catch (\Exception $exception) {
             $self->addException($exception);
             $self->save();
+
             return false;
         }
     }

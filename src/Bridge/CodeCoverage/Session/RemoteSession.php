@@ -33,7 +33,7 @@ class RemoteSession extends Session
         $session = new static($name);
         if (isset($_SERVER[static::HEADER_TEST_CASE_KEY])) {
             $session->doStartSession();
-        }else{
+        } else {
             return false;
         }
         $session->save();
@@ -67,10 +67,10 @@ class RemoteSession extends Session
         $testCase = new TestCase($name);
         $this->setTestCase($testCase);
 
-        try{
+        try {
             $this->start();
             register_shutdown_function([$this, 'shutdown']);
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $this->reset();
             $this->exceptions[] = $e;
         }

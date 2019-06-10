@@ -50,9 +50,9 @@ class LocalCoverageListener extends AbstractSessionCoverageListener implements E
             $event->getProcessor()->merge($processor);
         }
 
-        if($session->hasExceptions()){
-            foreach($session->getExceptions() as $exception){
-                $event->getConsoleIO()->sessionError($session->getName(),$exception->getMessage());
+        if ($session->hasExceptions()) {
+            foreach ($session->getExceptions() as $exception) {
+                $event->getConsoleIO()->sessionError($session->getName(), $exception->getMessage());
             }
         }
     }

@@ -15,16 +15,11 @@ namespace Doyo\Behat\Coverage\Listener;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Exception\SessionException;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\SessionInterface;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
-use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\Exception\RequestExceptionInterface;
-use Symfony\Component\HttpFoundation\Response;
 
 class RemoteCoverageListener extends AbstractSessionCoverageListener implements EventSubscriberInterface
 {
@@ -37,8 +32,6 @@ class RemoteCoverageListener extends AbstractSessionCoverageListener implements 
      * @var ClientInterface
      */
     private $httpClient;
-
-    private $minkSessionName;
 
     private $remoteUrl;
 
@@ -105,22 +98,22 @@ class RemoteCoverageListener extends AbstractSessionCoverageListener implements 
             $client->request('POST', $url, $options);
             $this->initialized = true;
         } catch (\Exception $e) {
-            $message = $this->getExceptionMessage($e);
-            $this->initialized = false;
+            $message                = $this->getExceptionMessage($e);
+            $this->initialized      = false;
             $this->refreshException = new SessionException($message);
         }
     }
 
     public function beforeCoverageStart(CoverageEvent $event)
     {
-        if($this->initialized){
+        if ($this->initialized) {
             $this->doBeforeCoverageStart($event);
         }
     }
 
     public function coverageCompleted(CoverageEvent $event)
     {
-        if($this->initialized){
+        if ($this->initialized) {
             $this->doCoverageComplete($event);
         }
     }
@@ -161,9 +154,9 @@ class RemoteCoverageListener extends AbstractSessionCoverageListener implements 
         ];
 
         try {
-            $response = $client->request('GET', $uri, $options);
+            $response  = $client->request('GET', $uri, $options);
             $data      = $response->getBody()->getContents();
-            $session = unserialize($data);
+            $session   = unserialize($data);
             $processor = $session->getProcessor();
             $event->getProcessor()->merge($processor);
         } catch (\Exception $exception) {
@@ -176,18 +169,18 @@ class RemoteCoverageListener extends AbstractSessionCoverageListener implements 
     {
         $message = $exception->getMessage();
 
-        if(!$exception instanceof RequestException){
+        if (!$exception instanceof RequestException) {
             return $message;
         }
 
         $response = $exception->getResponse();
-        if(!$response instanceof ResponseInterface){
+        if (!$response instanceof ResponseInterface) {
             return $message;
         }
 
         $contentType = $response->getHeader('Content-Type');
-        if(in_array('application/json',$contentType)){
-            $data = json_decode($response->getBody()->getContents(), true);
+        if (\in_array('application/json', $contentType, true)) {
+            $data    = json_decode($response->getBody()->getContents(), true);
             $message = $data['message'];
         }
 

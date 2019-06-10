@@ -29,7 +29,8 @@
         "psr-4": {
             "Test\\Doyo\\Behat\\Coverage\\": "tests/",
             "spec\\Doyo\\Behat\\Coverage\\": "spec/",
-            "Test\\Doyo\\Behat\\Coverage\\Contexts\\": "features/contexts/"
+            "Test\\Doyo\\Behat\\Coverage\\Contexts\\": "features/contexts/",
+            "Doyo\\Behat\\Coverage\\Bridge\\CodeCoverage\\": "src/Bridge/CodeCoverage/"
         }
     },
     "require": {

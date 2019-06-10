@@ -40,7 +40,6 @@ jobs:
     - php: '7.1'
     - php: '7.2'
     - php: '7.3'
-    - php: '7.3'
       env: COVERAGE=yes
       before_cache:
         - *install-php-coveralls
@@ -50,9 +49,6 @@ jobs:
         - *run-test-coverage
       after_script:
         - *upload-coverage
-  allow_failures:
-    - env: COVERAGE=yes
-  fast_finish: true
 
 before_install:
   - *disable-php-memory-limit

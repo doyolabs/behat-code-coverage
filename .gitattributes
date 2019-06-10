@@ -6,6 +6,7 @@
 *.dist
 composer.lock
 RoboFile.php
+bin
 build
 features
 spec

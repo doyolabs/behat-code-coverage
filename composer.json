@@ -1,5 +1,5 @@
 {
-    "name": "doyo/behat-coverage-extension",
+    "name": "doyo/behat-code-coverage",
     "description": "Behat Code Coverage Extension",
     "type": "library",
     "license": "MIT",

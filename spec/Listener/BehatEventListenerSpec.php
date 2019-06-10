@@ -17,7 +17,7 @@ use Doyo\Behat\Coverage\Event\ReportEvent;
 use Doyo\Behat\Coverage\Listener\BehatEventListener;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use Doyo\Behat\Coverage\Bridge\Symfony\EventDispatcher;
+use Doyo\Symfony\Bridge\EventDispatcher\EventDispatcher;
 
 class BehatEventListenerSpec extends ObjectBehavior
 {

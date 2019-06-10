@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Doyo\Behat\Coverage\Controller\Cli;
 
 use Behat\Testwork\Cli\Controller;
-use Doyo\Behat\Coverage\Bridge\Symfony\Event;
+use Doyo\Symfony\Bridge\EventDispatcher\Event;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use Symfony\Component\Console\Command\Command;

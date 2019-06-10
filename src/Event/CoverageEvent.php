@@ -15,7 +15,7 @@ namespace Doyo\Behat\Coverage\Event;
 
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
-use Doyo\Behat\Coverage\Bridge\Symfony\Event;
+use Doyo\Symfony\Bridge\EventDispatcher\Event;
 use Doyo\Behat\Coverage\Console\ConsoleIO;
 
 class CoverageEvent extends Event

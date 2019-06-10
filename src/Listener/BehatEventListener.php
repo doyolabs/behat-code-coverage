@@ -20,7 +20,7 @@ use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Behat\Testwork\Tester\Result\TestResult;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
-use Doyo\Behat\Coverage\Bridge\Symfony\EventDispatcher;
+use Doyo\Symfony\Bridge\EventDispatcher\EventDispatcher;
 use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;

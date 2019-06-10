@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Event;
 
-use Doyo\Behat\Coverage\Bridge\Symfony\Event;
+use Doyo\Symfony\Bridge\EventDispatcher\Event;
 
 class RefreshEvent extends Event
 {

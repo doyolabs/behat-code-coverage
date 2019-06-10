@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Event;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Console\ConsoleIO;
+use Doyo\Bridge\CodeCoverage\ProcessorInterface;
+use Doyo\Bridge\CodeCoverage\TestCase;
 use Doyo\Symfony\Bridge\EventDispatcher\Event;
 
 class CoverageEvent extends Event

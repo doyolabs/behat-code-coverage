@@ -11,13 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Test\Doyo\Behat\Coverage\Bridge\CodeCoverage\Session;
+namespace Test\Doyo\Bridge\CodeCoverage\Session;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Exception\SessionException;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\LocalSession;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase as CoverageTestCase;
 use Doyo\Behat\Coverage\Extension;
+use Doyo\Bridge\CodeCoverage\Exception\SessionException;
+use Doyo\Bridge\CodeCoverage\ProcessorInterface;
+use Doyo\Bridge\CodeCoverage\Session\LocalSession;
+use Doyo\Bridge\CodeCoverage\TestCase as CoverageTestCase;
 use PHPUnit\Framework\TestCase;
 use SebastianBergmann\CodeCoverage\Filter;
 

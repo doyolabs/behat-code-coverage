@@ -13,10 +13,10 @@ declare(strict_types=1);
 
 namespace spec\Doyo\Behat\Coverage\Event;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
+use Doyo\Bridge\CodeCoverage\ProcessorInterface;
+use Doyo\Bridge\CodeCoverage\TestCase;
 use PhpSpec\ObjectBehavior;
 
 class CoverageEventSpec extends ObjectBehavior

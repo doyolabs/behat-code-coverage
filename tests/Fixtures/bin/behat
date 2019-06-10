@@ -3,7 +3,7 @@
 
 require __DIR__.'/../../../vendor/autoload.php';
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\LocalSession;
+use Doyo\Bridge\CodeCoverage\Session\LocalSession;
 
 LocalSession::startSession('console');
 

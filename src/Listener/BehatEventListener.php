@@ -18,11 +18,11 @@ use Behat\Behat\EventDispatcher\Event\ScenarioTested;
 use Behat\Testwork\EventDispatcher\Event\AfterTested;
 use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Behat\Testwork\Tester\Result\TestResult;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
+use Doyo\Bridge\CodeCoverage\ProcessorInterface;
+use Doyo\Bridge\CodeCoverage\TestCase;
 use Doyo\Symfony\Bridge\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 

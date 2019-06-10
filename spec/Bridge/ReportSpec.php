@@ -14,11 +14,11 @@ declare(strict_types=1);
 namespace spec\Doyo\Behat\Coverage\Bridge;
 
 use Behat\Mink\Driver\DriverInterface;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
 use Doyo\Behat\Coverage\Bridge\Report;
 use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Event\ReportEvent;
+use Doyo\Bridge\CodeCoverage\Driver\Dummy;
+use Doyo\Bridge\CodeCoverage\Processor;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use SebastianBergmann\CodeCoverage\CodeCoverage;

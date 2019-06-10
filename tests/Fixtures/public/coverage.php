@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 require __DIR__.'/../../../vendor/autoload.php';
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Controller\RemoteController;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\LocalSession;
+use Doyo\Bridge\CodeCoverage\Controller\RemoteController;
+use Doyo\Bridge\CodeCoverage\Session\LocalSession;
 
 LocalSession::startSession('coverage');
 RemoteController::create()->getResponse()->send();

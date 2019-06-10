@@ -20,12 +20,12 @@ use Behat\Testwork\EventDispatcher\Event\AfterTested;
 use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Behat\Testwork\Tester\Result\TestResult;
 use Behat\Testwork\Tester\Result\TestResults;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Event\ReportEvent;
 use Doyo\Behat\Coverage\Listener\BehatEventListener;
+use Doyo\Bridge\CodeCoverage\ProcessorInterface;
+use Doyo\Bridge\CodeCoverage\TestCase;
 use Doyo\Symfony\Bridge\EventDispatcher\EventDispatcher;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -106,8 +106,7 @@ class BehatEventListenerSpec extends ObjectBehavior
         $processor
             ->getCurrentTestCase()
             ->shouldBeCalledOnce()
-            ->willReturn($testCase)
-        ;
+            ->willReturn($testCase);
         $processor->stop()->shouldBeCalled();
 
         $dispatcher->dispatch(Argument::type(CoverageEvent::class), CoverageEvent::BEFORE_STOP)

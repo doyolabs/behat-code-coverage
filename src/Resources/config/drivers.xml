@@ -4,7 +4,7 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
     <parameters>
-        <parameter key="doyo.coverage.driver.dummy.class">Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy</parameter>
+        <parameter key="doyo.coverage.driver.dummy.class">Doyo\Bridge\CodeCoverage\Driver\Dummy</parameter>
         <parameter key="doyo.coverage.driver.phpdbg.class">SebastianBergmann\CodeCoverage\Driver\PHPDBG</parameter>
         <parameter key="doyo.coverage.driver.xdebug.class">SebastianBergmann\CodeCoverage\Driver\Xdebug</parameter>
     </parameters>

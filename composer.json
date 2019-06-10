@@ -29,13 +29,13 @@
         "psr-4": {
             "Test\\Doyo\\Behat\\Coverage\\": "tests/",
             "spec\\Doyo\\Behat\\Coverage\\": "spec/",
-            "Test\\Doyo\\Behat\\Coverage\\Contexts\\": "features/contexts/",
-            "Doyo\\Behat\\Coverage\\Bridge\\CodeCoverage\\": "src/Bridge/CodeCoverage/"
+            "Test\\Doyo\\Behat\\Coverage\\Contexts\\": "features/contexts/"
         }
     },
     "require": {
         "php": ">=7.0",
         "behat/behat": "^3.5",
+        "doyo/code-coverage-bridge": "^1.0@dev | ^2.0@dev",
         "doyo/symfony-bridge": "~1.0@dev",
         "guzzlehttp/guzzle": "^6.3",
         "phpunit/php-code-coverage": "^5.3 | ^6.0",

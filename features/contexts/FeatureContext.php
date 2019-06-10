@@ -15,7 +15,7 @@ namespace Test\Doyo\Behat\Coverage\Contexts;
 
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
+use Doyo\Bridge\CodeCoverage\Driver\Dummy;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;

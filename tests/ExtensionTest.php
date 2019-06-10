@@ -13,15 +13,15 @@ declare(strict_types=1);
 
 namespace Test\Doyo\Behat\Coverage;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Driver\Dummy;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Processor;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\LocalSession;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession;
 use Doyo\Behat\Coverage\Bridge\Report;
 use Doyo\Behat\Coverage\Controller\Cli\CoverageController;
 use Doyo\Behat\Coverage\Listener\BehatEventListener;
 use Doyo\Behat\Coverage\Listener\LocalCoverageListener;
 use Doyo\Behat\Coverage\Listener\RemoteCoverageListener;
+use Doyo\Bridge\CodeCoverage\Driver\Dummy;
+use Doyo\Bridge\CodeCoverage\Processor;
+use Doyo\Bridge\CodeCoverage\Session\LocalSession;
+use Doyo\Bridge\CodeCoverage\Session\RemoteSession;
 use PHPUnit\Framework\TestCase;
 
 class ExtensionTest extends TestCase

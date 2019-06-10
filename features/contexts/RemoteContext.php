@@ -15,8 +15,8 @@ namespace Test\Doyo\Behat\Coverage\Contexts;
 
 use Behat\Gherkin\Node\PyStringNode;
 use Behatch\Context\RestContext;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Controller\RemoteController;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\SessionInterface;
+use Doyo\Bridge\CodeCoverage\Controller\RemoteController;
+use Doyo\Bridge\CodeCoverage\Session\SessionInterface;
 use Webmozart\Assert\Assert;
 
 class RemoteContext extends RestContext

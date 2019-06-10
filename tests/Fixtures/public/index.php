@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 include __DIR__.'/../../../vendor/autoload.php';
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\LocalSession;
+use Doyo\Bridge\CodeCoverage\Session\LocalSession;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Test\Doyo\Behat\Coverage\Fixtures\src\blacklist\blacklist;
 use Test\Doyo\Behat\Coverage\Fixtures\src\Foo;

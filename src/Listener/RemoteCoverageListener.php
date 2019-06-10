@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Listener;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Exception\SessionException;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
+use Doyo\Bridge\CodeCoverage\Exception\SessionException;
+use Doyo\Bridge\CodeCoverage\Session\RemoteSession;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;

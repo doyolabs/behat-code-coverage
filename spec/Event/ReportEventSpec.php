@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace spec\Doyo\Behat\Coverage\Event;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
 use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Event\ReportEvent;
+use Doyo\Bridge\CodeCoverage\ProcessorInterface;
 use PhpSpec\ObjectBehavior;
 
 class ReportEventSpec extends ObjectBehavior

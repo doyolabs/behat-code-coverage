@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 include __DIR__.'/../../../vendor/autoload.php';
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\LocalSession;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\RemoteSession;
+use Doyo\Bridge\CodeCoverage\Session\LocalSession;
+use Doyo\Bridge\CodeCoverage\Session\RemoteSession;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Test\Doyo\Behat\Coverage\Fixtures\src\remote\Remote;
 

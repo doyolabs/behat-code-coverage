@@ -13,12 +13,12 @@ declare(strict_types=1);
 
 namespace spec\Doyo\Behat\Coverage\Listener;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\ProcessorInterface;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\SessionInterface;
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\TestCase;
 use Doyo\Behat\Coverage\Console\ConsoleIO;
 use Doyo\Behat\Coverage\Event\CoverageEvent;
 use Doyo\Behat\Coverage\Listener\LocalCoverageListener;
+use Doyo\Bridge\CodeCoverage\ProcessorInterface;
+use Doyo\Bridge\CodeCoverage\Session\SessionInterface;
+use Doyo\Bridge\CodeCoverage\TestCase;
 use PhpSpec\ObjectBehavior;
 use SebastianBergmann\CodeCoverage\Filter;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Doyo\Behat\Coverage\Listener;
 
-use Doyo\Behat\Coverage\Bridge\CodeCoverage\Session\SessionInterface;
 use Doyo\Behat\Coverage\Console\ConsoleIO;
+use Doyo\Bridge\CodeCoverage\Session\SessionInterface;
 
 class AbstractSessionCoverageListener
 {

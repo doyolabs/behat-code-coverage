@@ -15,9 +15,6 @@
             "dev-develop": "2.0-dev"
         }
     },
-    "replace": {
-        "code-coverage-bridge": "self.version"
-    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {

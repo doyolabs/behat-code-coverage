@@ -5,12 +5,10 @@ suites:
         psr4_prefix: Doyo\Behat\Coverage
 
 extensions:
-    Doyo\PhpSpec\CoverageExtension:
-        whitelist:
-            - src
-        format:
-            - php
-            - html
-        output:
+    Doyo\PhpSpec\CodeCoverage\Extension:
+        filters:
+            whitelist:
+                - src
+        reports:
             php: build/cov/03-phpspec.cov
             html: build/phpspec

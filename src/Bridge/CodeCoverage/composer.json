@@ -16,6 +16,12 @@
         }
     },
     "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Doyo\\Behat\\Coverage\\Bridge\\CodeCoverage\\": ""
+        }
+    },
     "require": {
         "php": ">=7.0",
         "phpunit/php-code-coverage": "^5.3 | ^6.0"

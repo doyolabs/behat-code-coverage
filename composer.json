@@ -49,7 +49,7 @@
         "behat/mink-extension": "^2.3",
         "behat/mink-goutte-driver": "^1.2",
         "behatch/contexts": "^3.2",
-        "doyo/phpspec-code-coverage": "^0.1.0",
+        "doyo/phpspec-code-coverage": "^1.0@dev | ^2.0@dev",
         "phpspec/phpspec": "^4.3 | ^5.0",
         "phpunit/phpcov": "^4.0 | ^5.0",
         "phpunit/phpunit": "^6.5 | ^7.0"

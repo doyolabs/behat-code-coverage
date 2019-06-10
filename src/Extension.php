@@ -42,7 +42,7 @@ class Extension implements ExtensionInterface
 
     public function getConfigKey()
     {
-        return 'doyo';
+        return 'doyo_coverage';
     }
 
     public function initialize(ExtensionManager $extensionManager)

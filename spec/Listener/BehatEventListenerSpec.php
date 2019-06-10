@@ -37,7 +37,6 @@ class BehatEventListenerSpec extends ObjectBehavior
         ProcessorInterface $processor,
         ConsoleIO $consoleIO
     ) {
-        $this->beAnInstanceOf(TestBehatEventListener::class);
         $this->beConstructedWith($dispatcher, $processor, $consoleIO);
     }
 
@@ -98,15 +97,17 @@ class BehatEventListenerSpec extends ObjectBehavior
         AfterTested $afterTested,
         TestResult $result,
         TestCase $testCase,
-        CoverageEvent $coverageEvent,
         ProcessorInterface $processor
     ) {
         $afterTested->getTestResult()->willReturn($result)->shouldBeCalledOnce();
         $result->getResultCode()->willReturn(0)->shouldBeCalledOnce();
 
-        $coverageEvent->getTestCase()->shouldBeCalled()->willReturn($testCase);
         $testCase->setResult(0)->shouldBeCalled();
-        $processor->addTestCase($testCase)->shouldBeCalled();
+        $processor
+            ->getCurrentTestCase()
+            ->shouldBeCalledOnce()
+            ->willReturn($testCase)
+        ;
         $processor->stop()->shouldBeCalled();
 
         $dispatcher->dispatch(Argument::type(CoverageEvent::class), CoverageEvent::BEFORE_STOP)
@@ -114,7 +115,6 @@ class BehatEventListenerSpec extends ObjectBehavior
         $dispatcher->dispatch(Argument::type(CoverageEvent::class), CoverageEvent::STOP)
             ->shouldBeCalled();
 
-        $this->setCoverageEvent($coverageEvent);
         $this->stopCoverage($afterTested);
     }
 

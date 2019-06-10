@@ -19,6 +19,21 @@ use SebastianBergmann\CodeCoverage\Filter;
 interface ProcessorInterface
 {
     /**
+     * Set current test case for code coverage
+     *
+     * @param TestCase $testCase
+     * @return void
+     */
+    public function setCurrentTestCase(TestCase $testCase);
+
+    /**
+     * Get current test case for code coverage
+     *
+     * @return TestCase:null
+     */
+    public function getCurrentTestCase();
+
+    /**
      * @return Filter
      */
     public function getCodeCoverageFilter();

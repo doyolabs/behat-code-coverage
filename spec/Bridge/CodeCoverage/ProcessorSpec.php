@@ -46,6 +46,15 @@ class ProcessorSpec extends ObjectBehavior
         $this->getCodeCoverage()->shouldReturn($codeCoverage);
     }
 
+    public function its_currentTestCase_should_be_mutable(
+        TestCase $testCase
+    )
+    {
+        $this->getCurrentTestCase()->shouldBeNull();
+        $this->setCurrentTestCase($testCase);
+        $this->getCurrentTestCase()->shouldReturn($testCase);
+    }
+
     public function its_stop_should_be_callable(
         DriverInterface $driver,
         TestCase $testCase

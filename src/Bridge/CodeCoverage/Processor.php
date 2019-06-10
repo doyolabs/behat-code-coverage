@@ -49,10 +49,25 @@ class Processor implements ProcessorInterface
      */
     private $coverageOptions;
 
+    /**
+     * @var TestCase
+     */
+    private $currentTestCase;
+
     public function __construct($driver = null, $filter = null)
     {
         $this->driver = $driver;
         $this->filter = $filter;
+    }
+
+    public function setCurrentTestCase(TestCase $testCase)
+    {
+        $this->currentTestCase = $testCase;
+    }
+
+    public function getCurrentTestCase()
+    {
+        return $this->currentTestCase;
     }
 
     public function setCodeCoverageOptions(array $options)
@@ -72,6 +87,8 @@ class Processor implements ProcessorInterface
 
     public function start(TestCase $testCase, $clear = false)
     {
+        $this->setCurrentTestCase($testCase);
+        $this->addTestCase($testCase);
         $this->getCodeCoverage()->start($testCase->getName(), $clear);
     }
 

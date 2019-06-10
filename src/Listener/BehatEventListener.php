@@ -34,11 +34,6 @@ class BehatEventListener implements EventSubscriberInterface
     private $dispatcher;
 
     /**
-     * @var CoverageEvent
-     */
-    protected $coverageEvent;
-
-    /**
      * @var ProcessorInterface
      */
     private $processor;
@@ -93,29 +88,26 @@ class BehatEventListener implements EventSubscriberInterface
         $processor->start($testCase);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::BEFORE_START);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::START);
-
-        $this->coverageEvent = $coverageEvent;
     }
 
     public function stopCoverage(AfterTested $testedEvent)
     {
         $dispatcher    = $this->dispatcher;
-        $coverageEvent = $this->coverageEvent;
-        $testCase      = $coverageEvent->getTestCase();
+        $processor     = $this->processor;
+        $testCase      = $processor->getCurrentTestCase();
         $result        = $testedEvent->getTestResult();
+        $consoleIO     = $this->consoleIO;
         $map           = [
             TestResult::PASSED  => TestCase::RESULT_PASSED,
             TestResult::FAILED  => TestCase::RESULT_FAILED,
             TestResult::SKIPPED => TestCase::RESULT_SKIPPED,
             TestResult::PENDING => TestCase::RESULT_SKIPPED,
         ];
-        $processor = $this->processor;
         $result    = $map[$result->getResultCode()];
 
         $testCase->setResult($result);
         $processor->stop();
-        $processor->addTestCase($testCase);
-
+        $coverageEvent = new CoverageEvent($processor, $consoleIO, $testCase);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::BEFORE_STOP);
         $dispatcher->dispatch($coverageEvent, CoverageEvent::STOP);
     }

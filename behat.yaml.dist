@@ -1,0 +1,35 @@
+default:
+    suites:
+        default:
+            contexts:
+                - Behat\MinkExtension\Context\MinkContext
+                - behatch:context:system
+                - behatch:context:json
+
+    extensions:
+        Behat\MinkExtension:
+            default_session: symfony2
+            sessions:
+                symfony2:
+                    goutte: ~
+            base_url: http://localhost:8000
+        Behatch\Extension: ~
+        Doyo\Behat\Coverage\Extension:
+            xdebug_patch: false
+            sessions:
+                console: ~
+                coverage: ~
+                index: ~
+                live: ~
+            filter:
+                - directory: ""
+                  exclude:
+                      - Resources
+                      - Context
+                      - Spec
+            report:
+                php: build/cov/02-behat.cov
+                html:
+                    target: build/behat
+                    lowUpperBound: 30
+                    highLowerBound: 90

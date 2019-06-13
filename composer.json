@@ -1,0 +1,52 @@
+{
+    "name": "doyo/behat-code-coverage",
+    "description": "Behat Code Coverage Extension",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Anthonius Munthi",
+            "email": "me@itstoni.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Doyo\\Behat\\CodeCoverage\\": ""
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Spec\\Doyo\\Behat\\CodeCoverage\\": "Spec/"
+        }
+    },
+    "require": {
+        "php": ">=7.0",
+        "behat/behat": "^3.5",
+        "doyo/code-coverage-bridge": "^1.0@dev | ^2.0@dev",
+        "doyo/symfony-bridge": "~1.0@dev",
+        "guzzlehttp/guzzle": "^6.3",
+        "symfony/cache": "^3.4 | ^4.0",
+        "symfony/finder": "^3.4 | ^4.0",
+        "symfony/http-foundation": "^3.4 | ^4.0"
+    },
+    "require-dev": {
+        "behat/mink-extension": "^2.3",
+        "behat/mink-goutte-driver": "^1.2",
+        "behatch/contexts": "^3.2",
+        "doyo/phpspec-code-coverage": "^1.0@dev",
+        "phpspec/phpspec": "^4.3 | ^5.0",
+        "phpunit/phpcov": "^4.0 | ^5.0",
+        "phpunit/phpunit": "^6.5 | ^7.0"
+    }
+}

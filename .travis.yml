@@ -1,0 +1,62 @@
+language: php
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - $HOME/bin
+    - vendor
+      
+.steps:
+  - &disable-php-memory-limit |
+    echo "memory_limit=-1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+  - &disable-xdebug-php-extension |
+    if [[ ${COVERAGE} != yes ]]; then phpenv config-rm xdebug.ini || echo "xdebug not available"; fi
+  - &update-project-dependencies |
+    composer update --prefer-dist --no-progress --no-suggest --ansi
+  - &install-php-coveralls |
+    composer require php-coveralls/php-coveralls --no-scripts
+  - &install-scrutinizer-ocular |
+    composer require scrutinizer/ocular --no-scripts
+  - &upload-coverage |
+    travis_retry vendor/bin/php-coveralls
+    travis_retry vendor/bin/ocular code-coverage:upload --format=php-clover build/logs/clover.xml
+  - &install-robo |
+    mkdir -p ${HOME}/bin || echo "directory exists"
+    export ROBO=${HOME}/bin/robo
+    [ -f "${ROBO}" ] && echo "installed" || wget -c https://github.com/kilip/robo/raw/site/robotheme/robo.phar -O ${ROBO}
+    chmod +x $ROBO
+    export PATH=${HOME}/bin:${PATH}
+  - &run-test |
+    ./vendor/bin/phpcs
+    robo test
+  - &run-test-coverage
+    robo coverage
+  - &start-php-server
+    php -S localhost:8000 -t tests/Fixtures/public > /dev/null 2>&1 &
+
+jobs:
+  include:
+    - php: '7.0'
+    - php: '7.1'
+    - php: '7.2'
+    - php: '7.3'
+      env: COVERAGE=yes
+      before_cache:
+        - *install-php-coveralls
+        - *install-scrutinizer-ocular
+      before_script: *start-php-server
+      script:
+        - *run-test-coverage
+      after_script:
+        - *upload-coverage
+
+before_install:
+  - *disable-php-memory-limit
+  - *disable-xdebug-php-extension
+  - *install-robo
+
+install:
+  - *update-project-dependencies
+
+script:
+  - *run-test

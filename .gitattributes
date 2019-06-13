@@ -1,4 +1,7 @@
 .gitignore export-ignore
+.gitattributes export-ignore
 .travis.yml export-ignore
 Spec export-ignore
 composer.lock export-ignore
+*.dist export-ignore
+RoboFile.php export-ignore

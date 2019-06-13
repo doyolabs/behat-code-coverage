@@ -1,18 +1,22 @@
-formatter.name: pretty
+formatter.name: dot
 suites:
-    doyo_behat:
-        namespace: Doyo\Behat\Coverage
-        psr4_prefix: Doyo\Behat\Coverage
+    behat_coverage:
+        namespace: Doyo\Behat\CodeCoverage
+        psr4_prefix: Doyo\Behat\CodeCoverage
+        spec_prefix: Spec
+        src_path: ""
 
 extensions:
     Doyo\PhpSpec\CodeCoverage\Extension:
-        filters:
-            whitelist:
-                - directory: ""
-                  exclude:
-                      - Resources
-                      - Context
-                      - Spec
+        filter:
+            - directory: ""
+              exclude:
+                  - Spec
+                  - Resources
+                  - Context
+                  - vendor
+                  - build
+                  - file: RoboFile.php
         reports:
-            php: build/cov/03-phpspec.cov
+            php: build/cov/01-phpspec.cov
             html: build/phpspec

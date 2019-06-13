@@ -1,35 +1,23 @@
 default:
     suites:
         default:
+            paths:
+                - "%paths.base%/Resources/features"
             contexts:
-                - Behat\MinkExtension\Context\MinkContext
-                - behatch:context:system
-                - behatch:context:json
+                - Doyo\Bridge\CodeCoverage\Context\ContainerContext
+                - Doyo\Bridge\CodeCoverage\Context\CoverageContext
 
     extensions:
-        Behat\MinkExtension:
-            default_session: symfony2
-            sessions:
-                symfony2:
-                    goutte: ~
-            base_url: http://localhost:8000
-        Behatch\Extension: ~
-        Doyo\Behat\Coverage\Extension:
-            xdebug_patch: false
-            sessions:
-                console: ~
-                coverage: ~
-                index: ~
-                live: ~
+        Doyo\Behat\CodeCoverage\Extension:
             filter:
                 - directory: ""
                   exclude:
+                      - Spec
                       - Resources
                       - Context
-                      - Spec
-            report:
+                      - vendor
+                      - build
+                      - file: RoboFile.php
+            reports:
                 php: build/cov/02-behat.cov
-                html:
-                    target: build/behat
-                    lowUpperBound: 30
-                    highLowerBound: 90
+                html: build/behat

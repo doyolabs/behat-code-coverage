@@ -18,6 +18,7 @@ use Behat\Behat\EventDispatcher\Event\ScenarioTested;
 use Behat\Testwork\EventDispatcher\Event\AfterTested;
 use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Behat\Testwork\Tester\Result\TestResult;
+use Behat\Testwork\Tester\Result\TestResults;
 use Doyo\Bridge\CodeCoverage\CodeCoverageInterface;
 use Doyo\Bridge\CodeCoverage\TestCase;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -78,7 +79,7 @@ class CoverageListener implements EventSubscriberInterface
 
     public function stop(AfterTested $tested)
     {
-        if (!$this->enabled) {
+        if (!$this->enabled || is_null($tested->getTestResult())) {
             return;
         }
 
@@ -87,11 +88,15 @@ class CoverageListener implements EventSubscriberInterface
             TestResult::FAILED  => TestCase::RESULT_FAILED,
             TestResult::SKIPPED => TestCase::RESULT_SKIPPED,
             TestResult::PENDING => TestCase::RESULT_SKIPPED,
+            TestResults::NO_TESTS => TestCase::RESULT_SKIPPED
         ];
+
         $result   = $map[$tested->getTestResult()->getResultCode()];
-        $coverage = $this->coverage;
-        $coverage->setResult($result);
-        $coverage->stop();
+        if(!is_null($result)){
+            $coverage = $this->coverage;
+            $coverage->setResult($result);
+            $coverage->stop();
+        }
     }
 
     public function complete()

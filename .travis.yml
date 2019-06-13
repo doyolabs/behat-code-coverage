@@ -4,7 +4,6 @@ cache:
   directories:
     - $HOME/.composer/cache
     - $HOME/bin
-    - vendor
       
 .steps:
   - &disable-php-memory-limit |

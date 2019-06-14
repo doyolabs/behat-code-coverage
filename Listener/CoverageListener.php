@@ -3,7 +3,7 @@
 /*
  * This file is part of the doyo/code-coverage project.
  *
- * (c) Anthonius Munthi <me@itstoni.com>
+ * (c) Anthonius Munthi <https://itstoni.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -79,20 +79,20 @@ class CoverageListener implements EventSubscriberInterface
 
     public function stop(AfterTested $tested)
     {
-        if (!$this->enabled || is_null($tested->getTestResult())) {
+        if (!$this->enabled || null === $tested->getTestResult()) {
             return;
         }
 
         $map           = [
-            TestResult::PASSED  => TestCase::RESULT_PASSED,
-            TestResult::FAILED  => TestCase::RESULT_FAILED,
-            TestResult::SKIPPED => TestCase::RESULT_SKIPPED,
-            TestResult::PENDING => TestCase::RESULT_SKIPPED,
-            TestResults::NO_TESTS => TestCase::RESULT_SKIPPED
+            TestResult::PASSED    => TestCase::RESULT_PASSED,
+            TestResult::FAILED    => TestCase::RESULT_FAILED,
+            TestResult::SKIPPED   => TestCase::RESULT_SKIPPED,
+            TestResult::PENDING   => TestCase::RESULT_SKIPPED,
+            TestResults::NO_TESTS => TestCase::RESULT_SKIPPED,
         ];
 
         $result   = $map[$tested->getTestResult()->getResultCode()];
-        if(!is_null($result)){
+        if (null !== $result) {
             $coverage = $this->coverage;
             $coverage->setResult($result);
             $coverage->stop();

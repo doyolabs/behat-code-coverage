@@ -102,7 +102,7 @@ class CoverageListener implements EventSubscriberInterface
     public function complete()
     {
         if (!$this->enabled) {
-            return;
+            //return;
         }
 
         $this->coverage->complete();

@@ -63,8 +63,9 @@ class Extension implements ExtensionInterface
         $container->set('doyo.coverage.container', $coverageContainer);
         $container->set('doyo.coverage', $coverageContainer->get('coverage'));
 
+        /* @var \Symfony\Component\Console\Input\InputInterface $input */
         $input           = $container->get('cli.input');
-        $coverageEnabled = $input->hasParameterOption(['--coverage'], true);
+        $coverageEnabled = $input->hasParameterOption(['--coverage']);
         $container->setParameter('doyo.coverage_enabled', $coverageEnabled);
 
         $listener = new Definition(CoverageListener::class);
